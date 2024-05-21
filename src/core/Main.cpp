@@ -7,17 +7,14 @@
 
 #include "ITensor.hpp"
 
-using namespace std;
-
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
-    cout << "\nStart testing." << endl;
-    cout << "Testing Tensor." << endl;
-    cout << endl;
+    std::cout << "\nStart testing.\n";
+    std::cout << "Testing Tensor.\n\n";
 
     int dimension = 2;
-    vector<int> dimensionSizes = {2, 3};
+    std::vector<int> dimensionSizes = {2, 3};
 
     Tensor<double>* tensor1 = new Tensor<double>(dimension, dimensionSizes);
 
@@ -37,29 +34,27 @@ int main(){
     tensor2->showTensor();
 
 
-    cout << "Addition now." << endl;
+    std::cout << "Addition now.\n";
 
     Tensor<double>* tensorAdd = *tensor1 + *tensor2;
     tensorAdd->showTensor();
 
 
-    cout << endl << endl;
+    std::cout << "\n\n";
 
-    cout << "Transposition now." << endl;
+    std::cout << "Transposition now.\n";
     Tensor<double>* tensorTransposed = tensor1->transposition();
-    cout << "Tensor allocated." << endl;
+    std::cout << "Tensor allocated.\n";
     tensorTransposed->showTensor();
 
-    cout << "Is equilateral? / no" << endl;
-    cout << tensorTransposed->isTensorEquilateral() << endl;
+    std::cout << "Is equilateral? / no\n";
+    std::cout << tensorTransposed->isTensorEquilateral() << "\n";
 
-    vector<int> tensorEquiDimensionSizes = {3, 3};
+    std::vector<int> tensorEquiDimensionSizes = {3, 3};
     Tensor<double>* tensorEqui = new Tensor<double>(dimension, tensorEquiDimensionSizes);
-    cout << "Is equilateral? / yes" << endl;
-    cout << tensorEqui->isTensorEquilateral() << endl;
+    std::cout << "Is equilateral? / yes\n";
+    std::cout << tensorEqui->isTensorEquilateral() << "\n";
 
-
-    // Testing - will be moved to separate file shortly
     assert(tensorEqui->isTensorEquilateral() == 1);
     assert(tensorTransposed->isTensorEquilateral() == 0);
 
