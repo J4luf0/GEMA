@@ -12,11 +12,13 @@ template<class T> class Tensor{
 
     private:
 
-    std::vector<T> tensor;               // The tensor itself, represented by one-dimensional vector containing all the elements
+    std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
 
-    int dimension;                  // Number of tensor dimensions
-    std::vector<int> dimensionSizes;     // Size od each tensor dimension
-    int itemCount;                  // Total number of items
+    int dimension;                          // Number of tensor dimensions
+    std::vector<int> dimensionSizes;        // Size od each tensor dimension
+    int itemCount;                          // Total number of items
+
+
 
     public:
 
@@ -115,6 +117,8 @@ template<class T> class Tensor{
 
     // Our destructor -------------------------------------------------------------------------------------------------------
     ~Tensor();
+
+
 
     private:
 
