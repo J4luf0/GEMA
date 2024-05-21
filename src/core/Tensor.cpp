@@ -4,10 +4,7 @@
 
 #include "ITensor.hpp"
 
-using namespace std;
-
 #define MAX_LOOP_COUNT 1024;
-#define TENSOR_TYPE double
 
     template class Tensor<int>;
     template class Tensor<long long int>;
@@ -15,7 +12,7 @@ using namespace std;
     template class Tensor<double>;
 
     template <class T>
-    Tensor<T>::Tensor(const int newTensorDimension, const vector<int>& newTensorDimensionSizes) 
+    Tensor<T>::Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes) 
     : dimension(newTensorDimension), dimensionSizes(newTensorDimensionSizes){
 
         // Calculate number of items
@@ -31,12 +28,11 @@ using namespace std;
 
         constructorMessage(itemCount, dimension, dimensionSizes);
 
-        cout << endl;
-        cout << endl;
+        std::cout << "\n\n";
     }
 
     template <class T>
-    vector<int> Tensor<T>::getDimensionSizes() const{
+    std::vector<int> Tensor<T>::getDimensionSizes() const{
         return dimensionSizes;
     }
 
@@ -71,9 +67,9 @@ using namespace std;
     }
 
     template <class T>
-    void Tensor<T>::assign(T value, vector<int> coordinates){
+    void Tensor<T>::assign(T value, std::vector<int> coordinates){
 
-        TENSOR_TYPE itemNumber = getItem(coordinates);
+        T itemNumber = getItem(coordinates);
         
         tensor[itemNumber] = value;
     }
@@ -81,48 +77,48 @@ using namespace std;
     template <class T>
     void Tensor<T>::showTensor() const{
 
-        cout << "Tensor is as follows:" << "\n\n";
+        std::cout << "Tensor is as follows:\n\n";
 
         for(int i = 0; i < itemCount; i++){
 
             if((i % dimensionSizes[0] == 0) && 
                 i > 0){
-                cout << "\n";
+                std::cout << "\n";
                 if(i % dimensionSizes[1] == 0){
-                    cout << "\n";
+                    std::cout << "\n";
                 }
             }
 
-            cout << "[" << tensor[i] << "] ";
+            std::cout << "[" << tensor[i] << "] ";
         }
 
-        cout << "\n\n";
+        std::cout << "\n\n";
     }
 
     template <class T>
-    void Tensor<T>::showItem(vector<int> coordinates) const{
+    void Tensor<T>::showItem(std::vector<int> coordinates) const{
         
         int itemNumber = getItem(coordinates);
-        cout << "Item: " << tensor[itemNumber] << endl;
+        std::cout << "Item: " << tensor[itemNumber] << "\n";
     }
 
     template <class T>
     void Tensor<T>::showCoords(const int itemNumber) const{
 
-        vector<int> coords = getCoords(itemNumber);
+        std::vector<int> coords = getCoords(itemNumber);
 
-        cout << "Coords: ";
+        std::cout << "Coords: ";
         for(int i = 0; i < dimension; i++){
-            cout << coords[i] << " ";
+            std::cout << coords[i] << " ";
         }
-        cout << endl;
+        std::cout << "\n";
     }
 
     template <class T>
     Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2){
 
         // Copying the dimensionSizes
-        vector<int> transposedDimensionSizes = dimensionSizes; 
+        std::vector<int> transposedDimensionSizes = dimensionSizes; 
 
         // Swapping the dimension sizes
         transposedDimensionSizes[dim1] = dimensionSizes[dim2]; 
@@ -131,7 +127,7 @@ using namespace std;
         // Initializing the new tensor
         Tensor* tensorTransposed = new Tensor(dimension, transposedDimensionSizes);
 
-        vector<int> temp, switched;
+        std::vector<int> temp, switched;
         temp.reserve(dimension);
         switched.reserve(dimension);
 
@@ -139,7 +135,7 @@ using namespace std;
         for(int i = 0; i < itemCount; i++){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
-            vector<int> temp(getCoords(i));
+            std::vector<int> temp(getCoords(i));
 
             // Deep copy of coords before swap
             for(const int& value : temp) switched.push_back(value);
@@ -149,7 +145,7 @@ using namespace std;
             switched[dim2] = temp[dim1];
 
             //cout << " tensor[" << i << "]: " << tensor[i] << " temp: " << temp[0] << " " << temp[1] 
-            //<< " switched: " << switched[0] << " " << switched[1] << " | getItem(temp): " << getItem(temp) << " | tr.getItem(switched): " << tensorTransposed->getItem(switched) << endl;
+            //<< " switched: " << switched[0] << " " << switched[1] << " | getItem(temp): " << getItem(temp) << " | tr.getItem(switched): " << tensorTransposed->getItem(switched) << "\n";
 
             // Works until now, check the getItem function if it actually works properly
             tensorTransposed->tensor[tensorTransposed->getItem(switched)] = tensor[getItem(temp)];
@@ -178,9 +174,9 @@ using namespace std;
     }
 
     template <class T>
-    vector<int> Tensor<T>::getCoords(int itemNumber) const{
+    std::vector<int> Tensor<T>::getCoords(int itemNumber) const{
 
-        vector<int> coordinates;
+        std::vector<int> coordinates;
         coordinates.reserve(dimension);
 
         int dimensionProduct = 1;
@@ -199,7 +195,7 @@ using namespace std;
     }
 
     template <class T>
-    int Tensor<T>::getItem(const vector<int>& coordinates) const{
+    int Tensor<T>::getItem(const std::vector<int>& coordinates) const{
         
         int itemNumber = 0;
 
@@ -224,12 +220,12 @@ using namespace std;
     }
 
     template <class T>
-    void Tensor<T>::constructorMessage(int itemCount, int dimension, vector<int>& dimensionSizes) const{
+    void Tensor<T>::constructorMessage(int itemCount, int dimension, std::vector<int>& dimensionSizes) const{
 
         // Message
-        cout << "A tensor of " << itemCount << " items and " << dimension << " dimensions been allocated." << endl;
-        cout << "A tensor dimensions are as follows: ";
+        std::cout << "A tensor of " << itemCount << " items and " << dimension << " dimensions been allocated.\n";
+        std::cout << "A tensor dimensions are as follows: ";
         for(int i = 0; i < dimension; i++){
-            cout << dimensionSizes[i] << " ";
+            std::cout << dimensionSizes[i] << " ";
         }
     }

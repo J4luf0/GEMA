@@ -1,15 +1,6 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
 
-#include "complex.h"
-
-using namespace std;
-
-#define MAX_LOOP_COUNT 1024;
-
-#ifndef TENSOR_HPP
-#define TENSOR_HPP
+#ifndef ITENSOR_HPP
+#define ITENSOR_HPP
 
 /** ===========================================================================================================================
  * Class for work with general tensors
@@ -21,10 +12,10 @@ template<class T> class Tensor{
 
     private:
 
-    vector<T> tensor;               // The tensor itself, represented by one-dimensional vector containing all the elements
+    std::vector<T> tensor;               // The tensor itself, represented by one-dimensional vector containing all the elements
 
     int dimension;                  // Number of tensor dimensions
-    vector<int> dimensionSizes;     // Size od each tensor dimension
+    std::vector<int> dimensionSizes;     // Size od each tensor dimension
     int itemCount;                  // Total number of items
 
     public:
@@ -39,14 +30,14 @@ template<class T> class Tensor{
      * Note: It can also calculate advanced characteristics of tensor like if a tensor is equilateral
      * Note: to-do how to deal with message and maybe it should not always compute advanced characteristics
     */
-    Tensor(const int newTensorDimension, const vector<int>& newTensorDimensionSizes);
+    Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getDimensionSizes() - Public method to get all dimension sizes
      * 
      * @return - vector containing one int per dimension with value of its size
     */
-    vector<int> getDimensionSizes() const;
+    std::vector<int> getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getNumberOfDimensions() - Public method to get the number of dimensions
@@ -70,7 +61,7 @@ template<class T> class Tensor{
      * @param value - a value of custom type that will be stored in the tensor
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
-    void assign(T value, vector<int> coordinates);
+    void assign(T value, std::vector<int> coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout
@@ -87,7 +78,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
     */
-    void showItem(vector<int> coordinates) const;
+    void showItem(std::vector<int> coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showCoords() - Public method to write into cout tensor coordinates based from item index input
@@ -137,7 +128,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
     */
-    vector<int> getCoords(int itemNumber) const;
+    std::vector<int> getCoords(int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getItem() - Private method to get items index number in tensor - this is inverse method of "getCoords()"
@@ -149,7 +140,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
     */
-    int getItem(const vector<int>& coordinates) const;
+    int getItem(const std::vector<int>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
@@ -158,7 +149,7 @@ template<class T> class Tensor{
      * @param dimension - number of dimensions to be output
      * @param dimensionSizes - the dimension sizes to be output
     */
-    void constructorMessage(int itemCount, int dimension, vector<int>& dimensionSizes) const;
+    void constructorMessage(int itemCount, int dimension, std::vector<int>& dimensionSizes) const;
 };
 
 #endif
