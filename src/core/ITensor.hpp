@@ -39,7 +39,7 @@ template<class T> class Tensor{
      * Note: It can also calculate advanced characteristics of tensor like if a tensor is equilateral
      * Note: to-do how to deal with message and maybe it should not always compute advanced characteristics
     */
-    Tensor(const int newTensorDimension, const vector<int> newTensorDimensionSizes);
+    Tensor(const int newTensorDimension, const vector<int>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getDimensionSizes() - Public method to get all dimension sizes

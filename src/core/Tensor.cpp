@@ -15,7 +15,7 @@ using namespace std;
     template class Tensor<double>;
 
     template <class T>
-    Tensor<T>::Tensor(const int newTensorDimension, const vector<int> newTensorDimensionSizes) 
+    Tensor<T>::Tensor(const int newTensorDimension, const vector<int>& newTensorDimensionSizes) 
     : dimension(newTensorDimension), dimensionSizes(newTensorDimensionSizes){
 
         // Calculate number of items
