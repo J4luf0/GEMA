@@ -21,7 +21,7 @@
             itemCounting *= newTensorDimensionSizes[i];
         }
 
-        itemCount = itemCounting;
+        this->itemCount = itemCounting;
 
         // Allocate space for the tensor
         tensor.reserve(itemCount);
@@ -42,10 +42,33 @@
     }
 
     template <class T>
-    void Tensor<T>::setTensor(const T* tensorItems){
+    void Tensor<T>::setItems(const std::vector<T>& tensorItems){
+
+        int copyLength = fmin(tensorItems.size(), itemCount);
+
+        for(int i = 0; i < copyLength; i++){
+            tensor[i] = tensorItems[i];
+        }
+    }
+
+    template <class T>
+    void Tensor<T>::setItems(const T* tensorItems){
+
+        if(tensorItems == nullptr || tensorItems == 0){
+            fillWith(0);
+            return;
+        }
         
         for(int i = 0; i < itemCount; i++){
             tensor[i] = tensorItems[i];
+        }
+    }
+
+    template <class T>
+    void Tensor<T>::fillWith(const T& fill){
+
+        for(int i = 0; i < itemCount; i++){
+            tensor[i] = fill;
         }
     }
 
@@ -143,9 +166,6 @@
             // The swap of two desired coordinates
             switched[dim1] = temp[dim2];
             switched[dim2] = temp[dim1];
-
-            //cout << " tensor[" << i << "]: " << tensor[i] << " temp: " << temp[0] << " " << temp[1] 
-            //<< " switched: " << switched[0] << " " << switched[1] << " | getItem(temp): " << getItem(temp) << " | tr.getItem(switched): " << tensorTransposed->getItem(switched) << "\n";
 
             // Works until now, check the getItem function if it actually works properly
             tensorTransposed->tensor[tensorTransposed->getItem(switched)] = tensor[getItem(temp)];

@@ -28,7 +28,7 @@ int main(){
     Tensor<double>* tensor2 = new Tensor<double>({2}, dimensionSizes);
 
     double tensor2Items[6] = {2, -5, 10, 5.89647, 3, 4};
-    tensor2->setTensor(tensor2Items);
+    tensor2->setItems(tensor2Items);
 
     tensor1->showTensor();
     tensor2->showTensor();

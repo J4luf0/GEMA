@@ -6,7 +6,7 @@
  * Class for work with general tensors
  * 
  * Note: Tensor is represented in class as one dimensional array with calculated number of items and 
- * methods getItem and getCoords that calculate the virtual coordinated of the tensor and vice versa
+ * methods getItem and getCoords that calculate the virtual coordinates of the tensor and vice versa
  */
 template<class T> class Tensor{
 
@@ -48,7 +48,21 @@ template<class T> class Tensor{
     */
     int getNumberOfDimensions() const;
 
-    void setTensor(const T* tensorItems);
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order
+     * 
+     * @param tensorItems - one dimensional array of items to be added by order
+    */
+    void setItems(const std::vector<T>& tensorItems);
+
+    void setItems(const T* tensorItems);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * fillWith() - Public method that fills all tensor with passed value
+     * 
+     * @param fill - the value to be filled into all items in tensor
+    */
+    void fillWith(const T& fill);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * isTensorEquilateral() - Public method to decide, if the tensor dimensions have the same sizes
