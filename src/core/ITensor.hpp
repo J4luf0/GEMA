@@ -5,18 +5,20 @@
 /** ===========================================================================================================================
  * Class for work with general tensors
  * 
- * Note: Tensor is represented in class as one dimensional array with calculated number of items and 
- * methods getIndex and getCoords that calculate the virtual coordinates of the tensor and vice versa
+ * Tensor is represented in class as one dimensional array with methods getCoords() that calculates the made-up
+ * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates.
+ * 
+ * 
  */
 template<class T> class Tensor{
 
     private:
 
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
-
-    int dimension;                          // Number of tensor dimensions
-    std::vector<int> dimensionSizes;        // Size od each tensor dimension
     int itemCount;                          // Total number of items
+
+    std::vector<int> dimensionSizes;        // Size od each tensor dimension
+    int dimension;                          // Number of tensor dimensions
 
 
 
@@ -151,7 +153,7 @@ template<class T> class Tensor{
     std::vector<int> getCoords(int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * getIndex() - Private method to get items index number in tensor - this is inverse method of "getCoords()"
+     * getIndex() - Private method to get items index number in tensor, this is inverse method of "getCoords()"
      * 
      * @param coordinates - an array of coordinates of one item in tensor
      * 
