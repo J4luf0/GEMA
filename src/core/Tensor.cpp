@@ -90,7 +90,7 @@
     template <class T>
     void Tensor<T>::assign(T value, std::vector<int> coordinates){
 
-        T itemNumber = getItem(coordinates);
+        T itemNumber = getIndex(coordinates);
         
         tensor[itemNumber] = value;
     }
@@ -119,7 +119,7 @@
     template <class T>
     void Tensor<T>::showItem(std::vector<int> coordinates) const{
         
-        int itemNumber = getItem(coordinates);
+        int itemNumber = getIndex(coordinates);
         std::cout << "Item: " << tensor[itemNumber] << "\n";
     }
 
@@ -165,8 +165,8 @@
             switched[dim1] = temp[dim2];
             switched[dim2] = temp[dim1];
 
-            // Works until now, check the getItem function if it actually works properly
-            tensorTransposed->tensor[tensorTransposed->getItem(switched)] = tensor[getItem(temp)];
+            // Works until now, check the getIndex function if it actually works properly
+            tensorTransposed->tensor[tensorTransposed->getIndex(switched)] = tensor[getIndex(temp)];
         }
 
         return tensorTransposed;
@@ -213,7 +213,7 @@
     }
 
     template <class T>
-    int Tensor<T>::getItem(const std::vector<int>& coordinates) const{
+    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const{
         
         int itemNumber = 0;
 

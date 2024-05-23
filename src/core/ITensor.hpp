@@ -6,7 +6,7 @@
  * Class for work with general tensors
  * 
  * Note: Tensor is represented in class as one dimensional array with calculated number of items and 
- * methods getItem and getCoords that calculate the virtual coordinates of the tensor and vice versa
+ * methods getIndex and getCoords that calculate the virtual coordinates of the tensor and vice versa
  */
 template<class T> class Tensor{
 
@@ -129,7 +129,9 @@ template<class T> class Tensor{
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
-    // Our destructor -------------------------------------------------------------------------------------------------------
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * ~Tensor() - Virtual destructor
+    */
     virtual ~Tensor();
 
 
@@ -137,7 +139,7 @@ template<class T> class Tensor{
     private:
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * getCoords() - Private method to get coordinates from itemNumber in tensor, this is inverse method of "getItem()" method
+     * getCoords() - Private method to get coordinates from itemNumber in tensor, this is inverse method of "getIndex()" method
      * 
      * @param itemNumber - it is the index of item that is stored in the tensor
      * 
@@ -149,7 +151,7 @@ template<class T> class Tensor{
     std::vector<int> getCoords(int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * getItem() - Private method to get items index number in tensor - this is inverse method of "getCoords()"
+     * getIndex() - Private method to get items index number in tensor - this is inverse method of "getCoords()"
      * 
      * @param coordinates - an array of coordinates of one item in tensor
      * 
@@ -158,7 +160,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
     */
-    int getItem(const std::vector<int>& coordinates) const;
+    int getIndex(const std::vector<int>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
