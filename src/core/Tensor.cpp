@@ -27,8 +27,6 @@
         tensor.reserve(itemCount);
 
         constructorMessage(itemCount, dimension, dimensionSizes);
-
-        std::cout << "\n\n";
     }
 
     template <class T>
@@ -233,7 +231,6 @@
             }
 
             itemNumber += coordinates[i] * dimensionProduct;
-            
        }
 
         return itemNumber;
@@ -248,4 +245,6 @@
         for(int i = 0; i < dimension; i++){
             std::cout << dimensionSizes[i] << " ";
         }
+
+        std::cout << "\n\n";
     }

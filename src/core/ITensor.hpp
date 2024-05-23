@@ -130,7 +130,7 @@ template<class T> class Tensor{
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
     // Our destructor -------------------------------------------------------------------------------------------------------
-    ~Tensor();
+    virtual ~Tensor();
 
 
 
