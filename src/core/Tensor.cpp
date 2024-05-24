@@ -6,6 +6,9 @@
 
 #define MAX_LOOP_COUNT 1024;
 
+    template class Tensor<bool>;
+    template class Tensor<char>;
+    template class Tensor<short>;
     template class Tensor<int>;
     template class Tensor<long long int>;
     template class Tensor<float>;
@@ -13,7 +16,7 @@
 
     template <class T>
     Tensor<T>::Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes) 
-    : dimension(newTensorDimension), dimensionSizes(newTensorDimensionSizes){
+    : dimensionSizes(newTensorDimensionSizes), dimension(newTensorDimension) {
 
         // Calculate number of items
         int itemCounting = 1;
