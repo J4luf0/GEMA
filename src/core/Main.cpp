@@ -13,10 +13,9 @@ int main(){
     std::cout << "\nStart testing.\n";
     std::cout << "Testing Tensor.\n\n";
 
-    int dimension = 2;
     std::vector<int> dimensionSizes = {2, 3};
 
-    Tensor<double>* tensor1 = new Tensor<double>(dimension, dimensionSizes);
+    Tensor<double>* tensor1 = new Tensor<double>(dimensionSizes);
 
     tensor1->assign(5,     {0, 0});
     tensor1->assign(0.55,    {1, 0});
@@ -25,7 +24,7 @@ int main(){
     tensor1->assign(4.5,   {0, 2});
     tensor1->assign(7,    {1, 2});
     
-    Tensor<double>* tensor2 = new Tensor<double>({2}, dimensionSizes);
+    Tensor<double>* tensor2 = new Tensor<double>(dimensionSizes);
 
     double tensor2Items[6] = {2, -5, 10, 5.89647, 3, 4};
     tensor2->setItems(tensor2Items);
@@ -51,7 +50,7 @@ int main(){
     std::cout << tensorTransposed->isTensorEquilateral() << "\n";
 
     std::vector<int> tensorEquiDimensionSizes = {3, 3};
-    Tensor<double>* tensorEqui = new Tensor<double>(dimension, tensorEquiDimensionSizes);
+    Tensor<double>* tensorEqui = new Tensor<double>(tensorEquiDimensionSizes);
     std::cout << "Is equilateral? / yes\n";
     std::cout << tensorEqui->isTensorEquilateral() << "\n";
 

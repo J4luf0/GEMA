@@ -16,12 +16,12 @@
     template class Tensor<double>;
 
     template <class T>
-    Tensor<T>::Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes) 
+    Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
     : dimensionSizes(newTensorDimensionSizes) {
 
         // Calculate number of items
         int itemCounting = 1;
-        for(int i = 0; i < newTensorDimension; i++){
+        for(__uint64 i = 0; i < newTensorDimensionSizes.size(); i++){
             itemCounting *= newTensorDimensionSizes[i];
         }
 
@@ -148,7 +148,7 @@
         transposedDimensionSizes[dim2] = dimensionSizes[dim1];
         
         // Initializing the new tensor
-        Tensor* tensorTransposed = new Tensor(dimensionSizes.size(), transposedDimensionSizes);
+        Tensor* tensorTransposed = new Tensor(transposedDimensionSizes);
 
         std::vector<int> temp, switched;
         temp.reserve(dimensionSizes.size());
@@ -178,7 +178,7 @@
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
         //Allocation of new tensor. Since tensor addition doesnt change the size, we can get right to allocation
-        Tensor* tensorOut = new Tensor(dimensionSizes.size(), dimensionSizes);
+        Tensor* tensorOut = new Tensor(dimensionSizes);
         tensorOut->tensor.reserve(tensor.size());
 
         for(__uint64 i = 0; i < tensor.size(); i++){

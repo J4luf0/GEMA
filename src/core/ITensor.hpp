@@ -25,13 +25,12 @@ template<class T> class Tensor{
      * TensorClass() constructor - Writes into tensor attributes dimension and dimension sizes and with that calculates
      * number of items
      * 
-     * @param newTensorDimension - number of tensor dimensions
-     * @param newTensorDImensionSizes - a vector filled with sizes of dimensions
+     * @param newTensorDimensionSizes - a vector filled with sizes of dimensions
      * 
      * Note: It can also calculate advanced characteristics of tensor like if a tensor is equilateral
      * Note: to-do how to deal with message and maybe it should not always compute advanced characteristics
     */
-    Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes);
+    Tensor(const std::vector<int>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getDimensionSizes() - Public method to get all dimension sizes
