@@ -5,6 +5,7 @@
 #include "ITensor.hpp"
 
 #define MAX_LOOP_COUNT 1024;
+#define __uint64 unsigned __int64
 
     template class Tensor<bool>;
     template class Tensor<char>;
@@ -24,12 +25,10 @@
             itemCounting *= newTensorDimensionSizes[i];
         }
 
-        this->itemCount = itemCounting;
-
         // Allocate space for the tensor
-        tensor.reserve(itemCount);
+        tensor.resize(itemCounting);
 
-        constructorMessage(itemCount, dimension, dimensionSizes);
+        constructorMessage(dimension, dimensionSizes);
     }
 
     template <class T>
@@ -39,13 +38,13 @@
 
     template <class T>
     int Tensor<T>::getNumberOfDimensions() const{
-        return dimension;
+        return tensor.size();
     }
 
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems){
 
-        int copyLength = fmin(tensorItems.size(), itemCount);
+        int copyLength = fmin(tensorItems.size(), tensor.size());
 
         for(int i = 0; i < copyLength; i++){
             tensor[i] = tensorItems[i];
@@ -60,7 +59,7 @@
             return;
         }
         
-        for(int i = 0; i < itemCount; i++){
+        for(__uint64 i = 0; i < tensor.size(); i++){
             tensor[i] = tensorItems[i];
         }
     }
@@ -68,7 +67,7 @@
     template <class T>
     void Tensor<T>::fillWith(const T& fill){
 
-        for(int i = 0; i < itemCount; i++){
+        for(__uint64 i = 0; i < tensor.size(); i++){
             tensor[i] = fill;
         }
     }
@@ -103,7 +102,7 @@
 
         std::cout << "Tensor is as follows:\n\n";
 
-        for(int i = 0; i < itemCount; i++){
+        for(__uint64 i = 0; i < tensor.size(); i++){
 
             if((i % dimensionSizes[0] == 0) && 
                 i > 0){
@@ -156,7 +155,7 @@
         switched.reserve(dimension);
 
         // Looping thru elements in tensor and swapping the desired coordinates
-        for(int i = 0; i < itemCount; i++){
+        for(__uint64 i = 0; i < tensor.size(); i++){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
             std::vector<int> temp(getCoords(i));
@@ -180,9 +179,9 @@
 
         //Allocation of new tensor. Since tensor addition doesnt change the size, we can get right to allocation
         Tensor* tensorOut = new Tensor(dimension, dimensionSizes);
-        tensorOut->tensor.reserve(itemCount);
+        tensorOut->tensor.reserve(tensor.size());
 
-        for(int i = 0; i < itemCount; i++){
+        for(__uint64 i = 0; i < tensor.size(); i++){
             tensorOut->tensor[i] = tensor[i] + tensor2.tensor[i];
         }
 
@@ -240,12 +239,12 @@
     }
 
     template <class T>
-    void Tensor<T>::constructorMessage(int itemCount, int dimension, std::vector<int>& dimensionSizes) const{
+    void Tensor<T>::constructorMessage(int dimension, std::vector<int>& dimensionSizes) const{
 
         // Message
-        std::cout << "A tensor of " << itemCount << " items and " << dimension << " dimensions been allocated.\n";
+        std::cout << "A tensor of " << tensor.size() << " items and " << dimension << " dimensions been allocated.\n";
         std::cout << "A tensor dimensions are as follows: ";
-        for(int i = 0; i < dimension; i++){
+        for(long long unsigned int i = 0; i < tensor.size(); i++){
             std::cout << dimensionSizes[i] << " ";
         }
 

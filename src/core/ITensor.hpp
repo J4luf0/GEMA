@@ -15,7 +15,6 @@ template<class T> class Tensor{
     private:
 
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
-    int itemCount;                          // Total number of items
 
     std::vector<int> dimensionSizes;        // Size od each tensor dimension
     int dimension;                          // Number of tensor dimensions
@@ -171,7 +170,7 @@ template<class T> class Tensor{
      * @param dimension - number of dimensions to be output
      * @param dimensionSizes - the dimension sizes to be output
     */
-    void constructorMessage(int itemCount, int dimension, std::vector<int>& dimensionSizes) const;
+    void constructorMessage(int dimension, std::vector<int>& dimensionSizes) const;
 };
 
 #endif
