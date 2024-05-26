@@ -15,9 +15,7 @@ template<class T> class Tensor{
     private:
 
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
-
     std::vector<int> dimensionSizes;        // Size od each tensor dimension
-    int dimension;                          // Number of tensor dimensions
 
 
 
@@ -166,11 +164,9 @@ template<class T> class Tensor{
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
      * 
-     * @param itemCount - number of item in a tensor to be output
-     * @param dimension - number of dimensions to be output
      * @param dimensionSizes - the dimension sizes to be output
     */
-    void constructorMessage(int dimension, std::vector<int>& dimensionSizes) const;
+    void constructorMessage(const std::vector<int>& dimensionSizes) const;
 };
 
 #endif

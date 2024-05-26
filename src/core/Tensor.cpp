@@ -17,7 +17,7 @@
 
     template <class T>
     Tensor<T>::Tensor(const int newTensorDimension, const std::vector<int>& newTensorDimensionSizes) 
-    : dimensionSizes(newTensorDimensionSizes), dimension(newTensorDimension) {
+    : dimensionSizes(newTensorDimensionSizes) {
 
         // Calculate number of items
         int itemCounting = 1;
@@ -28,7 +28,7 @@
         // Allocate space for the tensor
         tensor.resize(itemCounting);
 
-        constructorMessage(dimension, dimensionSizes);
+        constructorMessage(dimensionSizes);
     }
 
     template <class T>
@@ -77,7 +77,7 @@
 
         bool isEquilateral = false;
 
-        for(int i = 0; i < dimension - 1; i++){
+        for(__uint64 i = 0; i < dimensionSizes.size() - 1; i++){
 
             isEquilateral = true;
             if(dimensionSizes[i] != dimensionSizes[i + 1]){
@@ -131,7 +131,7 @@
         std::vector<int> coords = getCoords(itemNumber);
 
         std::cout << "Coords: ";
-        for(int i = 0; i < dimension; i++){
+        for(__uint64 i = 0; i < dimensionSizes.size(); i++){
             std::cout << coords[i] << " ";
         }
         std::cout << "\n";
@@ -148,11 +148,11 @@
         transposedDimensionSizes[dim2] = dimensionSizes[dim1];
         
         // Initializing the new tensor
-        Tensor* tensorTransposed = new Tensor(dimension, transposedDimensionSizes);
+        Tensor* tensorTransposed = new Tensor(dimensionSizes.size(), transposedDimensionSizes);
 
         std::vector<int> temp, switched;
-        temp.reserve(dimension);
-        switched.reserve(dimension);
+        temp.reserve(dimensionSizes.size());
+        switched.reserve(dimensionSizes.size());
 
         // Looping thru elements in tensor and swapping the desired coordinates
         for(__uint64 i = 0; i < tensor.size(); i++){
@@ -178,7 +178,7 @@
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
         //Allocation of new tensor. Since tensor addition doesnt change the size, we can get right to allocation
-        Tensor* tensorOut = new Tensor(dimension, dimensionSizes);
+        Tensor* tensorOut = new Tensor(dimensionSizes.size(), dimensionSizes);
         tensorOut->tensor.reserve(tensor.size());
 
         for(__uint64 i = 0; i < tensor.size(); i++){
@@ -197,12 +197,13 @@
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const{
 
         std::vector<int> coordinates;
+        __uint64 dimension = dimensionSizes.size();
         coordinates.reserve(dimension);
 
         int dimensionProduct = 1;
 
-        for(int i = 0; i < dimension; i++){
-            for(int j = 0; j < (dimension - i - 1); j++){
+        for(__uint64 i = 0; i < dimension; i++){
+            for(__uint64 j = 0; j < (dimension - i - 1); j++){
                 dimensionProduct *= dimensionSizes[j];
             }
 
@@ -219,7 +220,7 @@
         
         int itemNumber = 0;
 
-       for(int i = 0; i < dimension; i++){
+       for(__uint64 i = 0; i < dimensionSizes.size(); i++){
 
             if(i == 0){
                 itemNumber += coordinates[i];
@@ -228,7 +229,7 @@
             
             int dimensionProduct = 1;
 
-            for(int j = 0; j < i; j++){
+            for(__uint64 j = 0; j < i; j++){
                 dimensionProduct *= dimensionSizes[j];
             }
 
@@ -239,10 +240,10 @@
     }
 
     template <class T>
-    void Tensor<T>::constructorMessage(int dimension, std::vector<int>& dimensionSizes) const{
+    void Tensor<T>::constructorMessage(const std::vector<int>& dimensionSizes) const{
 
         // Message
-        std::cout << "A tensor of " << tensor.size() << " items and " << dimension << " dimensions been allocated.\n";
+        std::cout << "A tensor of " << tensor.size() << " items and " << dimensionSizes.size() << " dimensions been allocated.\n";
         std::cout << "A tensor dimensions are as follows: ";
         for(long long unsigned int i = 0; i < tensor.size(); i++){
             std::cout << dimensionSizes[i] << " ";
