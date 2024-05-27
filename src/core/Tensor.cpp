@@ -7,7 +7,7 @@
 #include "ITensor.hpp"
 
 #define MAX_LOOP_COUNT 1024;
-#define __uint64 __uint64_t
+#define __uint64 uint64_t
 
     template class Tensor<bool>;
     template class Tensor<char>;
