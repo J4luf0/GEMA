@@ -247,7 +247,7 @@
         // Message
         std::cout << "A tensor of " << tensor.size() << " items and " << dimensionSizes.size() << " dimensions been allocated.\n";
         std::cout << "A tensor dimensions are as follows: ";
-        for(long long unsigned int i = 0; i < tensor.size(); i++){
+        for(long long unsigned int i = 0; i < dimensionSizes.size(); i++){
             std::cout << dimensionSizes[i] << " ";
         }
 
