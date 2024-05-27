@@ -37,7 +37,7 @@ template<class T> class Tensor{
      * 
      * @return - vector containing one int per dimension with value of its size
     */
-    std::vector<int> getDimensionSizes() const;
+    const std::vector<int>* getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getNumberOfDimensions() - Public method to get the number of dimensions
@@ -75,7 +75,7 @@ template<class T> class Tensor{
      * @param value - a value of custom type that will be stored in the tensor
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
-    void assign(T value, std::vector<int> coordinates);
+    void assign(const T& value, const std::vector<int>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout
@@ -92,7 +92,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
     */
-    void showItem(std::vector<int> coordinates) const;
+    void showItem(const std::vector<int>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showCoords() - Public method to write into cout tensor coordinates based from item index input
@@ -114,7 +114,7 @@ template<class T> class Tensor{
      * 
      * Example: TensorClass* tensorTransposed = tensor1->transposition();
     */
-    Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1);
+    Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * TensorClass* operator+() - Publicly overload to add two tensors of the same size. Both by reference.

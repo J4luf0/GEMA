@@ -32,8 +32,8 @@
     }
 
     template <class T>
-    std::vector<int> Tensor<T>::getDimensionSizes() const{
-        return dimensionSizes;
+    const std::vector<int>* Tensor<T>::getDimensionSizes() const{
+        return &dimensionSizes;
     }
 
     template <class T>
@@ -90,7 +90,7 @@
     }
 
     template <class T>
-    void Tensor<T>::assign(T value, std::vector<int> coordinates){
+    void Tensor<T>::assign(const T& value, const std::vector<int>& coordinates){
 
         T itemNumber = getIndex(coordinates);
         
@@ -119,7 +119,7 @@
     }
 
     template <class T>
-    void Tensor<T>::showItem(std::vector<int> coordinates) const{
+    void Tensor<T>::showItem(const std::vector<int>& coordinates) const{
         
         int itemNumber = getIndex(coordinates);
         std::cout << "Item: " << tensor[itemNumber] << "\n";
@@ -138,7 +138,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2){
+    Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const{
 
         // Copying the dimensionSizes
         std::vector<int> transposedDimensionSizes = dimensionSizes; 
