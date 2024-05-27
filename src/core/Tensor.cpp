@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <memory>
 
 #include "ITensor.hpp"
 
