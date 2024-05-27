@@ -2,11 +2,12 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <stdint.h>
 
 #include "ITensor.hpp"
 
 #define MAX_LOOP_COUNT 1024;
-#define __uint64 unsigned __int64
+#define __uint64 __uint64_t
 
     template class Tensor<bool>;
     template class Tensor<char>;
