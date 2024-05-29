@@ -51,12 +51,12 @@ int main(){
     tensorTransposed->showTensor();
 
     cout << "Is equilateral? / no\n";
-    cout << tensorTransposed->isTensorEquilateral() << "\n";
+    cout << tensorTransposed->isTensorEquilateral() << '\n';
 
     vector<int> tensorEquiDimensionSizes = {3, 3};
     unique_ptr<Tensor<double>> tensorEqui(new Tensor<double>(tensorEquiDimensionSizes));
     cout << "Is equilateral? / yes\n";
-    cout << tensorEqui->isTensorEquilateral() << "\n";
+    cout << tensorEqui->isTensorEquilateral() << '\n';
 
     assert(tensorEqui->isTensorEquilateral() == 1);
     assert(tensorTransposed->isTensorEquilateral() == 0);

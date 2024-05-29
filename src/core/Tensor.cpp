@@ -108,9 +108,9 @@
 
             if((i % dimensionSizes[0] == 0) && 
                 i > 0){
-                std::cout << "\n";
+                std::cout << '\n';
                 if(i % dimensionSizes[1] == 0){
-                    std::cout << "\n";
+                    std::cout << '\n';
                 }
             }
 
@@ -124,7 +124,7 @@
     void Tensor<T>::showItem(const std::vector<int>& coordinates) const{
         
         int itemNumber = getIndex(coordinates);
-        std::cout << "Item: " << tensor[itemNumber] << "\n";
+        std::cout << "Item: " << tensor[itemNumber] << '\n';
     }
 
     template <class T>
@@ -136,7 +136,7 @@
         for(__uint64 i = 0; i < dimensionSizes.size(); i++){
             std::cout << coords[i] << " ";
         }
-        std::cout << "\n";
+        std::cout << '\n';
     }
 
     template <class T>
