@@ -40,7 +40,7 @@
 
     template <class T>
     int Tensor<T>::getNumberOfDimensions() const{
-        return tensor.size();
+        return dimensionSizes.size();
     }
 
     template <class T>
