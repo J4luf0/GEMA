@@ -47,7 +47,8 @@ template<class T> class Tensor{
     int getNumberOfDimensions() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order
+     * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order, if the array is 
+     * longer than number of items in a tensor, only those that fit will be added
      * 
      * @param tensorItems - one dimensional array of items to be added by order
     */
