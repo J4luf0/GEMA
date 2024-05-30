@@ -63,7 +63,7 @@ template<class T> class Tensor{
      * 
      * @param tensorOutput - function that defines the output of the tensor
     */
-    void setTensorOutput(const std::functionvoid(const T&)> tensorOutput);
+    void setTensorOutput(const std::function<void(const T&)> tensorOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * isTensorEquilateral() - Public method to decide, if the tensor dimensions have the same sizes
