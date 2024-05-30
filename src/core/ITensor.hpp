@@ -173,6 +173,15 @@ template<class T> class Tensor{
     int getIndex(const std::vector<int>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * getNumberOfItems() - Private method to calculate the number of possible items in a tensor based on given dimension sizes
+     * 
+     * @param dimensionSizes - vector containing size of each dimension
+     * 
+     * @return - total number of items that can fit into a tensor
+    */
+    int getNumberOfItems(const std::vector<int>& dimensionSizes) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
      * 
      * @param dimensionSizes - the dimension sizes to be output

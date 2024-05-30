@@ -22,13 +22,8 @@
     Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
     : dimensionSizes(newTensorDimensionSizes) {
 
-        // Calculate number of items
-        int itemCounting = 1;
-        for(const auto& newTensorDimensionSize : newTensorDimensionSizes){
-            itemCounting *= newTensorDimensionSize;
-        }
+        int itemCounting = getNumberOfItems(newTensorDimensionSizes);
 
-        // Allocate space for the tensor
         tensor.resize(itemCounting);
 
         constructorMessage(dimensionSizes);
@@ -234,6 +229,16 @@
        }
 
         return itemNumber;
+    }
+
+    template <class T>
+    int Tensor<T>::getNumberOfItems(const std::vector<int>& dimensionSizes) const{
+
+        int itemCounting = 1;
+        for(const auto& dimensionSize : dimensionSizes){
+            itemCounting *= dimensionSize;
+        }
+        return itemCounting;
     }
 
     template <class T>
