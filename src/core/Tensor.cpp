@@ -68,6 +68,11 @@
     }
 
     template <class T>
+    void Tensor<T>::setTensorOutput(const std::function<void(const T&)> tensorOutput){
+        this->tensorOutput = tensorOutput;
+    }
+
+    template <class T>
     bool Tensor<T>::isTensorEquilateral() const{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }

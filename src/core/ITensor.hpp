@@ -5,10 +5,11 @@
 #include <functional>
 
 /** ===========================================================================================================================
- * Class for work with general tensors
+ * Class for work with generic tensors
  * 
  * Tensor is represented in class as one dimensional array with methods getCoords() that calculates the made-up
  * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates.
+ * 
  * 
  * 
  */
