@@ -23,8 +23,8 @@
 
         // Calculate number of items
         int itemCounting = 1;
-        for(__uint64 i = 0; i < newTensorDimensionSizes.size(); i++){
-            itemCounting *= newTensorDimensionSizes[i];
+        for(const auto& newTensorDimensionSize : newTensorDimensionSizes){
+            itemCounting *= newTensorDimensionSize;
         }
 
         // Allocate space for the tensor
@@ -69,6 +69,7 @@
     template <class T>
     void Tensor<T>::fillWith(const T& fill){
 
+        // Since the type parameter is allowed to be bool, this cannot be a ranged based for loop
         for(__uint64 i = 0; i < tensor.size(); i++){
             tensor[i] = fill;
         }
@@ -77,7 +78,7 @@
     template <class T>
     bool Tensor<T>::isTensorEquilateral() const{
 
-        bool isEquilateral = false;
+        bool isEquilateral;
 
         for(__uint64 i = 0; i < dimensionSizes.size() - 1; i++){
 
@@ -133,8 +134,8 @@
         std::vector<int> coords = getCoords(itemNumber);
 
         std::cout << "Coords: ";
-        for(__uint64 i = 0; i < dimensionSizes.size(); i++){
-            std::cout << coords[i] << " ";
+        for(const auto& coord : coords){
+            std::cout << coord << " ";
         }
         std::cout << '\n';
     }
@@ -247,8 +248,8 @@
         // Message
         std::cout << "A tensor of " << tensor.size() << " items and " << dimensionSizes.size() << " dimensions been allocated.\n";
         std::cout << "A tensor dimensions are as follows: ";
-        for(long long unsigned int i = 0; i < dimensionSizes.size(); i++){
-            std::cout << dimensionSizes[i] << " ";
+        for(const auto& dimensionSize : dimensionSizes){
+            std::cout << dimensionSize << " ";
         }
 
         std::cout << "\n\n";

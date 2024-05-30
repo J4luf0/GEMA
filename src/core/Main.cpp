@@ -43,7 +43,7 @@ int main(){
     tensorAdd->showTensor();
 
 
-    cout << "\n\n";
+    cout << '\n';
 
     cout << "Transposition now.\n";
     unique_ptr<Tensor<double>> tensorTransposed(tensor1->transposition());
