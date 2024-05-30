@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <stdint.h>
 
 #include "ITensor.hpp"
@@ -77,19 +78,7 @@
 
     template <class T>
     bool Tensor<T>::isTensorEquilateral() const{
-
-        bool isEquilateral;
-
-        for(__uint64 i = 0; i < dimensionSizes.size() - 1; i++){
-
-            isEquilateral = true;
-            if(dimensionSizes[i] != dimensionSizes[i + 1]){
-                isEquilateral = false;
-                break;
-            }
-        }
-
-        return isEquilateral;
+        return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }
 
     template <class T>
