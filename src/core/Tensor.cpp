@@ -8,7 +8,7 @@
 #include "ITensor.hpp"
 
 #define MAX_LOOP_COUNT 1024;
-#define __uint64 uint64_t
+#define uint64t uint64_t
 
     template class Tensor<bool>;
     template class Tensor<char>;
@@ -40,7 +40,7 @@
     }
 
     template <class T>
-    int Tensor<T>::getNumberOfDimensions() const{
+    uint64t Tensor<T>::getNumberOfDimensions() const{
         return dimensionSizes.size();
     }
 
@@ -62,17 +62,8 @@
             return;
         }
         
-        for(__uint64 i = 0; i < tensor.size(); i++){
+        for(uint64t i = 0; i < tensor.size(); i++){
             tensor[i] = tensorItems[i];
-        }
-    }
-
-    template <class T>
-    void Tensor<T>::fillWith(const T& fill){
-
-        // Since the type parameter is allowed to be bool, this cannot be a ranged based for loop
-        for(__uint64 i = 0; i < tensor.size(); i++){
-            tensor[i] = fill;
         }
     }
 
@@ -90,11 +81,20 @@
     }
 
     template <class T>
+    void Tensor<T>::fillWith(const T& fill){
+
+        // Since the type parameter is allowed to be bool, this cannot be a ranged based for loop
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensor[i] = fill;
+        }
+    }
+
+    template <class T>
     void Tensor<T>::showTensor() const{
 
         std::cout << "Tensor is as follows:\n\n";
 
-        for(__uint64 i = 0; i < tensor.size(); i++){
+        for(uint64t i = 0; i < tensor.size(); i++){
 
             if((i % dimensionSizes[0] == 0) && 
                 i > 0){
@@ -147,7 +147,7 @@
         switched.reserve(dimensionSizes.size());
 
         // Looping thru elements in tensor and swapping the desired coordinates
-        for(__uint64 i = 0; i < tensor.size(); i++){
+        for(uint64t i = 0; i < tensor.size(); i++){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
             std::vector<int> temp(getCoords(i));
@@ -173,7 +173,7 @@
         Tensor* tensorOut = new Tensor(dimensionSizes);
         tensorOut->tensor.reserve(tensor.size());
 
-        for(__uint64 i = 0; i < tensor.size(); i++){
+        for(uint64t i = 0; i < tensor.size(); i++){
             tensorOut->tensor[i] = tensor[i] + tensor2.tensor[i];
         }
 
@@ -189,13 +189,13 @@
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const{
 
         std::vector<int> coordinates;
-        __uint64 dimension = dimensionSizes.size();
+        uint64t dimension = dimensionSizes.size();
         coordinates.reserve(dimension);
 
         int dimensionProduct = 1;
 
-        for(__uint64 i = 0; i < dimension; i++){
-            for(__uint64 j = 0; j < (dimension - i - 1); j++){
+        for(uint64t i = 0; i < dimension; i++){
+            for(uint64t j = 0; j < (dimension - i - 1); j++){
                 dimensionProduct *= dimensionSizes[j];
             }
 
@@ -212,7 +212,7 @@
         
         int itemNumber = 0;
 
-       for(__uint64 i = 0; i < dimensionSizes.size(); i++){
+       for(uint64t i = 0; i < dimensionSizes.size(); i++){
 
             if(i == 0){
                 itemNumber += coordinates[i];
@@ -221,7 +221,7 @@
             
             int dimensionProduct = 1;
 
-            for(__uint64 j = 0; j < i; j++){
+            for(uint64t j = 0; j < i; j++){
                 dimensionProduct *= dimensionSizes[j];
             }
 

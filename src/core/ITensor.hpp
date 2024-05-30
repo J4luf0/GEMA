@@ -2,6 +2,8 @@
 #ifndef ITENSOR_HPP
 #define ITENSOR_HPP
 
+#include <functional>
+
 /** ===========================================================================================================================
  * Class for work with general tensors
  * 
@@ -16,7 +18,7 @@ template<class T> class Tensor{
 
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
     std::vector<int> dimensionSizes;        // Size od each tensor dimension
-
+    std::function<void(const T&)> tensorOutput;
 
 
     public:
@@ -44,7 +46,7 @@ template<class T> class Tensor{
      * 
      * @return - a number representing a number of dimensions
     */
-    int getNumberOfDimensions() const;
+    uint64_t getNumberOfDimensions() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order, if the array is 
@@ -57,11 +59,11 @@ template<class T> class Tensor{
     void setItems(const T* tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * fillWith() - Public method that fills all tensor with passed value
+     * setTensorOutput() - Public method that allows the user to set the output of the tensor through this->showTensor() method
      * 
-     * @param fill - the value to be filled into all items in tensor
+     * @param tensorOutput - function that defines the output of the tensor
     */
-    void fillWith(const T& fill);
+    void setTensorOutput(const std::functionvoid(const T&)> tensorOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * isTensorEquilateral() - Public method to decide, if the tensor dimensions have the same sizes
@@ -77,6 +79,14 @@ template<class T> class Tensor{
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
     void assign(const T& value, const std::vector<int>& coordinates);
+
+    
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * fillWith() - Public method that fills all tensor with passed value
+     * 
+     * @param fill - the value to be filled into all items in tensor
+    */
+    void fillWith(const T& fill);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout
