@@ -7,10 +7,8 @@
 /** ===========================================================================================================================
  * Class for work with generic tensors
  * 
- * Tensor is represented in class as one dimensional array with methods getCoords() that calculates the made-up
- * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates.
- * 
- * 
+ * Tensor is represented in class as one dimensional array with two key methods getCoords() that calculates the made-up
+ * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates
  * 
  */
 template<class T> class Tensor{
@@ -25,13 +23,10 @@ template<class T> class Tensor{
     public:
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * TensorClass() constructor - Writes into tensor attributes dimension and dimension sizes and with that calculates
-     * number of items
+     * TensorClass() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
+     * the result is empty tensor, with defined dimensions and allocated space
      * 
      * @param newTensorDimensionSizes - a vector filled with sizes of dimensions
-     * 
-     * Note: It can also calculate advanced characteristics of tensor like if a tensor is equilateral
-     * Note: to-do how to deal with message and maybe it should not always compute advanced characteristics
     */
     Tensor(const std::vector<int>& newTensorDimensionSizes);
 
@@ -43,9 +38,9 @@ template<class T> class Tensor{
     const std::vector<int>* getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * getNumberOfDimensions() - Public method to get the number of dimensions
+     * getNumberOfDimensions() - Public method to get the number of dimensions of a tensor
      * 
-     * @return - a number representing a number of dimensions
+     * @return - a number of dimensions
     */
     uint64_t getNumberOfDimensions() const;
 
@@ -67,23 +62,22 @@ template<class T> class Tensor{
     void setTensorOutput(const std::function<void(const T&)> tensorOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * isTensorEquilateral() - Public method to decide, if the tensor dimensions have the same sizes
+     * isTensorEquilateral() - Public method to calculate, if the tensor dimensions have the same sizes
      * 
      * @return - boolean true if the tensor is equilateral and false if not
     */
     bool isTensorEquilateral() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * assign() - Public method to assign value into tensor on the desired coordinates
+     * assign() - Public method to assign one value into tensor onto the desired coordinates
      *  
-     * @param value - a value of custom type that will be stored in the tensor
+     * @param value - a value of generic type that will be stored in the tensor
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
     void assign(const T& value, const std::vector<int>& coordinates);
-
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * fillWith() - Public method that fills all tensor with passed value
+     * fillWith() - Public method that fills tensor with passed value
      * 
      * @param fill - the value to be filled into all items in tensor
     */
@@ -100,9 +94,6 @@ template<class T> class Tensor{
      * showItem() - Public method to write into cout the item index based on the coordinates input
      * 
      * @param coordinates - address of coordinates in a tensor
-     * 
-     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
-     * or by just index in the actual array
     */
     void showItem(const std::vector<int>& coordinates) const;
 
@@ -110,9 +101,6 @@ template<class T> class Tensor{
      * showCoords() - Public method to write into cout tensor coordinates based from item index input
      * 
      * @param itemNumber - item index in a tensor
-     * 
-     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
-     * or by just index in the actual array
     */
     void showCoords(const int itemNumber) const;
 
@@ -123,19 +111,15 @@ template<class T> class Tensor{
      * @param dim2 - second dimension to swap, default value is 1
      * 
      * @return - a pointer to new allocated tensor, that has got transposed two dimensions
-     * 
-     * Example: TensorClass* tensorTransposed = tensor1->transposition();
     */
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * TensorClass* operator+() - Publicly overload to add two tensors of the same size. Both by reference.
+     * TensorClass* operator+() - Public overload to add two tensors of the same size. Both by reference.
      * 
      * @param tensor2 - a second tensor to be added as reference (the same as the first)
      * 
      * @return - a pointer to new allocated tensor that is the sum of the both
-     * 
-     * Example: TensorClass* tensorAdd = *tensor1 + *tensor2;
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
@@ -165,7 +149,7 @@ template<class T> class Tensor{
      * 
      * @param coordinates - an array of coordinates of one item in tensor
      * 
-     * @return - index of one number in tensor when represented in one dimension
+     * @return - index of one item in tensor when represented in one dimension
      * 
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
      * or by just index in the actual array
@@ -174,6 +158,8 @@ template<class T> class Tensor{
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getNumberOfItems() - Private method to calculate the number of possible items in a tensor based on given dimension sizes
+     * This method calculates the number of items before the tensor itself is allocated, and should be useless
+     * after
      * 
      * @param dimensionSizes - vector containing size of each dimension
      * 
