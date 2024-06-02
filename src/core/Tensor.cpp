@@ -171,7 +171,7 @@
 
         //Allocation of new tensor. Since tensor addition doesnt change the size, we can get right to allocation
         Tensor* tensorOut = new Tensor(dimensionSizes);
-        tensorOut->tensor.reserve(tensor.size());
+        tensorOut->tensor.resize(tensor.size());
 
         for(uint64t i = 0; i < tensor.size(); i++){
             tensorOut->tensor[i] = tensor[i] + tensor2.tensor[i];
