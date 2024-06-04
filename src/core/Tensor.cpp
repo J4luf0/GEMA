@@ -132,27 +132,25 @@
         transposedDimensionSizes[dim2] = dimensionSizes[dim1];
         
         // Initializing the new tensor
-        Tensor* tensorTransposed = new Tensor(transposedDimensionSizes);
+        Tensor<T>* tensorTransposed = new Tensor<T>(transposedDimensionSizes);
 
-        std::vector<int> temp, switched;
-        temp.reserve(dimensionSizes.size());
-        switched.reserve(dimensionSizes.size());
+        std::vector<int> original, switched;
+        original.resize(dimensionSizes.size());
+        switched.resize(dimensionSizes.size());
 
         // Looping thru elements in tensor and swapping the desired coordinates
         for(uint64t i = 0; i < tensor.size(); i++){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
-            std::vector<int> temp(getCoords(i));
+            original = getCoords(i);
 
-            // Deep copy of coords before swap
-            for(const int& value : temp) switched.push_back(value);
-            
             // The swap of two desired coordinates
-            switched[dim1] = temp[dim2];
-            switched[dim2] = temp[dim1];
+            switched = original;
+            switched[dim1] = original[dim2];
+            switched[dim2] = original[dim1];
 
             // Works until now, check the getIndex function if it actually works properly
-            tensorTransposed->tensor[tensorTransposed->getIndex(switched)] = tensor[getIndex(temp)];
+            tensorTransposed->tensor[tensorTransposed->getIndex(switched)] = tensor[getIndex(original)];
         }
 
         return tensorTransposed;

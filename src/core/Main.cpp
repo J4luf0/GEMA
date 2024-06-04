@@ -20,8 +20,6 @@ int main(){
 
     cout << "Allocation:\n\n";
 
-    //Tensor<double>* tensor1 = new Tensor<double>(dimensionSizes);
-    //unique_ptr<Tensor<double>> tensor1(new Tensor<double>(dimensionSizes));
     auto tensor1 = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor1->assign(5,     {0, 0});
@@ -30,13 +28,14 @@ int main(){
     tensor1->assign(-2,      {1, 1});
     tensor1->assign(4.5,   {0, 2});
     tensor1->assign(7,    {1, 2});
+
+    tensor1->showTensor();
     
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
-    double tensor2Items[6] = {2, -5, 10, 5.89647, 3, 4};
+    vector<double> tensor2Items = {2, -5, 10, 5.89647, 3, 4};
     tensor2->setItems(tensor2Items);
 
-    tensor1->showTensor();
     tensor2->showTensor();
 
 
