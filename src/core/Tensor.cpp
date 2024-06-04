@@ -55,19 +55,6 @@
     }
 
     template <class T>
-    void Tensor<T>::setItems(const T* tensorItems){
-
-        if(tensorItems == nullptr || tensorItems == 0){
-            fillWith(0);
-            return;
-        }
-        
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensor[i] = tensorItems[i];
-        }
-    }
-
-    template <class T>
     void Tensor<T>::setTensorOutput(const std::function<void(const T&)> tensorOutput){
         this->tensorOutput = tensorOutput;
     }

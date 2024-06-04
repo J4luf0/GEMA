@@ -52,8 +52,6 @@ template<class T> class Tensor{
     */
     void setItems(const std::vector<T>& tensorItems);
 
-    void setItems(const T* tensorItems);
-
     /** -----------------------------------------------------------------------------------------------------------------------
      * setTensorOutput() - Public method that allows the user to set the output of the tensor through this->showTensor() method
      * 
