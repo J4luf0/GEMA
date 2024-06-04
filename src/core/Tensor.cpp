@@ -175,7 +175,12 @@
     }
 
     template <class T>
-    constexpr Tensor<T>* Tensor<T>::operator=(Tensor<T>& asigner) const{
+    constexpr Tensor<T>& Tensor<T>::operator=(const Tensor<T>& assigner) const{
+        return *copy();
+    }
+
+    template <class T>
+    constexpr Tensor<T>* Tensor<T>::operator=(const Tensor<T>* assigner) const{
         return copy();
     }
 

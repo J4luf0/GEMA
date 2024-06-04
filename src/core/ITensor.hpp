@@ -129,11 +129,12 @@ template<class T> class Tensor{
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * operator=() - Public overload to deep copy the tensor
+     * operator=() - Public overload to deep copy the tensor.
      * 
      * @return - pointer to deep copy of this tensor
     */
-    constexpr Tensor<T>* operator=(Tensor<T>& asigner) const;
+    constexpr Tensor<T>& operator=(const Tensor<T>& assigner) const;
+    constexpr Tensor<T>* operator=(const Tensor<T>* assigner) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * ~Tensor() - Virtual destructor
@@ -151,8 +152,8 @@ template<class T> class Tensor{
      * 
      * @return - coordinates of the item in the tensor
      * 
-     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
-     * or by just index in the actual array
+     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate 
+     * system or by just index in the actual array
     */
     std::vector<int> getCoords(int itemNumber) const;
 
@@ -163,8 +164,8 @@ template<class T> class Tensor{
      * 
      * @return - index of one item in tensor when represented in one dimension
      * 
-     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate system 
-     * or by just index in the actual array
+     * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate
+     * system or by just index in the actual array
     */
     int getIndex(const std::vector<int>& coordinates) const;
 
