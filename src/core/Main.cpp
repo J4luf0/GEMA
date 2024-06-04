@@ -18,13 +18,15 @@ int main(){
 
     vector<int> dimensionSizes = {2, 3};
 
+    cout << "Allocation:\n\n";
+
     //Tensor<double>* tensor1 = new Tensor<double>(dimensionSizes);
     //unique_ptr<Tensor<double>> tensor1(new Tensor<double>(dimensionSizes));
     auto tensor1 = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor1->assign(5,     {0, 0});
     tensor1->assign(0.55,    {1, 0});
-    tensor1->assign(1,     {0, 1});
+    tensor1->assign(-0,     {0, 1});
     tensor1->assign(-2,      {1, 1});
     tensor1->assign(4.5,   {0, 2});
     tensor1->assign(7,    {1, 2});

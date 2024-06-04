@@ -3,7 +3,8 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 
 #include "ITensor.hpp"
 
@@ -17,6 +18,10 @@
     template class Tensor<long long int>;
     template class Tensor<float>;
     template class Tensor<double>;
+    template class Tensor<std::string>;
+    template <typename V> class Tensor<std::vector<V>>;
+    template <typename V> class Tensor<std::unique_ptr<V>>;
+    template <typename T> class Tensor<Tensor<T>*>;
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
@@ -75,7 +80,7 @@
     template <class T>
     void Tensor<T>::assign(const T& value, const std::vector<int>& coordinates){
 
-        T itemNumber = getIndex(coordinates);
+        int itemNumber = getIndex(coordinates);
         
         tensor[itemNumber] = value;
     }
