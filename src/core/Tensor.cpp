@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
+#include <type_traits>
+//#include <typeinfo>
 
 #include "ITensor.hpp"
 
@@ -43,6 +45,8 @@
     uint64t Tensor<T>::getNumberOfDimensions() const{
         return dimensionSizes.size();
     }
+
+
 
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems){
@@ -171,6 +175,11 @@
     }
 
     template <class T>
+    constexpr Tensor<T>* Tensor<T>::operator=(Tensor<T>& asigner) const{
+        return copy();
+    }
+
+    template <class T>
     Tensor<T>::~Tensor(){
             //
     }
@@ -229,6 +238,18 @@
             itemCounting *= dimensionSize;
         }
         return itemCounting;
+    }
+
+    template <class T>
+    inline constexpr Tensor<T>* Tensor<T>::copy() const{
+
+        Tensor<T>* newTensor = new Tensor<T>(dimensionSizes);
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            newTensor->tensor[i] = tensor[i];
+        }
+
+        return newTensor;
     }
 
     template <class T>

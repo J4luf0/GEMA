@@ -67,6 +67,13 @@ template<class T> class Tensor{
     bool isTensorEquilateral() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * copyRecursive() - Public method to deep copy a tensor, attempting to dereference items, if they are of a pointer type.
+     * 
+     * @return - pointer to deep copy of this tensor
+    */
+    constexpr Tensor<T>* copyRecursive() const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * assign() - Public method to assign one value into tensor onto the desired coordinates
      *  
      * @param value - a value of generic type that will be stored in the tensor
@@ -113,13 +120,20 @@ template<class T> class Tensor{
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * TensorClass* operator+() - Public overload to add two tensors of the same size. Both by reference.
+     * operator+() - Public overload to add two tensors of the same size. Both by reference.
      * 
      * @param tensor2 - a second tensor to be added as reference (the same as the first)
      * 
      * @return - a pointer to new allocated tensor that is the sum of the both
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator=() - Public overload to deep copy the tensor
+     * 
+     * @return - pointer to deep copy of this tensor
+    */
+    constexpr Tensor<T>* operator=(Tensor<T>& asigner) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * ~Tensor() - Virtual destructor
@@ -164,6 +178,14 @@ template<class T> class Tensor{
      * @return - total number of items that can fit into a tensor
     */
     int getNumberOfItems(const std::vector<int>& dimensionSizes) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * copy() - Private method to deep copy a tensor, meaning the items in it get copied, but if the items in it are of pointer
+     * type, then it is not guaranteed to copy values of those pointers.
+     * 
+     * @return - pointer to deep copy of this tensor
+    */
+    constexpr Tensor<T>* copy() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation

@@ -16,7 +16,7 @@ int main(){
     cout << "\nStart testing.\n";
     cout << "Testing Tensor.\n\n";
 
-    vector<int> dimensionSizes = {2, 3};
+    const vector<int> dimensionSizes = {2, 3};
 
     cout << "Allocation:\n\n";
 
@@ -33,7 +33,7 @@ int main(){
     
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
-    vector<double> tensor2Items = {2, -5, 10, 5.89647, 3, 4};
+    const vector<double> tensor2Items = {2, -5, 10, 5.89647, 3, 4};
     tensor2->setItems(tensor2Items);
 
     tensor2->showTensor();
