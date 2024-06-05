@@ -3,17 +3,18 @@
 #include <vector>
 #include <cassert>
 #include <memory>
-
 #include <format>
 
 #include "ITensor.hpp"
 
+#define uint64t uint64_t
+
 using std::vector, std::make_unique, std::cout, std::endl;
 
-void test_constructor_001(){
+inline void test_constructor_001(){
 
     cout << "test_constructor_001\n";
-    const vector<int> dimensionSizes = {2, 3};
+    const vector<int> dimensionSizes{2, 3};
 
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
@@ -23,17 +24,49 @@ void test_constructor_001(){
     tensor->setItem(-2,      {1, 1});
     tensor->setItem(4.5,   {0, 2});
     tensor->setItem(7,    {1, 2});
+
+
+    vector<int> expected = {2, 3};
 
     assert(tensor->getNumberOfDimensions() == 2);
-    vector<int> expected = {2, 3};
-    cout << tensor->getDimensionSizes()[0] << " vs " << expected[0] << endl;
-    assert(tensor->getDimensionSizes()[0] == expected[0]);
+
+    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+        assert(tensor->getDimensionSizes()[i] == expected[i]);
+    }
 }
 
-void test_setItem_001(){
+inline void test_constructor_002(){
+
+    cout << "test_constructor_002\n";
+    const vector<int> dimensionSizes{2, 2, 3};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+
+    tensor->setItem(7,     {0, 0, 0});
+    tensor->setItem(0.2,  {1, 0, 0});
+    tensor->setItem(-0,    {0, 1, 0});
+    tensor->setItem(-1,    {1, 1, 0});
+    tensor->setItem(-100,   {0, 0, 1});
+    tensor->setItem(0.1,  {1, 0, 1});
+    tensor->setItem(99,    {0, 1, 1});
+    tensor->setItem(35,    {1, 1, 1});
+    tensor->setItem(-2.56,   {0, 0, 2});
+    tensor->setItem(30.62,  {1, 0, 2});
+    tensor->setItem(2,  {1, 1, 2});
+
+    vector<int> expected = {2, 2, 3};
+
+    assert(tensor->getNumberOfDimensions() == 3);
+
+    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+        assert(tensor->getDimensionSizes()[i] == expected[i]);
+    }
+}
+
+inline void test_setItem_001(){
 
     cout << "test_setItem_001\n";
-    const vector<int> dimensionSizes = {2, 3};
+    const vector<int> dimensionSizes{2, 3};
 
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
@@ -44,12 +77,12 @@ void test_setItem_001(){
     tensor->setItem(4.5,   {0, 2});
     tensor->setItem(7,    {1, 2});
 
-    assert(tensor->getItem(vector<int>(0, 0)) == 5);
-    assert(tensor->getItem(vector<int>(1, 0)) == 0.55);
-    assert(tensor->getItem(vector<int>(0, 1)) == 0);
-    assert(tensor->getItem(vector<int>(1, 1)) == -2);
-    assert(tensor->getItem(vector<int>(1, 2)) == 4.5);
-    assert(tensor->getItem(vector<int>(1, 2)) == 7);
+    assert(tensor->getItem({0, 0}) == 5);
+    assert(tensor->getItem({1, 0}) == 0.55);
+    assert(tensor->getItem({0, 1}) == 0);
+    assert(tensor->getItem({1, 1}) == -2);
+    assert(tensor->getItem({0, 2}) == 4.5);
+    assert(tensor->getItem({1, 2}) == 7);
 }
 
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
@@ -60,9 +93,10 @@ int main(){
 
 
     test_constructor_001();
+    test_constructor_002();
     test_setItem_001();
 
-    cout << "All test done.\n";
+    cout << "\nAll test done.\n";
     
 /*
     const vector<int> dimensionSizes = {2, 3};

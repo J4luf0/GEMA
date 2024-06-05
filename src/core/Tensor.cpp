@@ -54,7 +54,7 @@
 
     template <class T>
     T Tensor<T>::getItem(const std::vector<int>& coordinates) const{
-        
+
         return tensor[getIndex(coordinates)];
     }
 
@@ -219,7 +219,7 @@
 
         std::vector<int> coordinates;
         uint64t dimension = dimensionSizes.size();
-        coordinates.reserve(dimension);
+        coordinates.resize(dimension);
 
         int dimensionProduct = 1;
 
