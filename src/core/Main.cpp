@@ -63,6 +63,37 @@ inline void test_constructor_002(){
     }
 }
 
+inline void test_constructor_003(){
+
+    cout << "test_constructor_003\n";
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+
+    tensor->setItem(2,     {0});
+    tensor->setItem(-0.3,  {1});
+    tensor->setItem(4,     {2});
+
+    vector<int> expected = {2};
+
+    assert(tensor->getNumberOfDimensions() == 1);
+
+    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+        assert(tensor->getDimensionSizes()[i] == expected[i]);
+    }
+}
+
+inline void test_constructor_004(){
+
+    cout << "test_constructor_004\n";
+    const vector<int> dimensionSizes{0};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+
+    assert(tensor->getNumberOfDimensions() == 1);
+}
+
+
 inline void test_setItem_001(){
 
     cout << "test_setItem_001\n";
@@ -94,6 +125,8 @@ int main(){
 
     test_constructor_001();
     test_constructor_002();
+    test_constructor_003();
+    test_constructor_004();
     test_setItem_001();
 
     cout << "\nAll test done.\n";

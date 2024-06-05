@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <string>
 #include <type_traits>
-//#include <typeinfo>
+#include <stdexcept>
 
 #include "ITensor.hpp"
 
@@ -66,6 +66,14 @@
     
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates){
+
+        /*for(uint64t i = 0; i < dimensionSizes.size(); i++){
+
+            if(coordinates[i] >= dimensionSizes[i]){
+                throw std::runtime_error("ACoordinate out of bounds for its dimension!");
+            }
+        }*/
+        
 
         int itemNumber = getIndex(coordinates);
         tensor[itemNumber] = value;
