@@ -129,6 +129,13 @@ template<class T> class Tensor{
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * operator+=() - Public overload to add tensor to tensor
+     * 
+     * @param tensor2 - a tensor to be added to this tensor
+    */
+    void operator+=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * operator=() - Public overload to deep copy the tensor.
      * 
      * @return - pointer to deep copy of this tensor

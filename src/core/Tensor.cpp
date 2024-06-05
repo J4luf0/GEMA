@@ -13,7 +13,6 @@
 #define MAX_LOOP_COUNT 1024;
 #define uint64t uint64_t
 
-    template class Tensor<bool>;
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -46,8 +45,6 @@
         return dimensionSizes.size();
     }
 
-
-
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems){
 
@@ -79,9 +76,8 @@
     template <class T>
     void Tensor<T>::fillWith(const T& fill){
 
-        // Since the type parameter is allowed to be bool, this cannot be a ranged based for loop
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensor[i] = fill;
+        for(T& item : tensor){
+            item = fill;
         }
     }
 
@@ -163,7 +159,6 @@
     template <class T>
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
-        //Allocation of new tensor. Since tensor addition doesnt change the size, we can get right to allocation
         Tensor* tensorOut = new Tensor(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
 
@@ -172,6 +167,14 @@
         }
 
         return tensorOut;
+    }
+
+    template <class T>
+    void Tensor<T>::operator+=(const Tensor<T>& tensor2){
+        
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensor[i] += tensor2.tensor[i];
+        }
     }
 
     template <class T>
