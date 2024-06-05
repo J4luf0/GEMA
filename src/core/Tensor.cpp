@@ -97,6 +97,13 @@
     }
 
     template <class T>
+    void Tensor<T>::forEach(const std::function<void(T&)>& apply){
+        for(T& item : tensor){
+            apply(item);
+        }
+    }
+
+    template <class T>
     void Tensor<T>::fillWith(const T& fill){
 
         for(T& item : tensor){

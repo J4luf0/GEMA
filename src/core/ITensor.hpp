@@ -103,6 +103,8 @@ template<class T> class Tensor{
     */
     bool isTensorEquilateral() const;
 
+    void forEach(const std::function<void(T&)>& apply);
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * fillWith() - Public method that fills tensor with passed value
      * 
