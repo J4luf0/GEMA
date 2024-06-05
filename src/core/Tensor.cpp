@@ -57,12 +57,17 @@
         
         return tensor[getIndex(coordinates)];
     }
+
+    template <class T>
+    void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const{
+        
+        return (void*)&tensor[getIndex(coordinates)];
+    }
     
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates){
 
         int itemNumber = getIndex(coordinates);
-        
         tensor[itemNumber] = value;
     }
 

@@ -6,7 +6,7 @@
 
 /** ===========================================================================================================================
  * Class for work with generic tensors
- * 
+ *
  * Tensor is represented in class as one dimensional array with two key methods getCoords() that calculates the made-up
  * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates
  * 
@@ -27,7 +27,7 @@ template<class T> class Tensor{
     /** -----------------------------------------------------------------------------------------------------------------------
      * TensorClass() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
      * the result is empty tensor, with defined dimensions and allocated space
-     * 
+     *
      * @param newTensorDimensionSizes - a vector filled with sizes of dimensions
     */
     Tensor(const std::vector<int>& newTensorDimensionSizes);
@@ -47,14 +47,24 @@ template<class T> class Tensor{
     uint64_t getNumberOfDimensions() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * getItem() - Public method to get item on provided coordinates, it returns an address to an item which might also
-     * be pointer, so one might need to dereference the return value two times in case of pointer type being stored in tensor
+     * getItem() - Public method to get item on provided coordinates, returns the item by value because large objects should
+     * have been already represented by pointer or reference
      * 
-     * @param coordinates - vector of coordinates leading to item
+     * @param coordinates - vector of coordinates specifying the item to be returned
      * 
      * @return - item on the provided coordinates
     */
     T getItem(const std::vector<int>& coordinates) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * getPointer() - Public method that forcibly returns address of item. Use with caution, because it casts to (void*) and
+     * if the item is already of pointer type, then it might need to dereference twice
+     * 
+     * @param coordinates - vector of coordinates specifying the item to be returned
+     * 
+     * @return - address of item on the provided coordinates
+    */
+    void* getPointer(const std::vector<int>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * assign() - Public method to assign one value into tensor onto the desired coordinates
@@ -111,7 +121,7 @@ template<class T> class Tensor{
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * operator+() - Public overload to add two tensors of the same size. Both by reference.
+     * operator+() - Public overload to add two tensors of the same size, both by reference
      * 
      * @param tensor2 - a second tensor to be added as reference (the same as the first)
      * 
@@ -183,8 +193,7 @@ template<class T> class Tensor{
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getNumberOfItems() - Private method to calculate the number of possible items in a tensor based on given dimension sizes
-     * This method calculates the number of items before the tensor itself is allocated, and should be useless
-     * after
+     * This method calculates the number of items before the tensor itself is allocated, and should be useless afterwards
      * 
      * @param dimensionSizes - vector containing size of each dimension
      * 
@@ -194,7 +203,7 @@ template<class T> class Tensor{
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * copy() - Private method to deep copy a tensor, meaning the items in it get copied, but if the items in it are of pointer
-     * type, then it is not guaranteed to copy values of those pointers.
+     * type, then it is not guaranteed to copy values of those pointers
      * 
      * @return - pointer to deep copy of this tensor
     */
