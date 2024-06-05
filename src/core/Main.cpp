@@ -10,16 +10,62 @@
 
 using std::vector, std::make_unique, std::cout, std::endl;
 
+void test_constructor_001(){
+
+    cout << "test_constructor_001\n";
+    const vector<int> dimensionSizes = {2, 3};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {0, 1});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {0, 2});
+    tensor->setItem(7,    {1, 2});
+
+    assert(tensor->getNumberOfDimensions() == 2);
+    vector<int> expected = {2, 3};
+    cout << tensor->getDimensionSizes()[0] << " vs " << expected[0] << endl;
+    assert(tensor->getDimensionSizes()[0] == expected[0]);
+}
+
+void test_setItem_001(){
+
+    cout << "test_setItem_001\n";
+    const vector<int> dimensionSizes = {2, 3};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {0, 1});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {0, 2});
+    tensor->setItem(7,    {1, 2});
+
+    assert(tensor->getItem(vector<int>(0, 0)) == 5);
+    assert(tensor->getItem(vector<int>(1, 0)) == 0.55);
+    assert(tensor->getItem(vector<int>(0, 1)) == 0);
+    assert(tensor->getItem(vector<int>(1, 1)) == -2);
+    assert(tensor->getItem(vector<int>(1, 2)) == 4.5);
+    assert(tensor->getItem(vector<int>(1, 2)) == 7);
+}
+
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
     cout << "\nStart testing.\n";
     cout << "Testing Tensor.\n\n";
 
+
+    test_constructor_001();
+    test_setItem_001();
+
+    cout << "All test done.\n";
+    
+/*
     const vector<int> dimensionSizes = {2, 3};
-
-    cout << "Allocation:\n\n";
-
     auto tensor1 = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor1->setItem(5,     {0, 0});
@@ -61,9 +107,10 @@ int main(){
     cout << tensorEqui->isTensorEquilateral() << '\n';
 
     assert(tensorEqui->isTensorEquilateral() == 1);
-    assert(tensorTransposed->isTensorEquilateral() == 0);
+    assert(tensorTransposed->isTensorEquilateral() == 0);*/
 
 
 
     return 0;
 }
+

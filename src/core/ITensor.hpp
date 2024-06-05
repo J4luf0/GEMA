@@ -37,7 +37,7 @@ template<class T> class Tensor{
      * 
      * @return - vector containing one int per dimension with value of its size
     */
-    const std::vector<int>* getDimensionSizes() const;
+    const std::vector<int>& getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * getNumberOfDimensions() - Public method to get the number of dimensions of a tensor

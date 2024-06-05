@@ -39,12 +39,12 @@
 
         tensor.resize(itemCounting);
 
-        constructorMessage(dimensionSizes);
+        //constructorMessage(dimensionSizes);
     }
 
     template <class T>
-    const std::vector<int>* Tensor<T>::getDimensionSizes() const{
-        return &dimensionSizes;
+    const std::vector<int>& Tensor<T>::getDimensionSizes() const{
+        return dimensionSizes;
     }
 
     template <class T>
