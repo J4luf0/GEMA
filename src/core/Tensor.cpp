@@ -68,6 +68,11 @@
     }
 
     template <class T>
+    void Tensor<T>::setItemOutput(const std::function<void(const T&)> itemOutput){
+        this->itemOutput = itemOutput;
+    }
+
+    template <class T>
     bool Tensor<T>::isTensorEquilateral() const{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }
@@ -88,45 +93,7 @@
         }
     }
 
-    template <class T>
-    void Tensor<T>::showTensor() const{
-
-        std::cout << "Tensor is as follows:\n\n";
-
-        for(uint64t i = 0; i < tensor.size(); i++){
-
-            if((i % dimensionSizes[0] == 0) && 
-                i > 0){
-                std::cout << '\n';
-                if(i % dimensionSizes[1] == 0){
-                    std::cout << '\n';
-                }
-            }
-
-            std::cout << "[" << tensor[i] << "] ";
-        }
-
-        std::cout << "\n\n";
-    }
-
-    template <class T>
-    void Tensor<T>::showItem(const std::vector<int>& coordinates) const{
-        
-        int itemNumber = getIndex(coordinates);
-        std::cout << "Item: " << tensor[itemNumber] << '\n';
-    }
-
-    template <class T>
-    void Tensor<T>::showCoords(const int itemNumber) const{
-
-        std::vector<int> coords = getCoords(itemNumber);
-
-        std::cout << "Coords: ";
-        for(const auto& coord : coords){
-            std::cout << coord << " ";
-        }
-        std::cout << '\n';
-    }
+    
 
     template <class T>
     Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const{
@@ -195,13 +162,57 @@
     }
 
     template <class T>
-    void Tensor<T>::deleteTensor(){
-        
-        for(T& item : tensor){
-            delete item;
+    void Tensor<T>::showTensor() const{
+
+        std::cout << "Tensor is as follows:\n\n";
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+
+            if((i % dimensionSizes[0] == 0) && 
+                i > 0){
+                std::cout << '\n';
+                if(i % dimensionSizes[1] == 0){
+                    std::cout << '\n';
+                }
+            }
+
+            std::cout << "[" << tensor[i] << "] ";
         }
-        
+
+        std::cout << "\n\n";
     }
+
+    template <class T>
+    void Tensor<T>::showItem(const std::vector<int>& coordinates) const{
+        
+        int itemNumber = getIndex(coordinates);
+        std::cout << "Item: " << tensor[itemNumber] << '\n';
+    }
+/*
+    template <class T>
+    void Tensor<T>::showCoords(const int itemNumber) const{
+
+        std::vector<int> coords = getCoords(itemNumber);
+
+        std::cout << "Coords: ";
+        for(const auto& coord : coords){
+            std::cout << coord << " ";
+        }
+        std::cout << '\n';
+    }
+
+    template <class T>
+    std::string Tensor<T>::coordsToString(const int itemNumber) const{
+
+        std::vector<int> coords = getCoords(itemNumber);
+
+        std::string coordsString = "";
+
+        for(const auto& coord : coords){
+            coordsString += coord + " ";
+        }
+        return coordsString;
+    }*/
 
     template <class T>
     Tensor<T>::~Tensor(){

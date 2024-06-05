@@ -10,6 +10,7 @@
  * Tensor is represented in class as one dimensional array with two key methods getCoords() that calculates the made-up
  * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates
  * 
+ * Tensor is made out of items, each having unique coordinates
  */
 template<class T> class Tensor{
 
@@ -18,6 +19,7 @@ template<class T> class Tensor{
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
     std::vector<int> dimensionSizes;        // Size od each tensor dimension
     std::function<void(const T&)> tensorOutput;
+    std::function<void(const T&)> itemOutput;
 
 
     public:
@@ -60,18 +62,18 @@ template<class T> class Tensor{
     void setTensorOutput(const std::function<void(const T&)> tensorOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * setTensorOutput() - Public method that allows the user to set the output of the items through this->showItem() method
+     * 
+     * @param tensorOutput - function that defines the output of the tensor
+    */
+    void setItemOutput(const std::function<void(const T&)> itemOutput);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * isTensorEquilateral() - Public method to calculate, if the tensor dimensions have the same sizes
      * 
      * @return - boolean true if the tensor is equilateral and false if not
     */
     bool isTensorEquilateral() const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * copyRecursive() - Public method to deep copy a tensor, attempting to dereference items, if they are of a pointer type.
-     * 
-     * @return - pointer to deep copy of this tensor
-    */
-    constexpr Tensor<T>* copyRecursive() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * assign() - Public method to assign one value into tensor onto the desired coordinates
@@ -87,27 +89,6 @@ template<class T> class Tensor{
      * @param fill - the value to be filled into all items in tensor
     */
     void fillWith(const T& fill);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * showTensor() - Public method to output the whole tensor into std::cout
-     * 
-     * Note: Is currently working only for 1d, 2d and maybe 3d tensors
-    */
-    void showTensor() const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * showItem() - Public method to write into cout the item index based on the coordinates input
-     * 
-     * @param coordinates - address of coordinates in a tensor
-    */
-    void showItem(const std::vector<int>& coordinates) const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * showCoords() - Public method to write into cout tensor coordinates based from item index input
-     * 
-     * @param itemNumber - item index in a tensor
-    */
-    void showCoords(const int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * transposition() - Public method to swap two dimensions in a tensor
@@ -143,7 +124,33 @@ template<class T> class Tensor{
     constexpr Tensor<T>& operator=(const Tensor<T>& assigner) const;
     constexpr Tensor<T>* operator=(const Tensor<T>* assigner) const;
 
-    void deleteTensor();
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * showTensor() - Public method to output the whole tensor into std::cout
+     * 
+     * Note: Is currently working only for 1d, 2d and maybe 3d tensors
+    */
+    void showTensor() const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * showItem() - Public method to write into cout the item index based on the coordinates input
+     * 
+     * @param coordinates - address of coordinates in a tensor
+    */
+    void showItem(const std::vector<int>& coordinates) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * showCoords() - Public method to write into cout tensor coordinates based from item index input
+     * 
+     * @param itemNumber - item index in a tensor
+    */
+    //void showCoords(const int itemNumber) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * showCoords() - Public method to write into cout tensor coordinates based from item index input
+     * 
+     * @param itemNumber - item index in a tensor
+    */
+    //std::string coordsToString(const int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * ~Tensor() - Virtual destructor
