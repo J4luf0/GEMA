@@ -53,6 +53,20 @@
     }
 
     template <class T>
+    T Tensor<T>::getItem(const std::vector<int>& coordinates) const{
+        
+        return tensor[getIndex(coordinates)];
+    }
+    
+    template <class T>
+    void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates){
+
+        int itemNumber = getIndex(coordinates);
+        
+        tensor[itemNumber] = value;
+    }
+
+    template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems){
 
         int copyLength = fmin(tensorItems.size(), tensor.size());
@@ -75,14 +89,6 @@
     template <class T>
     bool Tensor<T>::isTensorEquilateral() const{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
-    }
-
-    template <class T>
-    void Tensor<T>::assign(const T& value, const std::vector<int>& coordinates){
-
-        int itemNumber = getIndex(coordinates);
-        
-        tensor[itemNumber] = value;
     }
 
     template <class T>
@@ -188,31 +194,6 @@
         int itemNumber = getIndex(coordinates);
         std::cout << "Item: " << tensor[itemNumber] << '\n';
     }
-/*
-    template <class T>
-    void Tensor<T>::showCoords(const int itemNumber) const{
-
-        std::vector<int> coords = getCoords(itemNumber);
-
-        std::cout << "Coords: ";
-        for(const auto& coord : coords){
-            std::cout << coord << " ";
-        }
-        std::cout << '\n';
-    }
-
-    template <class T>
-    std::string Tensor<T>::coordsToString(const int itemNumber) const{
-
-        std::vector<int> coords = getCoords(itemNumber);
-
-        std::string coordsString = "";
-
-        for(const auto& coord : coords){
-            coordsString += coord + " ";
-        }
-        return coordsString;
-    }*/
 
     template <class T>
     Tensor<T>::~Tensor(){

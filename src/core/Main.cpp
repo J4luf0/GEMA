@@ -22,12 +22,12 @@ int main(){
 
     auto tensor1 = make_unique<Tensor<double>>(dimensionSizes);
 
-    tensor1->assign(5,     {0, 0});
-    tensor1->assign(0.55,    {1, 0});
-    tensor1->assign(-0,     {0, 1});
-    tensor1->assign(-2,      {1, 1});
-    tensor1->assign(4.5,   {0, 2});
-    tensor1->assign(7,    {1, 2});
+    tensor1->setItem(5,     {0, 0});
+    tensor1->setItem(0.55,    {1, 0});
+    tensor1->setItem(-0,     {0, 1});
+    tensor1->setItem(-2,      {1, 1});
+    tensor1->setItem(4.5,   {0, 2});
+    tensor1->setItem(7,    {1, 2});
 
     tensor1->showTensor();
     

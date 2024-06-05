@@ -47,6 +47,24 @@ template<class T> class Tensor{
     uint64_t getNumberOfDimensions() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * getItem() - Public method to get item on provided coordinates, it returns an address to an item which might also
+     * be pointer, so one might need to dereference the return value two times in case of pointer type being stored in tensor
+     * 
+     * @param coordinates - vector of coordinates leading to item
+     * 
+     * @return - item on the provided coordinates
+    */
+    T getItem(const std::vector<int>& coordinates) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * assign() - Public method to assign one value into tensor onto the desired coordinates
+     *  
+     * @param value - a value of generic type that will be stored in the tensor
+     * @param coordinates - a vector of coordinates that the value will be assigned to
+    */
+    void setItem(const T& value, const std::vector<int>& coordinates);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order, if the array is 
      * longer than number of items in a tensor, only those that fit will be added
      * 
@@ -75,14 +93,6 @@ template<class T> class Tensor{
     */
     bool isTensorEquilateral() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * assign() - Public method to assign one value into tensor onto the desired coordinates
-     *  
-     * @param value - a value of generic type that will be stored in the tensor
-     * @param coordinates - a vector of coordinates that the value will be assigned to
-    */
-    void assign(const T& value, const std::vector<int>& coordinates);
-    
     /** -----------------------------------------------------------------------------------------------------------------------
      * fillWith() - Public method that fills tensor with passed value
      * 
@@ -137,20 +147,6 @@ template<class T> class Tensor{
      * @param coordinates - address of coordinates in a tensor
     */
     void showItem(const std::vector<int>& coordinates) const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * showCoords() - Public method to write into cout tensor coordinates based from item index input
-     * 
-     * @param itemNumber - item index in a tensor
-    */
-    //void showCoords(const int itemNumber) const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * showCoords() - Public method to write into cout tensor coordinates based from item index input
-     * 
-     * @param itemNumber - item index in a tensor
-    */
-    //std::string coordsToString(const int itemNumber) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * ~Tensor() - Virtual destructor
