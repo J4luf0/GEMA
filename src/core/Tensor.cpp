@@ -13,6 +13,7 @@
 #define MAX_LOOP_COUNT 1024;
 #define uint64t uint64_t
 
+    // Primitives and simple types
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -20,9 +21,15 @@
     template class Tensor<float>;
     template class Tensor<double>;
     template class Tensor<std::string>;
-    template <typename V> class Tensor<std::vector<V>>;
-    template <typename V> class Tensor<std::unique_ptr<V>>;
+    // The tensor itself and basically any object, O meaning Object
     template <typename T> class Tensor<Tensor<T>*>;
+    template <typename O> class Tensor<O&>;
+    template <typename O> class Tensor<O*>;
+    // Others
+    template <typename O> class Tensor<std::vector<O>>;
+    template <typename O> class Tensor<std::unique_ptr<O>>;
+
+    // public
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
@@ -188,9 +195,20 @@
     }
 
     template <class T>
-    Tensor<T>::~Tensor(){
-            //
+    void Tensor<T>::deleteTensor(){
+        
+        for(T& item : tensor){
+            delete item;
+        }
+        
     }
+
+    template <class T>
+    Tensor<T>::~Tensor(){
+        //
+    }
+
+    // private
 
     template <class T>
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const{

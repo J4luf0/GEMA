@@ -143,6 +143,8 @@ template<class T> class Tensor{
     constexpr Tensor<T>& operator=(const Tensor<T>& assigner) const;
     constexpr Tensor<T>* operator=(const Tensor<T>* assigner) const;
 
+    void deleteTensor();
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * ~Tensor() - Virtual destructor
     */
