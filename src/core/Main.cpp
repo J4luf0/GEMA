@@ -127,6 +127,7 @@ int main(){
     test_constructor_001();
     test_constructor_002();
     test_constructor_003();
+    test_constructor_004();
     test_setItem_001();
 
     cout << "\nAll test done.\n";
