@@ -123,6 +123,16 @@ template<class T> class Tensor{
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * operator== - Public overload to compare two tensors, iterating through all items the return value is bool true if items
+     * are all the same and false if there is atleast one different or the dimensions didnt match
+     * 
+     * @param tensor2 - a second tensor to be compared
+     * 
+     * @return - boolean true if the tensors are the same and false in not
+     */
+    bool operator==(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * operator+() - Public overload to add two tensors of the same size, both by reference
      * 
      * @param tensor2 - a second tensor to be added as reference (the same as the first)
