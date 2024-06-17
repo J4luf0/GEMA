@@ -160,7 +160,11 @@
             return false;
         }
 
+        // Check if all items are equal
         return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
+
+        // This one line does the same thing and gets rid of branching, yet is unreadable and the performance difference may be negligible
+        //return !(this->tensor.size() - tensor2.tensor.size()) && std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
     }
 
     template <class T>
