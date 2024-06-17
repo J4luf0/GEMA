@@ -73,7 +73,6 @@
                 throw std::runtime_error("ACoordinate out of bounds for its dimension!");
             }
         }*/
-        
 
         int itemNumber = getIndex(coordinates);
         tensor[itemNumber] = value;
