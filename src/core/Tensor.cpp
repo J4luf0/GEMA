@@ -118,8 +118,6 @@
         }
     }
 
-    
-
     template <class T>
     Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const{
 
@@ -153,6 +151,16 @@
         }
 
         return tensorTransposed;
+    }
+
+    template <class T>
+    bool Tensor<T>::operator==(const Tensor<T>& tensor2) const{
+
+        if(this->tensor.size() != tensor2.tensor.size()){
+            return false;
+        }
+
+        return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
     }
 
     template <class T>
