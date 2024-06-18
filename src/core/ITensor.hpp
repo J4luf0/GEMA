@@ -11,6 +11,8 @@
  * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates
  * 
  * Tensor is made out of items, each having unique coordinates
+ * 
+ * This is inner class that doesnt implement any checking against bad input, that will be implemented in wrapper class
  */
 template<class T> class Tensor{
 
@@ -18,14 +20,14 @@ template<class T> class Tensor{
 
     std::vector<T> tensor;                  // The tensor itself, represented by one-dimensional vector containing all the elements
     std::vector<int> dimensionSizes;        // Size od each tensor dimension
+
     std::function<void(const T&)> tensorOutput;
     std::function<void(const T&)> itemOutput;
-
 
     public:
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * TensorClass() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
+     * Tensor() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
      * the result is empty tensor, with defined dimensions and allocated space
      *
      * @param newTensorDimensionSizes - a vector filled with sizes of dimensions

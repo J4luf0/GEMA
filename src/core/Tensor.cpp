@@ -29,7 +29,23 @@
     template <typename O> class Tensor<std::vector<O>>;
     template <typename O> class Tensor<std::unique_ptr<O>>;
 
-    // public
+    // helper functions
+
+    inline bool compare(const double a, const double b){
+
+        //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
+        
+        double veightedEpsilon = std::numeric_limits<double>::epsilon();
+        return std::fabs(a - b) < veightedEpsilon;
+    }
+
+    template <class T>
+    inline bool compare(const T& a, const T& b){
+        
+        return a == b;
+    }
+
+    // public methods
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
@@ -66,13 +82,6 @@
     
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates){
-
-        /*for(uint64t i = 0; i < dimensionSizes.size(); i++){
-
-            if(coordinates[i] >= dimensionSizes[i]){
-                throw std::runtime_error("ACoordinate out of bounds for its dimension!");
-            }
-        }*/
 
         int itemNumber = getIndex(coordinates);
         tensor[itemNumber] = value;
@@ -161,7 +170,10 @@
         }
 
         // Check if all items are equal
-        return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
+        return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin(), [](const auto& a, const auto& b){
+
+            return compare(a, b);
+        });
 
         // This one line does the same thing and gets rid of branching, yet is unreadable and the performance difference may be negligible
         //return !(this->tensor.size() - tensor2.tensor.size()) && std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
@@ -231,7 +243,7 @@
         //
     }
 
-    // private
+    // private methods
 
     template <class T>
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const{

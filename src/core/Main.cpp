@@ -117,6 +117,39 @@ inline void test_setItem_001(){
     assert(tensor->getItem({1, 2}) == 7);
 }
 
+inline void test_setItem_002(){
+
+    cout << "test_setItem_002\n";
+    const vector<int> dimensionSizes{3, 2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {2, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});
+
+    tensor2->setItems({5, 0.55, -0, -2, 4.5, 7});
+
+    tensor->forEach([](double& item){
+        cout << item << "; ";
+    });
+    cout << endl;
+
+    tensor2->forEach([](double& item){
+        cout << item << "; ";
+    });
+    cout << endl;
+
+    bool x = (*tensor == *tensor2);
+    cout << "equal?: " << x << endl;
+
+    assert(*tensor == *tensor2);
+}
+
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
@@ -129,6 +162,7 @@ int main(){
     test_constructor_003();
     test_constructor_004();
     test_setItem_001();
+    test_setItem_002();
 
     cout << "\nAll test done.\n";
     
