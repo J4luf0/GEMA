@@ -35,6 +35,19 @@ template<class T> class Tensor{
     Tensor(const std::vector<int>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * Tensor() constructor - Copy style constructor, makes the object the same as the parameter
+     * 
+     * @param otherTensor - A tensor to be copied
+     */
+    Tensor(const Tensor<T>& otherTensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * Tensor() constructor - Empty constructor so it can be declared without being initalized - trying to do something with
+     * uninitialized tensor is sure undefined behavior
+     */
+    Tensor();
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * getDimensionSizes() - Public method to get all dimension sizes
      * 
      * @return - vector containing one int per dimension with value of its size
@@ -155,8 +168,7 @@ template<class T> class Tensor{
      * 
      * @return - pointer to deep copy of this tensor
     */
-    constexpr Tensor<T>& operator=(const Tensor<T>& assigner) const;
-    constexpr Tensor<T>* operator=(const Tensor<T>* assigner) const;
+    //constexpr Tensor<T> operator=(const Tensor<T>& assigner) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout

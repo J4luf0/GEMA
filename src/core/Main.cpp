@@ -185,12 +185,40 @@ inline void test_setItem_003(){
     assert(*tensor == *expected);
 }
 
+inline void test_operatorAssign_001(){
+
+    cout << "test_operatorAssign_001\n";
+
+    const vector<int> dimensionSizes{3, 2};
+
+    auto tensor = new Tensor<double>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {2, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});
+
+    Tensor<double> tensor2;
+    tensor2 = *tensor;
+
+    tensor->setItem(8, {0, 0});
+
+    auto expected = new Tensor<double>(dimensionSizes);
+    expected->setItems({5, 0.55, -0, -2, 4.5, 7});
+    cout << "ex " << expected->getItem({0, 0}) << " " << tensor2.getItem({0, 0}) << endl;
+    assert(*expected == tensor2);
+
+    delete expected;
+    delete tensor;
+}
+
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
     cout << "\nStart testing.\n";
     cout << "Testing Tensor.\n\n";
-
 
     test_constructor_001();
     test_constructor_002();
@@ -201,6 +229,7 @@ int main(){
     test_setItem_001();
     test_setItem_002();
     test_setItem_003();
+    test_operatorAssign_001();
 
     cout << "\nAll test done.\n";
     

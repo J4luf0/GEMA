@@ -45,6 +45,16 @@
     }
 
     template <class T>
+    Tensor<T>::Tensor(const Tensor<T>& otherTensor){
+        *this = otherTensor;
+    }
+
+    template <class T>
+    Tensor<T>::Tensor(){
+        
+    }
+
+    template <class T>
     const std::vector<int>& Tensor<T>::getDimensionSizes() const{
         return dimensionSizes;
     }
@@ -186,15 +196,15 @@
         }
     }
 
-    template <class T>
-    constexpr Tensor<T>& Tensor<T>::operator=(const Tensor<T>& assigner) const{
-        return *copy();
-    }
+    /*template <class T>
+    constexpr Tensor<T> Tensor<T>::operator=(const Tensor<T>& assigner) const{
+        std::cout << "copy here" << std::endl;
 
-    template <class T>
-    constexpr Tensor<T>* Tensor<T>::operator=(const Tensor<T>* assigner) const{
-        return copy();
-    }
+;       Tensor<T>* copiedTensor = assigner.copy();
+
+
+        return *this;
+    }*/
 
     template <class T>
     void Tensor<T>::showTensor() const{
@@ -293,7 +303,7 @@
         Tensor<T>* newTensor = new Tensor<T>(dimensionSizes);
 
         for(uint64t i = 0; i < tensor.size(); i++){
-            newTensor->tensor[i] = tensor[i];
+            newTensor->tensor[i] = *(new T(tensor[i]));
         }
 
         return newTensor;
