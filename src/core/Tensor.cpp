@@ -29,9 +29,9 @@
     template <typename O> class Tensor<std::vector<O>>;
     template <typename O> class Tensor<std::unique_ptr<O>>;
 
-    // helper functions
+    // nonmember helper functions
 
-    inline bool compare(const double a, const double b){
+    inline bool compareItems(const double a, const double b) {
 
         //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
         
@@ -40,7 +40,7 @@
     }
 
     template <class T>
-    inline bool compare(const T& a, const T& b){
+    inline bool compareItems(const T& a, const T& b){
         
         return a == b;
     }
@@ -170,9 +170,9 @@
         }
 
         // Check if all items are equal
-        return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin(), [](const auto& a, const auto& b){
+        return std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin(), [&](const auto& a, const auto& b){
 
-            return compare(a, b);
+            return compareItems(a, b);
         });
 
         // This one line does the same thing and gets rid of branching, yet is unreadable and the performance difference may be negligible
