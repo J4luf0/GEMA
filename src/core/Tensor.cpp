@@ -31,7 +31,8 @@
 
     // nonmember helper functions
 
-    inline bool compareItems(const double a, const double b) {
+    template<class T>
+    inline bool Tensor<T>::compareItems(const double a, const double b){
 
         //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
         
@@ -40,7 +41,7 @@
     }
 
     template <class T>
-    inline bool compareItems(const T& a, const T& b){
+    inline bool Tensor<T>::compareItems(const T& a, const T& b) const{
         
         return a == b;
     }

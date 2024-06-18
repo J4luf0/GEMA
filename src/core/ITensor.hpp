@@ -224,6 +224,18 @@ template<class T> class Tensor{
     constexpr Tensor<T>* copy() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * compareItems() - Private method to compare two items using "==", its override for double explicitly compares using
+     * epsilon and fabs
+     * 
+     * @param a - first operand to compare
+     * @param b - second operand to compare
+     * 
+     * @return - boolean true if both operands same and falsi if not
+     */
+    inline bool compareItems(const T& a, const T& b) const;
+    inline bool compareItems(const double a, const double b);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
      * 
      * @param dimensionSizes - the dimension sizes to be output
