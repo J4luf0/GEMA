@@ -134,19 +134,10 @@ inline void test_setItem_002(){
 
     tensor2->setItems({5, 0.55, -0, -2, 4.5, 7});
 
-    tensor->forEach([](double& item){
+    /*tensor->forEach([](double& item){
         cout << item << "; ";
     });
-    cout << endl;
-
-    tensor2->forEach([](double& item){
-        cout << item << "; ";
-    });
-    cout << endl;
-
-    bool x = (*tensor == *tensor2);
-    cout << "equal?: " << x << endl;
-
+    cout << endl;*/
     assert(*tensor == *tensor2);
 }
 

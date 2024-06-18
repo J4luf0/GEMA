@@ -224,7 +224,7 @@ template<class T> class Tensor{
     constexpr Tensor<T>* copy() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * compareItems() - Private method to compare two items using "==", its override for double explicitly compares using
+     * compareItems() - Private method to compare two items using "==", it is overriden for double explicitly comparing using
      * epsilon and fabs
      * 
      * @param a - first operand to compare
