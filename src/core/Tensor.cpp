@@ -29,22 +29,7 @@
     template <typename O> class Tensor<std::vector<O>>;
     template <typename O> class Tensor<std::unique_ptr<O>>;
 
-    // nonmember helper functions
-
-    template<class T>
-    inline bool Tensor<T>::compareItems(const double a, const double b){
-
-        //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
-        
-        double veightedEpsilon = std::numeric_limits<double>::epsilon();
-        return std::fabs(a - b) < veightedEpsilon;
-    }
-
-    template <class T>
-    inline bool Tensor<T>::compareItems(const T& a, const T& b) const{
-        
-        return a == b;
-    }
+    
 
     // public methods
 
@@ -91,9 +76,9 @@
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems){
 
-        int copyLength = fmin(tensorItems.size(), tensor.size());
+        //int copyLength = fmin(tensorItems.size(), tensor.size()); //readd in safety wrapper
 
-        for(int i = 0; i < copyLength; i++){
+        for(uint64t i = 0; i < tensor.size(); i++){
             tensor[i] = tensorItems[i];
         }
     }
@@ -312,6 +297,21 @@
         }
 
         return newTensor;
+    }
+
+    template<class T>
+    inline bool Tensor<T>::compareItems(const double a, const double b){
+
+        //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
+        
+        double veightedEpsilon = std::numeric_limits<double>::epsilon();
+        return std::fabs(a - b) < veightedEpsilon;
+    }
+
+    template <class T>
+    inline bool Tensor<T>::compareItems(const T& a, const T& b) const{
+        
+        return a == b;
     }
 
     template <class T>

@@ -94,6 +94,34 @@ inline void test_constructor_004(){
     assert(tensor->getNumberOfDimensions() == 1);
 }
 
+inline void test_operatorEquals_001(){
+
+    cout << "test_operatorEquals_001\n";
+    const vector<int> dimensionSizes{1, 2, 2};
+    
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5.1, 0, -0.000001, 500000});
+    auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
+    tensor2->setItems({5.1, -0, -0.000001, 500000});
+
+    bool expected = true;
+    assert(expected == (*tensor == *tensor));
+}
+
+inline void test_operatorEquals_002(){
+
+    cout << "test_operatorEquals_002\n";
+    const vector<int> dimensionSizes{3, 2, 1};
+    
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5.1, 0, -0.000001, 500000, 1, -1});
+    auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
+    tensor2->setItems({5.1, 0, -0, 500000, 1, -1});
+
+    bool expected = false;
+    assert(expected == (*tensor == *tensor2));
+}
+
 
 inline void test_setItem_001(){
 
@@ -141,6 +169,22 @@ inline void test_setItem_002(){
     assert(*tensor == *tensor2);
 }
 
+inline void test_setItem_003(){
+
+    cout << "test_setItem_003\n";
+    const vector<int> dimensionSizes{2, 2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({2, 0, -1, 6.4});
+
+    tensor->setItem(3.3, {1, 0});
+
+    auto expected = make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({2, 3.3, -1, 6.4});
+    
+    assert(*tensor == *expected);
+}
+
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
@@ -152,8 +196,11 @@ int main(){
     test_constructor_002();
     test_constructor_003();
     test_constructor_004();
+    test_operatorEquals_001();
+    test_operatorEquals_002();
     test_setItem_001();
     test_setItem_002();
+    test_setItem_003();
 
     cout << "\nAll test done.\n";
     
