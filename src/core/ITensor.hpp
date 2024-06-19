@@ -118,6 +118,11 @@ template<class T> class Tensor{
     */
     bool isTensorEquilateral() const;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * forEach() - Public method to apply function on all elements thru passed function
+     * 
+     * @param apply - function that will be applied on all items
+     */
     void forEach(const std::function<void(T&)>& apply);
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -178,13 +183,6 @@ template<class T> class Tensor{
      * @param tensor2 - a tensor to be substracted from this tensor
      */
     void operator-=(const Tensor<T>& tensor2);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * operator=() - Public overload to deep copy the tensor.
-     * 
-     * @return - pointer to deep copy of this tensor
-    */
-    //constexpr Tensor<T> operator=(const Tensor<T>& assigner) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout

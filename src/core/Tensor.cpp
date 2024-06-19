@@ -217,16 +217,6 @@
         }
     }
 
-    /*template <class T>
-    constexpr Tensor<T> Tensor<T>::operator=(const Tensor<T>& assigner) const{
-        std::cout << "copy here" << std::endl;
-
-;       Tensor<T>* copiedTensor = assigner.copy();
-
-
-        return *this;
-    }*/
-
     template <class T>
     void Tensor<T>::showTensor() const{
 
@@ -259,6 +249,8 @@
     Tensor<T>::~Tensor(){
         //
     }
+
+
 
     // private methods
 
