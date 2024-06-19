@@ -157,11 +157,27 @@ template<class T> class Tensor{
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * operator-() - Public overload to substract parameter tensor from this tensor
+     * 
+     * @param tensor2 - a second tensor to be substracted
+     * 
+     * @return - a pointer to new allocated tensor that the result of substraction
+     */
+    Tensor<T>* operator-(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * operator+=() - Public overload to add tensor to tensor
      * 
      * @param tensor2 - a tensor to be added to this tensor
     */
     void operator+=(const Tensor<T>& tensor2);
+    
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator-=() - Public overload to substract a tensor from a tensor
+     * 
+     * @param tensor2 - a tensor to be substracted from this tensor
+     */
+    void operator-=(const Tensor<T>& tensor2);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * operator=() - Public overload to deep copy the tensor.

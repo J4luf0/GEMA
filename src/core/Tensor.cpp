@@ -189,10 +189,31 @@
     }
 
     template <class T>
+    Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const{
+
+        Tensor* tensorOut = new Tensor(dimensionSizes);
+        tensorOut->tensor.resize(tensor.size());
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensorOut->tensor[i] = tensor[i] - tensor2.tensor[i];
+        }
+
+        return tensorOut;
+    }
+
+    template <class T>
     void Tensor<T>::operator+=(const Tensor<T>& tensor2){
         
         for(uint64t i = 0; i < tensor.size(); i++){
             tensor[i] += tensor2.tensor[i];
+        }
+    }
+
+    template <class T>
+    void Tensor<T>::operator-=(const Tensor<T>& tensor2){
+        
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensor[i] -= tensor2.tensor[i];
         }
     }
 
