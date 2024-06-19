@@ -20,7 +20,6 @@
     template class Tensor<long long int>;
     template class Tensor<float>;
     template class Tensor<double>;
-    template class Tensor<std::string>;
     // The tensor itself and basically any object, O meaning Object
     template <typename T> class Tensor<Tensor<T>*>;
     template <typename O> class Tensor<O&>;
