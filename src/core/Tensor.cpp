@@ -109,6 +109,18 @@
     }
 
     template <class T>
+    inline constexpr Tensor<T>* Tensor<T>::copy() const{
+
+        Tensor<T>* newTensor = new Tensor<T>(dimensionSizes);
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            newTensor->tensor[i] = *(new T(tensor[i]));
+        }
+
+        return newTensor;
+    }
+
+    template <class T>
     void Tensor<T>::forEach(const std::function<void(T&)>& apply){
         for(T& item : tensor){
             apply(item);
@@ -308,18 +320,6 @@
             itemCounting *= dimensionSize;
         }
         return itemCounting;
-    }
-
-    template <class T>
-    inline constexpr Tensor<T>* Tensor<T>::copy() const{
-
-        Tensor<T>* newTensor = new Tensor<T>(dimensionSizes);
-
-        for(uint64t i = 0; i < tensor.size(); i++){
-            newTensor->tensor[i] = *(new T(tensor[i]));
-        }
-
-        return newTensor;
     }
 
     template<class T>

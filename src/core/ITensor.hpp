@@ -119,6 +119,14 @@ template<class T> class Tensor{
     bool isTensorEquilateral() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * copy() - Private method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored
+     * in a tensor, then the values pointed to by those pointers will be copied too
+     * 
+     * @return - pointer to deep copy of this tensor
+    */
+    constexpr Tensor<T>* copy() const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * forEach() - Public method to apply function on all elements thru passed function
      * 
      * @param apply - function that will be applied on all items
@@ -240,14 +248,6 @@ template<class T> class Tensor{
      * @return - total number of items that can fit into a tensor
     */
     int getNumberOfItems(const std::vector<int>& dimensionSizes) const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * copy() - Private method to deep copy a tensor, meaning the items in it get copied, but if the items in it are of pointer
-     * type, then it is not guaranteed to copy values of those pointers
-     * 
-     * @return - pointer to deep copy of this tensor
-    */
-    constexpr Tensor<T>* copy() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * compareItems() - Private method to compare two items using "==", it is overriden for double explicitly comparing using
