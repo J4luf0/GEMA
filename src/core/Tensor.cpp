@@ -189,10 +189,10 @@
 
     template <class T>
     void Tensor<T>::operator+=(const Tensor<T>& tensor2){
-        
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensor[i] += tensor2.tensor[i];
-        }
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem += tensor2Item;
+        });
     }
 
     template <class T>
@@ -224,9 +224,8 @@
         return tensorOut;
     }
 
-    
     template <class T>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(const T&, const T&)>& operation) const{
+    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation){
 
         for(uint64t i = 0; i < tensor.size(); i++){
             operation(tensor[i], tensor2.tensor[i]);

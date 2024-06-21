@@ -256,7 +256,7 @@ template<class T> class Tensor{
      * @param tensor2 - a second tensor to use the operation against as second operand
      * @param operation - a binary function that defines operation between two items
      */
-    inline void apply(const Tensor<T>& tensor2, const std::function<void(const T&, const T&)>& operation) const;
+    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * forEach() - Public method to apply function on all elements thru passed function
