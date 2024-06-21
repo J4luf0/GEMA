@@ -7,6 +7,7 @@
 #include <string>
 #include <type_traits>
 #include <stdexcept>
+#include <bit>
 
 #include "ITensor.hpp"
 
@@ -211,7 +212,7 @@
             tensorItem -= tensor2Item;
         });
     }
-/*
+
     template <class T>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
 
@@ -219,7 +220,23 @@
 
             return tensorItem | tensor2Item;
         });
-    }*/
+    }
+
+    template <>
+    Tensor<double>* Tensor<double>::operator|(const Tensor<double>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
+            return static_cast<uint64t>(tensorItem) | static_cast<uint64t>(tensor2Item);
+        });
+    }
+
+    template <>
+    Tensor<float>* Tensor<float>::operator|(const Tensor<float>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
+            return static_cast<int>(tensorItem) | static_cast<int>(tensor2Item);
+        });
+    }
 
 /*
     template <class T>
@@ -264,6 +281,34 @@
 
     template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
+
+        Tensor* tensorOut = new Tensor(dimensionSizes);
+        tensorOut->tensor.resize(tensor.size());
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensorOut->tensor[i] = operation(tensor[i], tensor2.tensor[i]);
+        }
+
+        return tensorOut;
+    }
+
+    template <>
+    inline Tensor<double>* Tensor<double>::applyAndReturn(
+    const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const{
+
+        Tensor* tensorOut = new Tensor(dimensionSizes);
+        tensorOut->tensor.resize(tensor.size());
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensorOut->tensor[i] = operation(tensor[i], tensor2.tensor[i]);
+        }
+
+        return tensorOut;
+    }
+
+    template <>
+    inline Tensor<float>* Tensor<float>::applyAndReturn(
+    const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const{
 
         Tensor* tensorOut = new Tensor(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
@@ -410,3 +455,5 @@
 
         std::cout << "\n\n";
     }
+
+    
