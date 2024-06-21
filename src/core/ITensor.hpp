@@ -381,4 +381,12 @@ template<class T> class Tensor{
     void constructorMessage(const std::vector<int>& dimensionSizes) const;
 };
 
+    template <>
+    inline Tensor<double>* 
+    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const;
+
+    template <>
+    inline Tensor<float>* 
+    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const;
+
 #endif

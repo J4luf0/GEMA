@@ -30,7 +30,7 @@
     template <typename O> class Tensor<std::vector<O>>;
     template <typename O> class Tensor<std::unique_ptr<O>>;
 
-    
+
 
     // public methods
 
@@ -282,7 +282,7 @@
     template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
 
-        Tensor* tensorOut = new Tensor(dimensionSizes);
+        Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
 
         for(uint64t i = 0; i < tensor.size(); i++){
@@ -293,10 +293,10 @@
     }
 
     template <>
-    inline Tensor<double>* Tensor<double>::applyAndReturn(
-    const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const{
+    inline Tensor<double>* 
+    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const{
 
-        Tensor* tensorOut = new Tensor(dimensionSizes);
+        Tensor<double>* tensorOut = new Tensor<double>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
 
         for(uint64t i = 0; i < tensor.size(); i++){
@@ -307,10 +307,10 @@
     }
 
     template <>
-    inline Tensor<float>* Tensor<float>::applyAndReturn(
-    const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const{
+    inline Tensor<float>* 
+    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const{
 
-        Tensor* tensorOut = new Tensor(dimensionSizes);
+        Tensor<float>* tensorOut = new Tensor<float>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
 
         for(uint64t i = 0; i < tensor.size(); i++){
@@ -455,5 +455,3 @@
 
         std::cout << "\n\n";
     }
-
-    
