@@ -4,7 +4,8 @@
 
 #include <functional>
 
-/** ===========================================================================================================================
+//  ===========================================================================================================================
+/**
  * Class for work with generic tensors
  *
  * Tensor is represented in class as one dimensional array with two key methods getCoords() that calculates the made-up
@@ -26,7 +27,8 @@ template<class T> class Tensor{
 
     public:
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * Tensor() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
      * the result is empty tensor, with defined dimensions and allocated space
      *
@@ -34,34 +36,39 @@ template<class T> class Tensor{
     */
     Tensor(const std::vector<int>& newTensorDimensionSizes);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * Tensor() constructor - Copy style constructor, makes the object the same as the parameter
      * 
      * @param otherTensor - A tensor to be copied
      */
     Tensor(const Tensor<T>& otherTensor);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * Tensor() constructor - Empty constructor so it can be declared without being initalized - trying to do something with
      * uninitialized tensor is sure undefined behavior
      */
     Tensor();
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getDimensionSizes() - Public method to get all dimension sizes
      * 
      * @return - vector containing one int per dimension with value of its size
     */
     const std::vector<int>& getDimensionSizes() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getNumberOfDimensions() - Public method to get the number of dimensions of a tensor
      * 
      * @return - a number of dimensions
     */
     uint64_t getNumberOfDimensions() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getItem() - Public method to get item on provided coordinates, returns the item by value because large objects should
      * have been already represented by pointer or reference
      * 
@@ -71,7 +78,8 @@ template<class T> class Tensor{
     */
     T getItem(const std::vector<int>& coordinates) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getPointer() - Public method that forcibly returns address of item. Use with caution, because it casts to (void*) and
      * if the item is already of pointer type, then it might need to dereference twice
      * 
@@ -81,7 +89,8 @@ template<class T> class Tensor{
     */
     void* getPointer(const std::vector<int>& coordinates) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * assign() - Public method to assign one value into tensor onto the desired coordinates
      *  
      * @param value - a value of generic type that will be stored in the tensor
@@ -89,7 +98,8 @@ template<class T> class Tensor{
     */
     void setItem(const T& value, const std::vector<int>& coordinates);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order, if the array is 
      * longer than number of items in a tensor, only those that fit will be added
      * 
@@ -97,28 +107,32 @@ template<class T> class Tensor{
     */
     void setItems(const std::vector<T>& tensorItems);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * setTensorOutput() - Public method that allows the user to set the output of the tensor through this->showTensor() method
      * 
      * @param tensorOutput - function that defines the output of the tensor
     */
     void setTensorOutput(const std::function<void(const T&)> tensorOutput);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * setTensorOutput() - Public method that allows the user to set the output of the items through this->showItem() method
      * 
      * @param tensorOutput - function that defines the output of the tensor
     */
     void setItemOutput(const std::function<void(const T&)> itemOutput);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * isTensorEquilateral() - Public method to calculate, if the tensor dimensions have the same sizes
      * 
      * @return - boolean true if the tensor is equilateral and false if not
     */
     bool isTensorEquilateral() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * copy() - Private method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored
      * in a tensor, then the values pointed to by those pointers will be copied too
      * 
@@ -126,14 +140,16 @@ template<class T> class Tensor{
     */
     constexpr Tensor<T>* copy() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * fillWith() - Public method that fills tensor with passed value
      * 
      * @param fill - the value to be filled into all items in tensor
     */
     void fillWith(const T& fill);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * transposition() - Public method to swap two dimensions in a tensor
      * 
      * @param dim1 - first dimension to swap, default value is 0
@@ -143,7 +159,8 @@ template<class T> class Tensor{
     */
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator== - Public overload to compare two tensors, iterating through all items the return value is bool true if items
      * are all the same and false if there is atleast one different or the dimensions didnt match
      * 
@@ -153,7 +170,8 @@ template<class T> class Tensor{
      */
     bool operator==(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator+() - Public overload to add two tensors of the same size, both by reference
      * 
      * @param tensor2 - a second tensor to be added as reference (the same as the first)
@@ -162,7 +180,8 @@ template<class T> class Tensor{
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator-() - Public overload to substract parameter tensor from this tensor
      * 
      * @param tensor2 - a second tensor to be substracted
@@ -171,21 +190,24 @@ template<class T> class Tensor{
      */
     Tensor<T>* operator-(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator+=() - Public overload to add tensor to tensor
      * 
      * @param tensor2 - a tensor to be added to this tensor
     */
     void operator+=(const Tensor<T>& tensor2);
     
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator-=() - Public overload to substract a tensor from a tensor
      * 
      * @param tensor2 - a tensor to be substracted from this tensor
      */
     void operator-=(const Tensor<T>& tensor2);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator|() - Public overload to perform bitwise or on each item in a tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
@@ -194,14 +216,16 @@ template<class T> class Tensor{
      */
     Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator|=() - Public overload to perform bitwise or on each item in a tensor and save result in this tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator|=(const Tensor<T>& tensor2) const;
+    void operator|=(const Tensor<T>& tensor2);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator&() - Public overload to perform bitwise and on each item in a tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
@@ -210,14 +234,16 @@ template<class T> class Tensor{
      */
     Tensor<T>* operator&(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator&=() - Public overload to perform bitwise and on each item in a tensor and save result in this tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator&=(const Tensor<T>& tensor2) const;
+    void operator&=(const Tensor<T>& tensor2);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator^() - Public overload to perform bitwise xor on each item in a tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
@@ -226,19 +252,22 @@ template<class T> class Tensor{
      */
     Tensor<T>* operator^(const Tensor<T>& tensor2) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator|=() - Public overload to perform bitwise xor on each item in a tensor and save result in this tensor
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator^=(const Tensor<T>& tensor2) const;
+    void operator^=(const Tensor<T>& tensor2);
     
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * operator~() - Public overload to perform bitwise negation on each item in a tensor
      */
     void operator~();
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * applyAndReturn() - Public method that allows to apply custom operation between each item of two tensors, items from this
      * tensor as first operand and items from the second tensor passed as parameter as second operand
      * 
@@ -249,7 +278,8 @@ template<class T> class Tensor{
      */
     inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * apply() - Public method that allowsto apply custom operation between each item of two tensors and then store the result
      * into the fisrt tensor
      * 
@@ -258,28 +288,32 @@ template<class T> class Tensor{
      */
     inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * forEach() - Public method to apply function on all elements thru passed function
      * 
      * @param apply - function that will be applied on all items
      */
     void forEach(const std::function<void(T&)>& apply);
     
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * showTensor() - Public method to output the whole tensor into std::cout
      * 
      * Note: Is currently working only for 1d, 2d and maybe 3d tensors
     */
     void showTensor() const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * showItem() - Public method to write into cout the item index based on the coordinates input
      * 
      * @param coordinates - address of coordinates in a tensor
     */
     void showItem(const std::vector<int>& coordinates) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * ~Tensor() - Virtual destructor
     */
     virtual ~Tensor();
@@ -288,7 +322,8 @@ template<class T> class Tensor{
 
     private:
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getCoords() - Private method to get coordinates from itemNumber in tensor, this is inverse method of "getIndex()" method
      * 
      * @param itemNumber - it is the index of item that is stored in the tensor
@@ -300,7 +335,8 @@ template<class T> class Tensor{
     */
     std::vector<int> getCoords(int itemNumber) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getIndex() - Private method to get items index number in tensor, this is inverse method of "getCoords()"
      * 
      * @param coordinates - an array of coordinates of one item in tensor
@@ -312,7 +348,8 @@ template<class T> class Tensor{
     */
     int getIndex(const std::vector<int>& coordinates) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * getNumberOfItems() - Private method to calculate the number of possible items in a tensor based on given dimension sizes
      * This method calculates the number of items before the tensor itself is allocated, and should be useless afterwards
      * 
@@ -322,7 +359,8 @@ template<class T> class Tensor{
     */
     int getNumberOfItems(const std::vector<int>& dimensionSizes) const;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * compareItems() - Private method to compare two items using "==", it is overriden for double explicitly comparing using
      * epsilon and fabs
      * 
@@ -334,7 +372,8 @@ template<class T> class Tensor{
     inline bool compareItems(const T& a, const T& b) const;
     inline bool compareItems(const double a, const double b);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * constructorMessage() - Private method to output message to console about the object creation
      * 
      * @param dimensionSizes - the dimension sizes to be output

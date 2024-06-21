@@ -14,6 +14,7 @@
 #define uint64t uint64_t
 
     // Primitives and simple types
+    //template class Tensor<bool>;
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -206,10 +207,60 @@
     template <class T>
     void Tensor<T>::operator-=(const Tensor<T>& tensor2){
         
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensor[i] -= tensor2.tensor[i];
-        }
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem -= tensor2Item;
+        });
     }
+/*
+    template <class T>
+    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+
+            return tensorItem | tensor2Item;
+        });
+    }*/
+
+/*
+    template <class T>
+    void Tensor<T>::operator|=(const Tensor<T>& tensor2){
+        
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem |= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem & tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator&=(const Tensor<T>& tensor2){
+        
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem &= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::operator^(const Tensor<T>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem ^ tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator^=(const Tensor<T>& tensor2){
+        
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem ^= tensor2Item;
+        });
+    }*/
 
     template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
