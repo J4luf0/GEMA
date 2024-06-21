@@ -189,14 +189,9 @@
     template <class T>
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
-        Tensor* tensorOut = new Tensor(dimensionSizes);
-        tensorOut->tensor.resize(tensor.size());
-
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensorOut->tensor[i] = tensor[i] + tensor2.tensor[i];
-        }
-
-        return tensorOut;
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem + tensor2Item;
+        });
     }
 
     template <class T>
@@ -210,14 +205,9 @@
     template <class T>
     Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const{
 
-        Tensor* tensorOut = new Tensor(dimensionSizes);
-        tensorOut->tensor.resize(tensor.size());
-
-        for(uint64t i = 0; i < tensor.size(); i++){
-            tensorOut->tensor[i] = tensor[i] - tensor2.tensor[i];
-        }
-
-        return tensorOut;
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem - tensor2Item;
+        });
     }
 
     template <class T>
@@ -335,6 +325,20 @@
         
         return a == b;
     }
+
+    template <class T>
+    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
+
+        Tensor* tensorOut = new Tensor(dimensionSizes);
+        tensorOut->tensor.resize(tensor.size());
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensorOut->tensor[i] = operation(tensor[i], tensor2.tensor[i]);
+        }
+
+        return tensorOut;
+    }
+
 
     template <class T>
     void Tensor<T>::constructorMessage(const std::vector<int>& dimensionSizes) const{

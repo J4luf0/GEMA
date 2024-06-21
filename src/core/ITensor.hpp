@@ -314,6 +314,8 @@ template<class T> class Tensor{
     inline bool compareItems(const T& a, const T& b) const;
     inline bool compareItems(const double a, const double b);
 
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
      * 
