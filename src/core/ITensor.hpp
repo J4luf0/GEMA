@@ -193,6 +193,59 @@ template<class T> class Tensor{
     void operator-=(const Tensor<T>& tensor2);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * operator|() - Public overload to perform bitwise or on each item in a tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     * 
+     * @return - a pointer to new allocated resulting tensor
+     */
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator|=() - Public overload to perform bitwise or on each item in a tensor and save result in this tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     */
+    void operator|=(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator&() - Public overload to perform bitwise and on each item in a tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     * 
+     * @return - a pointer to new allocated resulting tensor
+     */
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator&=() - Public overload to perform bitwise and on each item in a tensor and save result in this tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     */
+    void operator&=(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator^() - Public overload to perform bitwise xor on each item in a tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     * 
+     * @return - a pointer to new allocated resulting tensor
+     */
+    Tensor<T>* operator^(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator|=() - Public overload to perform bitwise xor on each item in a tensor and save result in this tensor
+     * 
+     * @param tensor2 - a second tensor to perform operation against
+     */
+    void operator^=(const Tensor<T>& tensor2) const;
+    
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * operator~() - Public overload to perform bitwise negation on each item in a tensor
+     */
+    void operator~();
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout
      * 
      * Note: Is currently working only for 1d, 2d and maybe 3d tensors
