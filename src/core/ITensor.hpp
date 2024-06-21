@@ -127,13 +127,6 @@ template<class T> class Tensor{
     constexpr Tensor<T>* copy() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * forEach() - Public method to apply function on all elements thru passed function
-     * 
-     * @param apply - function that will be applied on all items
-     */
-    void forEach(const std::function<void(T&)>& apply);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
      * fillWith() - Public method that fills tensor with passed value
      * 
      * @param fill - the value to be filled into all items in tensor
@@ -246,6 +239,33 @@ template<class T> class Tensor{
     void operator~();
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * applyAndReturn() - Public method that allows to apply custom operation between each item of two tensors, items from this
+     * tensor as first operand and items from the second tensor passed as parameter as second operand
+     * 
+     * @param tensor2 - a second tensor to use the operation against as second operand
+     * @param operation - a binary function that defines operation between two items
+     * 
+     * @return - a pointer to resulting tensor
+     */
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * apply() - Public method that allowsto apply custom operation between each item of two tensors and then store the result
+     * into the fisrt tensor
+     * 
+     * @param tensor2 - a second tensor to use the operation against as second operand
+     * @param operation - a binary function that defines operation between two items
+     */
+    inline void apply(const Tensor<T>& tensor2, const std::function<void(const T&, const T&)>& operation) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * forEach() - Public method to apply function on all elements thru passed function
+     * 
+     * @param apply - function that will be applied on all items
+     */
+    void forEach(const std::function<void(T&)>& apply);
+    
+    /** -----------------------------------------------------------------------------------------------------------------------
      * showTensor() - Public method to output the whole tensor into std::cout
      * 
      * Note: Is currently working only for 1d, 2d and maybe 3d tensors
@@ -313,8 +333,6 @@ template<class T> class Tensor{
      */
     inline bool compareItems(const T& a, const T& b) const;
     inline bool compareItems(const double a, const double b);
-
-    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * constructorMessage() - Private method to output message to console about the object creation
