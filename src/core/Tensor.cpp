@@ -290,12 +290,32 @@
             return std::bit_cast<uint32t>(tensorItem) & std::bit_cast<uint32t>(tensor2Item);
         });
     }
-/*
+
     template <class T>
     void Tensor<T>::operator&=(const Tensor<T>& tensor2){
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem &= tensor2Item;
+        });
+    }
+
+    template <>
+    void Tensor<double>::operator&=(const Tensor<double>& tensor2){
+        
+        apply(tensor2, [](double& tensorItem, const double& tensor2Item){
+            auto newItem = std::bit_cast<uint64t>(tensorItem);
+            tensorItem = newItem & std::bit_cast<uint64t>(tensor2Item);
+            return tensorItem;
+        });
+    }
+
+    template <>
+    void Tensor<float>::operator&=(const Tensor<float>& tensor2){
+        
+        apply(tensor2, [](float& tensorItem, const float& tensor2Item){
+            auto newItem = std::bit_cast<uint32t>(tensorItem);
+            tensorItem = newItem & std::bit_cast<uint32t>(tensor2Item);
+            return tensorItem;
         });
     }
 
@@ -307,13 +327,73 @@
         });
     }
 
+    template <>
+    Tensor<double>* Tensor<double>::operator^(const Tensor<double>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
+            return std::bit_cast<uint64t>(tensorItem) ^ std::bit_cast<uint64t>(tensor2Item);
+        });
+    }
+
+    template <>
+    Tensor<float>* Tensor<float>::operator^(const Tensor<float>& tensor2) const{
+
+        return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
+            return std::bit_cast<uint32t>(tensorItem) ^ std::bit_cast<uint32t>(tensor2Item);
+        });
+    }
+
     template <class T>
     void Tensor<T>::operator^=(const Tensor<T>& tensor2){
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem ^= tensor2Item;
         });
-    }*/
+    }
+
+    template <>
+    void Tensor<double>::operator^=(const Tensor<double>& tensor2){
+        
+        apply(tensor2, [](double& tensorItem, const double& tensor2Item){
+            auto newItem = std::bit_cast<uint64t>(tensorItem);
+            tensorItem = newItem ^ std::bit_cast<uint64t>(tensor2Item);
+            return tensorItem;
+        });
+    }
+
+    template <>
+    void Tensor<float>::operator^=(const Tensor<float>& tensor2){
+        
+        apply(tensor2, [](float& tensorItem, const float& tensor2Item){
+            auto newItem = std::bit_cast<uint32t>(tensorItem);
+            tensorItem = newItem ^ std::bit_cast<uint32t>(tensor2Item);
+            return tensorItem;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator~(){
+        
+        forEach([](T& item){
+            item = ~item;
+        });
+    }
+
+    template <>
+    void Tensor<double>::operator~(){
+        
+        forEach([](double& item){
+            item = std::bit_cast<double>(~std::bit_cast<uint64t>(item));
+        });
+    }
+
+    template <>
+    void Tensor<float>::operator~(){
+        
+        forEach([](float& item){
+            item = std::bit_cast<float>(~std::bit_cast<uint32t>(item));
+        });
+    }
 
     template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
