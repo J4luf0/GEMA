@@ -10,10 +10,12 @@
  *
  * Tensor is represented in class as one dimensional array with two key methods getCoords() that calculates the made-up
  * coordinates of the tensor and inverse method getIndex() that return actual vector index when provided with coordinates
+ * Those methods are hidden implementation
  * 
- * Tensor is made out of items, each having unique coordinates
+ * Tensor is made out of items, every item has unique coordinates
  * 
- * This is inner class that doesnt implement any checking against bad input, that will be implemented in wrapper class
+ * This is inner class that doesnt implement any checking against bad input, that will be implemented in wrapper class - that
+ * means working directly with this class might be dangerous if the user is not sure about validity of the data
  * 
  * Warning!, even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
  * of std::vector bit by bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
@@ -36,7 +38,7 @@ template<class T> class Tensor{
      * Tensor() constructor - Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
      * the result is empty tensor, with defined dimensions and allocated space
      *
-     * @param newTensorDimensionSizes - a vector filled with sizes of dimensions
+     * @param newTensorDimensionSizes a vector filled with sizes of dimensions
     */
     Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept;
 
@@ -44,7 +46,7 @@ template<class T> class Tensor{
     /**
      * Tensor() constructor - Copy style constructor, makes the object the same as the parameter
      * 
-     * @param otherTensor - A tensor to be copied
+     * @param otherTensor a tensor to be copied
      */
     Tensor(const Tensor<T>& otherTensor) noexcept;
 
@@ -76,7 +78,7 @@ template<class T> class Tensor{
      * getItem() - Public method to get item on provided coordinates, returns the item by value because large objects should
      * have been already represented by pointer or reference
      * 
-     * @param coordinates - vector of coordinates specifying the item to be returned
+     * @param coordinates vector of coordinates specifying the item to be returned
      * 
      * @return - item on the provided coordinates
     */
@@ -89,7 +91,7 @@ template<class T> class Tensor{
      * 
      * Warning!, works differently for bool type because how std::vector works - instead it returns address of the whole vector
      * 
-     * @param coordinates - vector of coordinates specifying the item to be returned
+     * @param coordinates vector of coordinates specifying the item to be returned
      * 
      * @return - address of item on the provided coordinates
     */
@@ -99,7 +101,7 @@ template<class T> class Tensor{
     /**
      * assign() - Public method to assign one value into tensor onto the desired coordinates
      *  
-     * @param value - a value of generic type that will be stored in the tensor
+     * @param value a value of generic type that will be stored in the tensor
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
     void setItem(const T& value, const std::vector<int>& coordinates) noexcept;
@@ -109,7 +111,7 @@ template<class T> class Tensor{
      * setItems() - Public method that takes in one dimensional array and puts its items into tensor by order, if the array is 
      * longer than number of items in a tensor, only those that fit will be added
      * 
-     * @param tensorItems - one dimensional array of items to be added by order
+     * @param tensorItems one dimensional array of items to be added by order
     */
     void setItems(const std::vector<T>& tensorItems) noexcept;
 
@@ -117,7 +119,7 @@ template<class T> class Tensor{
     /**
      * setTensorOutput() - Public method that allows the user to set the output of the tensor through this->showTensor() method
      * 
-     * @param tensorOutput - function that defines the output of the tensor
+     * @param tensorOutput function that defines the output of the tensor
     */
     void setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept;
 
@@ -125,7 +127,7 @@ template<class T> class Tensor{
     /**
      * setTensorOutput() - Public method that allows the user to set the output of the items through this->showItem() method
      * 
-     * @param tensorOutput - function that defines the output of the tensor
+     * @param tensorOutput function that defines the output of the tensor
     */
     void setItemOutput(const std::function<void(const T&)> itemOutput) noexcept;
 
@@ -151,7 +153,7 @@ template<class T> class Tensor{
      * fillWith() - Public method that fills tensor with passed value
      * Has specialization for bool because of how std::vector is implemented
      * 
-     * @param fill - the value to be filled into all items in tensor
+     * @param fill the value to be filled into all items in tensor
     */
     void fillWith(const T& fill) noexcept;
 
@@ -159,8 +161,8 @@ template<class T> class Tensor{
     /**
      * transposition() - Public method to swap two dimensions in a tensor
      * 
-     * @param dim1 - first dimension to swap, default value is 0
-     * @param dim2 - second dimension to swap, default value is 1
+     * @param dim1 first dimension to swap, default value is 0
+     * @param dim2 second dimension to swap, default value is 1
      * 
      * @return - a pointer to new allocated tensor, that has got transposed two dimensions
     */
@@ -171,7 +173,7 @@ template<class T> class Tensor{
      * operator== - Public overload to compare two tensors, iterating through all items the return value is bool true if items
      * are all the same and false if there is atleast one different or the dimensions didnt match
      * 
-     * @param tensor2 - a second tensor to be compared
+     * @param tensor2 a second tensor to be compared
      * 
      * @return - boolean true if the tensors are the same and false in not
      */
@@ -181,7 +183,7 @@ template<class T> class Tensor{
     /**
      * operator+() - Public overload to add two tensors of the same size, both by reference
      * 
-     * @param tensor2 - a second tensor to be added as reference (the same as the first)
+     * @param tensor2 a second tensor to be added as reference (the same as the first)
      * 
      * @return - a pointer to new allocated tensor that is the sum of the both
     */
@@ -191,7 +193,7 @@ template<class T> class Tensor{
     /**
      * operator-() - Public overload to substract parameter tensor from this tensor
      * 
-     * @param tensor2 - a second tensor to be substracted
+     * @param tensor2 a second tensor to be substracted
      * 
      * @return - a pointer to new allocated tensor that the result of substraction
      */
@@ -201,7 +203,7 @@ template<class T> class Tensor{
     /**
      * operator+=() - Public overload to add tensor to tensor
      * 
-     * @param tensor2 - a tensor to be added to this tensor
+     * @param tensor2 a tensor to be added to this tensor
     */
     void operator+=(const Tensor<T>& tensor2) noexcept;
     
@@ -209,7 +211,7 @@ template<class T> class Tensor{
     /**
      * operator-=() - Public overload to substract a tensor from a tensor
      * 
-     * @param tensor2 - a tensor to be substracted from this tensor
+     * @param tensor2 a tensor to be substracted from this tensor
      */
     void operator-=(const Tensor<T>& tensor2) noexcept;
 
@@ -217,7 +219,7 @@ template<class T> class Tensor{
     /**
      * operator|() - Public overload to perform bitwise or on each item in a tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      * 
      * @return - a pointer to new allocated resulting tensor
      */
@@ -227,7 +229,7 @@ template<class T> class Tensor{
     /**
      * operator|=() - Public overload to perform bitwise or on each item in a tensor and save result in this tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      */
     void operator|=(const Tensor<T>& tensor2) noexcept;
 
@@ -235,7 +237,7 @@ template<class T> class Tensor{
     /**
      * operator&() - Public overload to perform bitwise and on each item in a tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      * 
      * @return - a pointer to new allocated resulting tensor
      */
@@ -245,7 +247,7 @@ template<class T> class Tensor{
     /**
      * operator&=() - Public overload to perform bitwise and on each item in a tensor and save result in this tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      */
     void operator&=(const Tensor<T>& tensor2) noexcept;
 
@@ -253,7 +255,7 @@ template<class T> class Tensor{
     /**
      * operator^() - Public overload to perform bitwise xor on each item in a tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      * 
      * @return - a pointer to new allocated resulting tensor
      */
@@ -263,7 +265,7 @@ template<class T> class Tensor{
     /**
      * operator|=() - Public overload to perform bitwise xor on each item in a tensor and save result in this tensor
      * 
-     * @param tensor2 - a second tensor to perform operation against
+     * @param tensor2 a second tensor to perform operation against
      */
     void operator^=(const Tensor<T>& tensor2) noexcept;
     
@@ -279,8 +281,8 @@ template<class T> class Tensor{
      * applyAndReturn() - Public method that allows to apply custom operation between each item of two tensors, items from this
      * tensor as first operand and items from the second tensor passed as parameter as second operand
      * 
-     * @param tensor2 - a second tensor to use the operation against as second operand
-     * @param operation - a binary function that defines operation between two items
+     * @param tensor2 a second tensor to use the operation against as second operand
+     * @param operation a binary function that defines operation between two items
      * 
      * @return - a pointer to resulting tensor
      */
@@ -291,8 +293,8 @@ template<class T> class Tensor{
      * apply() - Public method that allowsto apply custom operation between each item of two tensors and then store the result
      * into the fisrt tensor
      * 
-     * @param tensor2 - a second tensor to use the operation against as second operand
-     * @param operation - a binary function that defines operation between two items
+     * @param tensor2 a second tensor to use the operation against as second operand
+     * @param operation a binary function that defines operation between two items
      */
     inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation) noexcept;
 
@@ -300,7 +302,7 @@ template<class T> class Tensor{
     /**
      * forEach() - Public method to apply function on all elements thru passed function
      * 
-     * @param apply - function that will be applied on all items
+     * @param apply function that will be applied on all items
      */
     void forEach(const std::function<void(T&)>& apply) noexcept;
     
@@ -316,7 +318,7 @@ template<class T> class Tensor{
     /**
      * showItem() - Public method to write into cout the item index based on the coordinates input
      * 
-     * @param coordinates - address of coordinates in a tensor
+     * @param coordinates address of coordinates in a tensor
     */
     void showItem(const std::vector<int>& coordinates) const noexcept;
 
@@ -334,7 +336,7 @@ template<class T> class Tensor{
     /**
      * getCoords() - Private method to get coordinates from itemNumber in tensor, this is inverse method of "getIndex()" method
      * 
-     * @param itemNumber - it is the index of item that is stored in the tensor
+     * @param itemNumber it is the index of item that is stored in the tensor
      * 
      * @return - coordinates of the item in the tensor
      * 
@@ -347,7 +349,7 @@ template<class T> class Tensor{
     /**
      * getIndex() - Private method to get items index number in tensor, this is inverse method of "getCoords()"
      * 
-     * @param coordinates - an array of coordinates of one item in tensor
+     * @param coordinates an array of coordinates of one item in tensor
      * 
      * @return - index of one item in tensor when represented in one dimension
      * 
@@ -361,7 +363,7 @@ template<class T> class Tensor{
      * getNumberOfItems() - Private method to calculate the number of possible items in a tensor based on given dimension sizes
      * This method calculates the number of items before the tensor itself is allocated, and should be useless afterwards
      * 
-     * @param dimensionSizes - vector containing size of each dimension
+     * @param dimensionSizes vector containing size of each dimension
      * 
      * @return - total number of items that can fit into a tensor
     */
@@ -371,8 +373,8 @@ template<class T> class Tensor{
     /**
      * compareItems() - Private method to compare two items using "==", it has two specializations for double and float
      * 
-     * @param a - first operand to compare
-     * @param b - second operand to compare
+     * @param a first operand to compare
+     * @param b second operand to compare
      * 
      * @return - boolean true if both operands same and false if not
      */
@@ -384,7 +386,7 @@ template<class T> class Tensor{
     /**
      * constructorMessage() - Private method to output message to console about the object creation
      * 
-     * @param dimensionSizes - the dimension sizes to be output
+     * @param dimensionSizes the dimension sizes to be output
     */
     void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 };
