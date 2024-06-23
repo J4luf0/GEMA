@@ -319,6 +319,55 @@ inline void test_operatorAssign_001(){
     delete tensor;
 }
 
+inline void test_operatorAssign_002(){
+
+    cout << "test_operatorAssign_002\n";
+
+    const vector<int> dimensionSizes{2, 2};
+
+    auto tensor = new Tensor<double>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+
+    Tensor<double> tensor2;
+    tensor2 = *tensor;
+
+    tensor->setItem(8, {0, 0});
+
+    assert(*tensor != tensor2);
+
+    delete tensor;
+}
+
+inline void test_operatorAssign_003(){
+
+    cout << "test_operatorAssign_003\n";
+
+    const vector<int> dimensionSizes{2, 2};
+
+    Tensor<double>* tensor = new Tensor<double>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+    
+    Tensor<double>* tensor2;
+    tensor2 = tensor;
+
+    tensor->setItem(1.1, {0, 0});
+
+    Tensor<double>* expected = new Tensor<double>(dimensionSizes);
+    expected->setItems({5, 0.55, -2, 4.5});
+    assert(*expected != *tensor2);
+
+    delete expected;
+    delete tensor;
+}
+
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
@@ -343,9 +392,10 @@ int main(){
     test_transposition_001();
     test_transposition_002();
     test_operatorAssign_001();
+    test_operatorAssign_002();
+    test_operatorAssign_003();
 
     cout << "\nAll test done.\n";
     
     return 0;
 }
-
