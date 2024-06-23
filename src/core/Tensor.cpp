@@ -36,7 +36,7 @@
     // public methods
 
     template <class T>
-    Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) 
+    Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept
     : dimensionSizes(newTensorDimensionSizes) {
 
         int itemCounting = getNumberOfItems(newTensorDimensionSizes);
@@ -47,46 +47,46 @@
     }
 
     template <class T>
-    Tensor<T>::Tensor(const Tensor<T>& otherTensor){
+    Tensor<T>::Tensor(const Tensor<T>& otherTensor) noexcept{
         *this = otherTensor;
     }
 
     template <class T>
-    Tensor<T>::Tensor(){
+    Tensor<T>::Tensor() noexcept{
         
     }
 
     template <class T>
-    const std::vector<int>& Tensor<T>::getDimensionSizes() const{
+    const std::vector<int>& Tensor<T>::getDimensionSizes() const noexcept{
         return dimensionSizes;
     }
 
     template <class T>
-    uint64t Tensor<T>::getNumberOfDimensions() const{
+    uint64t Tensor<T>::getNumberOfDimensions() const noexcept{
         return dimensionSizes.size();
     }
 
     template <class T>
-    T Tensor<T>::getItem(const std::vector<int>& coordinates) const{
+    T Tensor<T>::getItem(const std::vector<int>& coordinates) const noexcept{
 
         return tensor[getIndex(coordinates)];
     }
 
     template <class T>
-    void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const{
+    void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const noexcept{
         
         return (void*)&tensor[getIndex(coordinates)];
     }
     
     template <class T>
-    void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates){
+    void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates) noexcept{
 
         int itemNumber = getIndex(coordinates);
         tensor[itemNumber] = value;
     }
 
     template <class T>
-    void Tensor<T>::setItems(const std::vector<T>& tensorItems){
+    void Tensor<T>::setItems(const std::vector<T>& tensorItems) noexcept{
 
         //int copyLength = fmin(tensorItems.size(), tensor.size()); //readd in safety wrapper
 
@@ -96,22 +96,22 @@
     }
 
     template <class T>
-    void Tensor<T>::setTensorOutput(const std::function<void(const T&)> tensorOutput){
+    void Tensor<T>::setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept{
         this->tensorOutput = tensorOutput;
     }
 
     template <class T>
-    void Tensor<T>::setItemOutput(const std::function<void(const T&)> itemOutput){
+    void Tensor<T>::setItemOutput(const std::function<void(const T&)> itemOutput) noexcept{
         this->itemOutput = itemOutput;
     }
 
     template <class T>
-    bool Tensor<T>::isTensorEquilateral() const{
+    bool Tensor<T>::isTensorEquilateral() const noexcept{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }
 
     template <class T>
-    inline constexpr Tensor<T>* Tensor<T>::copy() const{
+    inline constexpr Tensor<T>* Tensor<T>::copy() const noexcept{
 
         Tensor<T>* newTensor = new Tensor<T>(dimensionSizes);
 
@@ -123,7 +123,7 @@
     }
 
     template <class T>
-    void Tensor<T>::fillWith(const T& fill){
+    void Tensor<T>::fillWith(const T& fill) noexcept{
 
         for(T& item : tensor){
             item = fill;
@@ -131,7 +131,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const{
+    Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const noexcept{
 
         // Copying the dimensionSizes
         std::vector<int> transposedDimensionSizes = dimensionSizes; 
@@ -166,7 +166,7 @@
     }
 
     template <class T>
-    bool Tensor<T>::operator==(const Tensor<T>& tensor2) const{
+    bool Tensor<T>::operator==(const Tensor<T>& tensor2) const noexcept{
 
         if(this->tensor.size() != tensor2.tensor.size()){
             return false;
@@ -183,7 +183,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
+    Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem + tensor2Item;
@@ -191,7 +191,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator+=(const Tensor<T>& tensor2){
+    void Tensor<T>::operator+=(const Tensor<T>& tensor2) noexcept{
 
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem += tensor2Item;
@@ -199,7 +199,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const{
+    Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem - tensor2Item;
@@ -207,7 +207,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator-=(const Tensor<T>& tensor2){
+    void Tensor<T>::operator-=(const Tensor<T>& tensor2) noexcept{
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem -= tensor2Item;
@@ -215,7 +215,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
+    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
 
@@ -224,7 +224,7 @@
     }
 
     template <>
-    Tensor<double>* Tensor<double>::operator|(const Tensor<double>& tensor2) const{
+    Tensor<double>* Tensor<double>::operator|(const Tensor<double>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
             return std::bit_cast<uint64t>(tensorItem) | std::bit_cast<uint64t>(tensor2Item);
@@ -232,7 +232,7 @@
     }
 
     template <>
-    Tensor<float>* Tensor<float>::operator|(const Tensor<float>& tensor2) const{
+    Tensor<float>* Tensor<float>::operator|(const Tensor<float>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
             return std::bit_cast<uint32t>(tensorItem) | std::bit_cast<uint32t>(tensor2Item);
@@ -240,7 +240,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator|=(const Tensor<T>& tensor2){
+    void Tensor<T>::operator|=(const Tensor<T>& tensor2) noexcept{
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem |= tensor2Item;
@@ -248,7 +248,7 @@
     }
 
     template <>
-    void Tensor<double>::operator|=(const Tensor<double>& tensor2){
+    void Tensor<double>::operator|=(const Tensor<double>& tensor2) noexcept{
         
         apply(tensor2, [](double& tensorItem, const double& tensor2Item){
             auto newItem = std::bit_cast<uint64t>(tensorItem);
@@ -258,7 +258,7 @@
     }
 
     template <>
-    void Tensor<float>::operator|=(const Tensor<float>& tensor2){
+    void Tensor<float>::operator|=(const Tensor<float>& tensor2) noexcept{
         
         apply(tensor2, [](float& tensorItem, const float& tensor2Item){
             auto newItem = std::bit_cast<uint32t>(tensorItem);
@@ -268,7 +268,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const{
+    Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem & tensor2Item;
@@ -276,7 +276,7 @@
     }
 
     template <>
-    Tensor<double>* Tensor<double>::operator&(const Tensor<double>& tensor2) const{
+    Tensor<double>* Tensor<double>::operator&(const Tensor<double>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
             return std::bit_cast<uint64t>(tensorItem) & std::bit_cast<uint64t>(tensor2Item);
@@ -284,7 +284,7 @@
     }
 
     template <>
-    Tensor<float>* Tensor<float>::operator&(const Tensor<float>& tensor2) const{
+    Tensor<float>* Tensor<float>::operator&(const Tensor<float>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
             return std::bit_cast<uint32t>(tensorItem) & std::bit_cast<uint32t>(tensor2Item);
@@ -292,7 +292,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator&=(const Tensor<T>& tensor2){
+    void Tensor<T>::operator&=(const Tensor<T>& tensor2) noexcept{
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem &= tensor2Item;
@@ -300,7 +300,7 @@
     }
 
     template <>
-    void Tensor<double>::operator&=(const Tensor<double>& tensor2){
+    void Tensor<double>::operator&=(const Tensor<double>& tensor2) noexcept{
         
         apply(tensor2, [](double& tensorItem, const double& tensor2Item){
             auto newItem = std::bit_cast<uint64t>(tensorItem);
@@ -310,7 +310,7 @@
     }
 
     template <>
-    void Tensor<float>::operator&=(const Tensor<float>& tensor2){
+    void Tensor<float>::operator&=(const Tensor<float>& tensor2) noexcept{
         
         apply(tensor2, [](float& tensorItem, const float& tensor2Item){
             auto newItem = std::bit_cast<uint32t>(tensorItem);
@@ -320,7 +320,7 @@
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator^(const Tensor<T>& tensor2) const{
+    Tensor<T>* Tensor<T>::operator^(const Tensor<T>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem ^ tensor2Item;
@@ -328,7 +328,7 @@
     }
 
     template <>
-    Tensor<double>* Tensor<double>::operator^(const Tensor<double>& tensor2) const{
+    Tensor<double>* Tensor<double>::operator^(const Tensor<double>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
             return std::bit_cast<uint64t>(tensorItem) ^ std::bit_cast<uint64t>(tensor2Item);
@@ -336,7 +336,7 @@
     }
 
     template <>
-    Tensor<float>* Tensor<float>::operator^(const Tensor<float>& tensor2) const{
+    Tensor<float>* Tensor<float>::operator^(const Tensor<float>& tensor2) const noexcept{
 
         return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
             return std::bit_cast<uint32t>(tensorItem) ^ std::bit_cast<uint32t>(tensor2Item);
@@ -344,7 +344,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator^=(const Tensor<T>& tensor2){
+    void Tensor<T>::operator^=(const Tensor<T>& tensor2) noexcept{
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem ^= tensor2Item;
@@ -352,7 +352,7 @@
     }
 
     template <>
-    void Tensor<double>::operator^=(const Tensor<double>& tensor2){
+    void Tensor<double>::operator^=(const Tensor<double>& tensor2) noexcept{
         
         apply(tensor2, [](double& tensorItem, const double& tensor2Item){
             auto newItem = std::bit_cast<uint64t>(tensorItem);
@@ -362,7 +362,7 @@
     }
 
     template <>
-    void Tensor<float>::operator^=(const Tensor<float>& tensor2){
+    void Tensor<float>::operator^=(const Tensor<float>& tensor2) noexcept{
         
         apply(tensor2, [](float& tensorItem, const float& tensor2Item){
             auto newItem = std::bit_cast<uint32t>(tensorItem);
@@ -372,7 +372,7 @@
     }
 
     template <class T>
-    void Tensor<T>::operator~(){
+    void Tensor<T>::operator~() noexcept{
         
         forEach([](T& item){
             item = ~item;
@@ -380,7 +380,7 @@
     }
 
     template <>
-    void Tensor<double>::operator~(){
+    void Tensor<double>::operator~() noexcept{
         
         forEach([](double& item){
             item = std::bit_cast<double>(~std::bit_cast<uint64t>(item));
@@ -388,7 +388,7 @@
     }
 
     template <>
-    void Tensor<float>::operator~(){
+    void Tensor<float>::operator~() noexcept{
         
         forEach([](float& item){
             item = std::bit_cast<float>(~std::bit_cast<uint32t>(item));
@@ -396,7 +396,7 @@
     }
 
     template <class T>
-    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
+    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const noexcept{
 
         Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
@@ -410,7 +410,7 @@
 
     template <>
     inline Tensor<double>* 
-    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const{
+    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const noexcept{
 
         Tensor<double>* tensorOut = new Tensor<double>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
@@ -424,7 +424,7 @@
 
     template <>
     inline Tensor<float>* 
-    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const{
+    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const noexcept{
 
         Tensor<float>* tensorOut = new Tensor<float>(dimensionSizes);
         tensorOut->tensor.resize(tensor.size());
@@ -437,7 +437,7 @@
     }
 
     template <class T>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation){
+    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation) noexcept{
 
         for(uint64t i = 0; i < tensor.size(); i++){
             operation(tensor[i], tensor2.tensor[i]);
@@ -445,14 +445,14 @@
     }
 
     template <class T>
-    void Tensor<T>::forEach(const std::function<void(T&)>& apply){
+    void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept{
         for(T& item : tensor){
             apply(item);
         }
     }
 
     template <class T>
-    void Tensor<T>::showTensor() const{
+    void Tensor<T>::showTensor() const noexcept{
 
         std::cout << "Tensor is as follows:\n\n";
 
@@ -473,14 +473,14 @@
     }
 
     template <class T>
-    void Tensor<T>::showItem(const std::vector<int>& coordinates) const{
+    void Tensor<T>::showItem(const std::vector<int>& coordinates) const noexcept{
         
         int itemNumber = getIndex(coordinates);
         std::cout << "Item: " << tensor[itemNumber] << '\n';
     }
 
     template <class T>
-    Tensor<T>::~Tensor(){
+    Tensor<T>::~Tensor() noexcept{
         //
     }
 
@@ -489,7 +489,7 @@
     // private methods
 
     template <class T>
-    std::vector<int> Tensor<T>::getCoords(int itemNumber) const{
+    std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
 
         std::vector<int> coordinates;
         uint64t dimension = dimensionSizes.size();
@@ -511,7 +511,7 @@
     }
 
     template <class T>
-    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const{
+    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
         
         int itemNumber = 0;
 
@@ -535,7 +535,7 @@
     }
 
     template <class T>
-    int Tensor<T>::getNumberOfItems(const std::vector<int>& dimensionSizes) const{
+    int Tensor<T>::getNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
 
         int itemCounting = 1;
         for(const auto& dimensionSize : dimensionSizes){
@@ -545,22 +545,29 @@
     }
 
     template<class T>
-    inline bool Tensor<T>::compareItems(const double a, const double b){
+    inline bool Tensor<T>::compareItems(const double a, const double b) noexcept{
 
         //std::cout << "comparing: " <<  a << " vs " << b << std::endl;
         
         double veightedEpsilon = std::numeric_limits<double>::epsilon();
         return std::fabs(a - b) < veightedEpsilon;
     }
+/*
+    template<>
+    inline bool Tensor<double>::compareItems(const double a, const double b) noexcept{
+        
+        double veightedEpsilon = std::numeric_limits<double>::epsilon();
+        return std::fabs(a - b) < veightedEpsilon;
+    }*/
 
     template <class T>
-    inline bool Tensor<T>::compareItems(const T& a, const T& b) const{
+    inline bool Tensor<T>::compareItems(const T& a, const T& b) const noexcept{
         
         return a == b;
     }
 
     template <class T>
-    void Tensor<T>::constructorMessage(const std::vector<int>& dimensionSizes) const{
+    void Tensor<T>::constructorMessage(const std::vector<int>& dimensionSizes) const noexcept{
 
         // Message
         std::cout << "A tensor of " << tensor.size() << " items and " << dimensionSizes.size() << " dimensions been allocated.\n";

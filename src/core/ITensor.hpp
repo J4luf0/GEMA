@@ -34,7 +34,7 @@ template<class T> class Tensor{
      *
      * @param newTensorDimensionSizes - a vector filled with sizes of dimensions
     */
-    Tensor(const std::vector<int>& newTensorDimensionSizes);
+    Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -42,14 +42,14 @@ template<class T> class Tensor{
      * 
      * @param otherTensor - A tensor to be copied
      */
-    Tensor(const Tensor<T>& otherTensor);
+    Tensor(const Tensor<T>& otherTensor) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
      * Tensor() constructor - Empty constructor so it can be declared without being initalized - trying to do something with
      * uninitialized tensor is sure undefined behavior
      */
-    Tensor();
+    Tensor() noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -57,7 +57,7 @@ template<class T> class Tensor{
      * 
      * @return - vector containing one int per dimension with value of its size
     */
-    const std::vector<int>& getDimensionSizes() const;
+    const std::vector<int>& getDimensionSizes() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -65,7 +65,7 @@ template<class T> class Tensor{
      * 
      * @return - a number of dimensions
     */
-    uint64_t getNumberOfDimensions() const;
+    uint64_t getNumberOfDimensions() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -76,7 +76,7 @@ template<class T> class Tensor{
      * 
      * @return - item on the provided coordinates
     */
-    T getItem(const std::vector<int>& coordinates) const;
+    T getItem(const std::vector<int>& coordinates) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -87,7 +87,7 @@ template<class T> class Tensor{
      * 
      * @return - address of item on the provided coordinates
     */
-    void* getPointer(const std::vector<int>& coordinates) const;
+    void* getPointer(const std::vector<int>& coordinates) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -96,7 +96,7 @@ template<class T> class Tensor{
      * @param value - a value of generic type that will be stored in the tensor
      * @param coordinates - a vector of coordinates that the value will be assigned to
     */
-    void setItem(const T& value, const std::vector<int>& coordinates);
+    void setItem(const T& value, const std::vector<int>& coordinates) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -105,7 +105,7 @@ template<class T> class Tensor{
      * 
      * @param tensorItems - one dimensional array of items to be added by order
     */
-    void setItems(const std::vector<T>& tensorItems);
+    void setItems(const std::vector<T>& tensorItems) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -113,7 +113,7 @@ template<class T> class Tensor{
      * 
      * @param tensorOutput - function that defines the output of the tensor
     */
-    void setTensorOutput(const std::function<void(const T&)> tensorOutput);
+    void setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -121,7 +121,7 @@ template<class T> class Tensor{
      * 
      * @param tensorOutput - function that defines the output of the tensor
     */
-    void setItemOutput(const std::function<void(const T&)> itemOutput);
+    void setItemOutput(const std::function<void(const T&)> itemOutput) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -129,7 +129,7 @@ template<class T> class Tensor{
      * 
      * @return - boolean true if the tensor is equilateral and false if not
     */
-    bool isTensorEquilateral() const;
+    bool isTensorEquilateral() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -138,7 +138,7 @@ template<class T> class Tensor{
      * 
      * @return - pointer to deep copy of this tensor
     */
-    constexpr Tensor<T>* copy() const;
+    constexpr Tensor<T>* copy() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -146,7 +146,7 @@ template<class T> class Tensor{
      * 
      * @param fill - the value to be filled into all items in tensor
     */
-    void fillWith(const T& fill);
+    void fillWith(const T& fill) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -157,7 +157,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated tensor, that has got transposed two dimensions
     */
-    Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
+    Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -168,7 +168,7 @@ template<class T> class Tensor{
      * 
      * @return - boolean true if the tensors are the same and false in not
      */
-    bool operator==(const Tensor<T>& tensor2) const;
+    bool operator==(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -178,7 +178,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated tensor that is the sum of the both
     */
-    Tensor<T>* operator+(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -188,7 +188,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated tensor that the result of substraction
      */
-    Tensor<T>* operator-(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator-(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -196,7 +196,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 - a tensor to be added to this tensor
     */
-    void operator+=(const Tensor<T>& tensor2);
+    void operator+=(const Tensor<T>& tensor2) noexcept;
     
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -204,7 +204,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 - a tensor to be substracted from this tensor
      */
-    void operator-=(const Tensor<T>& tensor2);
+    void operator-=(const Tensor<T>& tensor2) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -214,7 +214,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated resulting tensor
      */
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -222,7 +222,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator|=(const Tensor<T>& tensor2);
+    void operator|=(const Tensor<T>& tensor2) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -232,7 +232,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated resulting tensor
      */
-    Tensor<T>* operator&(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -240,7 +240,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator&=(const Tensor<T>& tensor2);
+    void operator&=(const Tensor<T>& tensor2) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -250,7 +250,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to new allocated resulting tensor
      */
-    Tensor<T>* operator^(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -258,13 +258,13 @@ template<class T> class Tensor{
      * 
      * @param tensor2 - a second tensor to perform operation against
      */
-    void operator^=(const Tensor<T>& tensor2);
+    void operator^=(const Tensor<T>& tensor2) noexcept;
     
     // ------------------------------------------------------------------------------------------------------------------------
     /**
      * operator~() - Public overload to perform bitwise negation on each item in a tensor
      */
-    void operator~();
+    void operator~() noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -276,7 +276,7 @@ template<class T> class Tensor{
      * 
      * @return - a pointer to resulting tensor
      */
-    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -286,7 +286,7 @@ template<class T> class Tensor{
      * @param tensor2 - a second tensor to use the operation against as second operand
      * @param operation - a binary function that defines operation between two items
      */
-    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation);
+    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -294,7 +294,7 @@ template<class T> class Tensor{
      * 
      * @param apply - function that will be applied on all items
      */
-    void forEach(const std::function<void(T&)>& apply);
+    void forEach(const std::function<void(T&)>& apply) noexcept;
     
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -302,7 +302,7 @@ template<class T> class Tensor{
      * 
      * Note: Is currently working only for 1d, 2d and maybe 3d tensors
     */
-    void showTensor() const;
+    void showTensor() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -310,13 +310,13 @@ template<class T> class Tensor{
      * 
      * @param coordinates - address of coordinates in a tensor
     */
-    void showItem(const std::vector<int>& coordinates) const;
+    void showItem(const std::vector<int>& coordinates) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
      * ~Tensor() - Virtual destructor
     */
-    virtual ~Tensor();
+    virtual ~Tensor() noexcept;
 
 
 
@@ -333,7 +333,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate 
      * system or by just index in the actual array
     */
-    std::vector<int> getCoords(int itemNumber) const;
+    std::vector<int> getCoords(int itemNumber) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -346,7 +346,7 @@ template<class T> class Tensor{
      * Note: Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate
      * system or by just index in the actual array
     */
-    int getIndex(const std::vector<int>& coordinates) const;
+    int getIndex(const std::vector<int>& coordinates) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -357,7 +357,7 @@ template<class T> class Tensor{
      * 
      * @return - total number of items that can fit into a tensor
     */
-    int getNumberOfItems(const std::vector<int>& dimensionSizes) const;
+    int getNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -369,8 +369,8 @@ template<class T> class Tensor{
      * 
      * @return - boolean true if both operands same and falsi if not
      */
-    inline bool compareItems(const T& a, const T& b) const;
-    inline bool compareItems(const double a, const double b);
+    inline bool compareItems(const T& a, const T& b) const noexcept;
+    inline bool compareItems(const double a, const double b) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -378,15 +378,15 @@ template<class T> class Tensor{
      * 
      * @param dimensionSizes - the dimension sizes to be output
     */
-    void constructorMessage(const std::vector<int>& dimensionSizes) const;
+    void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 };
 
     template <>
     inline Tensor<double>* 
-    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const;
+    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const noexcept;
 
     template <>
     inline Tensor<float>* 
-    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const;
+    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const noexcept;
 
 #endif
