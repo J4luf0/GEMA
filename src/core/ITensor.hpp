@@ -14,6 +14,10 @@
  * Tensor is made out of items, each having unique coordinates
  * 
  * This is inner class that doesnt implement any checking against bad input, that will be implemented in wrapper class
+ * 
+ * Warning!, even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
+ * of std::vector bit by bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
+ * forEach(), etc...)
  */
 template<class T> class Tensor{
 
