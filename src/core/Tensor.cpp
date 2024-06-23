@@ -16,7 +16,7 @@
 #define uint32t uint32_t
 
     // Primitives and simple types
-    //template class Tensor<bool>;
+    template class Tensor<bool>;
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -77,6 +77,12 @@
         
         return (void*)&tensor[getIndex(coordinates)];
     }
+
+    template <>
+    inline void* Tensor<bool>::getPointer(const std::vector<int>& coordinates) const noexcept{
+        
+        return (void*)&tensor;
+    }
     
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates) noexcept{
@@ -127,6 +133,14 @@
 
         for(T& item : tensor){
             item = fill;
+        }
+    }
+
+    template <>
+    void Tensor<bool>::fillWith(const bool& fill) noexcept{
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            tensor.at(i) = fill;
         }
     }
 
@@ -380,6 +394,14 @@
     }
 
     template <>
+    void Tensor<bool>::operator~() noexcept{
+        
+        forEach([](bool& item){
+            item = !item;
+        });
+    }
+
+    template <>
     void Tensor<double>::operator~() noexcept{
         
         forEach([](double& item){
@@ -444,10 +466,30 @@
         }
     }
 
+    template <>
+    inline void Tensor<bool>::apply(const Tensor<bool>& tensor2, const std::function<void(bool&, const bool&)>& operation) noexcept{
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+            bool tensorItemValue = tensor.at(i);
+            bool tensor2ItemValue = tensor2.tensor.at(i);
+            operation(tensorItemValue, tensor2ItemValue);
+        }
+    }
+
     template <class T>
     void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept{
         for(T& item : tensor){
             apply(item);
+        }
+    }
+
+    template <>
+    void Tensor<bool>::forEach(const std::function<void(bool&)>& apply) noexcept{
+        
+        for(uint64t i = 0; i < tensor.size(); i++){
+            bool value = tensor.at(i);
+            apply(value);
+            tensor.at(i) = value;
         }
     }
 

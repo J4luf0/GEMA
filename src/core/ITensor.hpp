@@ -83,6 +83,8 @@ template<class T> class Tensor{
      * getPointer() - Public method that forcibly returns address of item. Use with caution, because it casts to (void*) and
      * if the item is already of pointer type, then it might need to dereference twice
      * 
+     * Warning!, works differently for bool type because how std::vector works - instead it returns address of the whole vector
+     * 
      * @param coordinates - vector of coordinates specifying the item to be returned
      * 
      * @return - address of item on the provided coordinates
@@ -143,6 +145,7 @@ template<class T> class Tensor{
     // ------------------------------------------------------------------------------------------------------------------------
     /**
      * fillWith() - Public method that fills tensor with passed value
+     * Has specialization for bool because of how std::vector is implemented
      * 
      * @param fill - the value to be filled into all items in tensor
     */
@@ -263,6 +266,7 @@ template<class T> class Tensor{
     // ------------------------------------------------------------------------------------------------------------------------
     /**
      * operator~() - Public overload to perform bitwise negation on each item in a tensor
+     * Warning!, has specialization on bool type that uses ! (not) instead of ~
      */
     void operator~() noexcept;
 
@@ -381,6 +385,17 @@ template<class T> class Tensor{
     void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 };
 
+    // Specialization declarations
+
+    template <>
+    inline void* Tensor<bool>::getPointer(const std::vector<int>& coordinates) const noexcept;
+
+    template <>
+    void Tensor<bool>::fillWith(const bool& fill) noexcept;
+
+    template <>
+    void Tensor<bool>::operator~() noexcept;
+
     template <>
     inline Tensor<double>* 
     Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const noexcept;
@@ -388,5 +403,11 @@ template<class T> class Tensor{
     template <>
     inline Tensor<float>* 
     Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const noexcept;
+
+    template <>
+    inline void Tensor<bool>::apply(const Tensor<bool>& tensor2, const std::function<void(bool&, const bool&)>& operation) noexcept;
+
+    template <>
+    void Tensor<bool>::forEach(const std::function<void(bool&)>& apply) noexcept;
 
 #endif
