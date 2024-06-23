@@ -367,7 +367,7 @@ template<class T> class Tensor{
      * @param a - first operand to compare
      * @param b - second operand to compare
      * 
-     * @return - boolean true if both operands same and falsi if not
+     * @return - boolean true if both operands same and false if not
      */
     inline bool compareItems(const T& a, const T& b) const noexcept;
     inline bool compareItems(const double a, const double b) noexcept;

@@ -543,7 +543,7 @@
         }
         return itemCounting;
     }
-
+/*
     template<class T>
     inline bool Tensor<T>::compareItems(const double a, const double b) noexcept{
 
@@ -551,14 +551,14 @@
         
         double veightedEpsilon = std::numeric_limits<double>::epsilon();
         return std::fabs(a - b) < veightedEpsilon;
-    }
-/*
+    }*/
+
     template<>
     inline bool Tensor<double>::compareItems(const double a, const double b) noexcept{
         
         double veightedEpsilon = std::numeric_limits<double>::epsilon();
         return std::fabs(a - b) < veightedEpsilon;
-    }*/
+    }
 
     template <class T>
     inline bool Tensor<T>::compareItems(const T& a, const T& b) const noexcept{
