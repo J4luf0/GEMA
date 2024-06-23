@@ -73,7 +73,7 @@
     }
 
     template <class T>
-    void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const noexcept{
+    inline void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const noexcept{
         
         return (void*)&tensor[getIndex(coordinates)];
     }

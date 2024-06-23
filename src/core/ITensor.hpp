@@ -87,7 +87,7 @@ template<class T> class Tensor{
      * 
      * @return - address of item on the provided coordinates
     */
-    void* getPointer(const std::vector<int>& coordinates) const noexcept;
+     inline void* getPointer(const std::vector<int>& coordinates) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
