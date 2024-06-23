@@ -207,7 +207,7 @@ inline void test_operatorAssign_001(){
 
     auto expected = new Tensor<double>(dimensionSizes);
     expected->setItems({5, 0.55, -0, -2, 4.5, 7});
-    cout << "ex " << expected->getItem({0, 0}) << " " << tensor2.getItem({0, 0}) << endl;
+    //cout << "ex " << expected->getItem({0, 0}) << " " << tensor2.getItem({0, 0}) << endl;
     assert(*expected == tensor2);
 
     delete expected;
