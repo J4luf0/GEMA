@@ -94,6 +94,17 @@ inline void test_constructor_004(){
     assert(tensor->getNumberOfDimensions() == 1);
 }
 
+inline void test_constructor_005(){
+
+    cout << "test_constructor_005\n";
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    auto result = make_unique<Tensor<double>>(*tensor);
+
+    assert(*tensor == *result);
+}
+
 inline void test_operatorEquals_001(){
 
     cout << "test_operatorEquals_001\n";
@@ -122,6 +133,17 @@ inline void test_operatorEquals_002(){
     assert(expected == (*tensor == *tensor2));
 }
 
+inline void test_operatorEquals_003(){
+
+    cout << "test_operatorEquals_003\n";
+    const vector<int> dimensionSizes{1};
+    
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
+
+    bool expected = true;
+    assert(expected == (*tensor == *tensor2));
+}
 
 inline void test_setItem_001(){
 
@@ -204,6 +226,25 @@ inline void test_transposition_001(){
     delete result;
 }
 
+inline void test_transposition_002(){
+
+    cout << "test_transposition_002\n";
+
+    const vector<int> dimensionSizes{1, 2};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({0, 5});
+
+    Tensor<int>* result = tensor->transposition();
+    
+    const vector<int> expectedDimensionSizes{2, 1};
+    auto expected = make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, 5});
+
+    assert(*result == *expected);
+    delete result;
+}
+
 inline void test_operatorAssign_001(){
 
     cout << "test_operatorAssign_001\n";
@@ -243,12 +284,15 @@ int main(){
     test_constructor_002();
     test_constructor_003();
     test_constructor_004();
+    test_constructor_005();
     test_operatorEquals_001();
     test_operatorEquals_002();
+    test_operatorEquals_003();
     test_setItem_001();
     test_setItem_002();
     test_setItem_003();
     test_transposition_001();
+    test_transposition_002();
     test_operatorAssign_001();
 
     cout << "\nAll test done.\n";
