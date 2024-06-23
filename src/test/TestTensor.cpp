@@ -6,7 +6,7 @@
 #include <format>
 #include <thread>
 
-#include "ITensor.hpp"
+#include "../core/ITensor.hpp"
 
 #define uint64t uint64_t
 
