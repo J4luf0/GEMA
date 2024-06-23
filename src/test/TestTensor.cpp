@@ -1,10 +1,7 @@
 #include <iostream>
-#include <cmath>
 #include <vector>
 #include <cassert>
 #include <memory>
-#include <format>
-#include <thread>
 
 #include "../core/ITensor.hpp"
 
