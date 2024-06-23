@@ -361,8 +361,7 @@ template<class T> class Tensor{
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
-     * compareItems() - Private method to compare two items using "==", it is overriden for double explicitly comparing using
-     * epsilon and fabs
+     * compareItems() - Private method to compare two items using "==", it has two specializations for double and float
      * 
      * @param a - first operand to compare
      * @param b - second operand to compare
@@ -371,6 +370,7 @@ template<class T> class Tensor{
      */
     inline bool compareItems(const T& a, const T& b) const noexcept;
     inline bool compareItems(const double a, const double b) noexcept;
+    inline bool compareItems(const float a, const float b) noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**

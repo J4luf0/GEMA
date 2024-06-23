@@ -560,6 +560,13 @@
         return std::fabs(a - b) < veightedEpsilon;
     }
 
+    template<>
+    inline bool Tensor<float>::compareItems(const float a, const float b) noexcept{
+        
+        float veightedEpsilon = std::numeric_limits<float>::epsilon();
+        return std::fabs(a - b) < veightedEpsilon;
+    }
+
     template <class T>
     inline bool Tensor<T>::compareItems(const T& a, const T& b) const noexcept{
         
