@@ -207,6 +207,54 @@ inline void test_setItem_003(){
     assert(*tensor == *expected);
 }
 
+inline void test_isTensorEquilateral_001(){
+
+    cout << "test_isTensorEquilateral_001\n";
+
+    const vector<int> dimensionSizes{2, 2};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({0, 5, -1, 100});
+
+    assert(tensor->isTensorEquilateral() == true);
+}
+
+inline void test_isTensorEquilateral_002(){
+
+    cout << "test_isTensorEquilateral_002\n";
+
+    const vector<int> dimensionSizes{2, 2, 1};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({0, 5, 3, -2});
+
+    assert(tensor->isTensorEquilateral() == false);
+}
+
+inline void test_isTensorEquilateral_003(){
+
+    cout << "test_isTensorEquilateral_003\n";
+
+    const vector<int> dimensionSizes{2};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({200});
+
+    assert(tensor->isTensorEquilateral() == true);
+}
+
+inline void test_isTensorEquilateral_004(){
+
+    cout << "test_isTensorEquilateral_004\n";
+
+    const vector<int> dimensionSizes{2, 2, 2};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
+
+    assert(tensor->isTensorEquilateral() == true);
+}
+
 inline void test_transposition_001(){
 
     cout << "test_transposition_001\n";
@@ -291,6 +339,10 @@ int main(){
     test_setItem_001();
     test_setItem_002();
     test_setItem_003();
+    test_isTensorEquilateral_001();
+    test_isTensorEquilateral_002();
+    test_isTensorEquilateral_003();
+    test_isTensorEquilateral_004();
     test_transposition_001();
     test_transposition_002();
     test_operatorAssign_001();
