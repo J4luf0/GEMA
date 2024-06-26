@@ -305,6 +305,9 @@ inline void test_operatorAssign_001(){
     tensor->setItem(4.5,   {1, 1});
     tensor->setItem(7,    {2, 1});
 
+    
+    cout << "\nTest to string: \n" << tensor->toString() << endl;
+
     Tensor<double> tensor2;
     tensor2 = *tensor;
 
@@ -354,6 +357,8 @@ inline void test_operatorAssign_003(){
     tensor->setItem(0.55,    {1, 0});
     tensor->setItem(-2,      {0, 1});
     tensor->setItem(4.5,   {1, 1});
+
+    cout << "\nTest to string: \n" << tensor->toString() << endl;
     
     Tensor<double>* tensor2;
     tensor2 = tensor;

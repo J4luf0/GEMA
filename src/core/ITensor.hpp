@@ -141,6 +141,14 @@ template<class T> class Tensor{
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
+     * toString() - Public method that generates a string from tensor items in form of parsable curly bracket hierarchy
+     * 
+     * @return - a parsable string representing the tensor
+     */
+    std::string toString() const;
+
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
      * copy() - Private method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored
      * in a tensor, then the values pointed to by those pointers will be copied too
      * 

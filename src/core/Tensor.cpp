@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <bit>
+#include <format>
 
 #include "ITensor.hpp"
 
@@ -13,7 +14,7 @@
 #define uint32t uint32_t
 
     // Primitives and simple types
-    template class Tensor<bool>;
+    //template class Tensor<bool>; //TODO: specialize toString()
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -111,6 +112,42 @@
     template <class T>
     bool Tensor<T>::isTensorEquilateral() const noexcept{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
+    }
+
+    template <class T>
+    std::string Tensor<T>::toString() const{
+
+        std::string output = "";
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+
+            const std::vector<int> itemCoords = getCoords(i);
+            
+            std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
+            for(uint64t j = 0; j < itemCoords.size(); j++){
+                std::cout << itemCoords[j] << ", ";
+            }
+            std::cout << std::endl;
+
+            std::string startBrackets = "";
+            std::string endBrackets = "";
+
+            // Get number of opening/closing brackets by looping through item coordinates and detecting presence of lowest/highest coordinate
+            for(uint64t j = 0; j < dimensionSizes.size(); j++){
+
+                if(itemCoords[j] <= 0){
+                    startBrackets += '{';
+                }
+
+                if(itemCoords[j] >= dimensionSizes[j] - 1){
+                    endBrackets += '}';
+                }
+            }
+
+            output += std::format("{}{}, {}", startBrackets, tensor[i], endBrackets);
+        }
+
+        return output;
     }
 
     template <class T>
