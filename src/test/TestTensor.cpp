@@ -98,6 +98,9 @@ inline void test_constructor_005(){
 
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     auto result = make_unique<Tensor<double>>(*tensor);
+    //TODO: initialize tensor so the comparison has its point
+    
+    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     assert(*tensor == *result);
 }
@@ -111,6 +114,9 @@ inline void test_operatorEquals_001(){
     tensor->setItems({5.1, 0, -0.000001, 500000});
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
     tensor2->setItems({5.1, -0, -0.000001, 500000});
+
+    
+    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     bool expected = true;
     assert(expected == (*tensor == *tensor));
