@@ -14,7 +14,7 @@
 #define uint32t uint32_t
 
     // Primitives and simple types
-    //template class Tensor<bool>; //TODO: specialize toString()
+    template class Tensor<bool>;
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
@@ -114,6 +114,7 @@
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }
 
+    //TODO: split into more methods and maybe make some structs
     template <class T>
     std::string Tensor<T>::toString() const{
 
@@ -164,7 +165,7 @@
             uint64t inverseIndex = tensor.size() - i - 1;
             itemCoords = getCoords(inverseIndex);
 
-            // Get number of opening brackets by looping through item coordinates and detecting presence of lowest coordinate
+            // Get number of closing brackets by looping through item coordinates and detecting presence of highest coordinate
             // Also checks if there is a switch to new dimension
             for(uint64t j = 0; j < dimensionSizes.size(); j++){
 
