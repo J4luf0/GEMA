@@ -119,9 +119,21 @@
 
         std::string output = "";
 
+        std::vector<int> itemsFromBegin(dimensionSizes.size());
+        std::fill(itemsFromBegin.begin(), itemsFromBegin.end(), -1);
+
+        std::vector<int> itemsFromEnd(dimensionSizes.size());
+        std::fill(itemsFromEnd.begin(), itemsFromEnd.end(), -1);
+
+        std::vector<std::string> beginBracketsOfItem(tensor.size());
+        std::fill(beginBracketsOfItem.begin(), beginBracketsOfItem.end(), "");
+
+        std::vector<std::string> endBracketsOfItem(tensor.size());
+        std::fill(endBracketsOfItem.begin(), endBracketsOfItem.end(), "");
+
         for(uint64t i = 0; i < tensor.size(); i++){
 
-            const std::vector<int> itemCoords = getCoords(i);
+            std::vector<int> itemCoords = getCoords(i);
             
             std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
             for(uint64t j = 0; j < itemCoords.size(); j++){
@@ -132,20 +144,47 @@
             std::string startBrackets = "";
             std::string endBrackets = "";
 
-            // Get number of opening/closing brackets by looping through item coordinates and detecting presence of lowest/highest coordinate
+            // Get number of opening brackets by looping through item coordinates and detecting presence of lowest coordinate
             for(uint64t j = 0; j < dimensionSizes.size(); j++){
 
                 if(itemCoords[j] <= 0){
-                    startBrackets += '{';
+
+                    if(itemsFromBegin[j] == itemCoords[j]){
+                        continue;
+                    }
+
+                    beginBracketsOfItem[i] += '{';
                 }
 
-                if(itemCoords[j] >= dimensionSizes[j] - 1){
-                    endBrackets += '}';
-                }
+                itemsFromBegin[j] = itemCoords[j];
             }
 
-            output += std::format("{}{}, {}", startBrackets, tensor[i], endBrackets);
+            uint64t inverseIndex = tensor.size() - i - 1;
+            itemCoords = getCoords(inverseIndex);
+
+            for(uint64t j = 0; j < dimensionSizes.size(); j++){
+
+                if(itemCoords[j] >= dimensionSizes[j] - 1){
+
+                    if(itemsFromEnd[j] == itemCoords[j]){
+                        continue;
+                    }
+
+                    endBracketsOfItem[inverseIndex] += '}';
+                }
+                
+                itemsFromEnd[j] = itemCoords[j];
+            }
+
+            //output += std::format("{}{}, {}", startBrackets, tensor[i], endBrackets);
         }
+
+        for(uint64t i = 0; i < tensor.size(); i++){
+
+            output += std::format("{}{}, {}", beginBracketsOfItem[i], tensor[i], endBracketsOfItem[i]);
+
+        }
+
 
         return output;
     }

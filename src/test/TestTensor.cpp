@@ -248,6 +248,8 @@ inline void test_isTensorEquilateral_004(){
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
+    
+    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     assert(tensor->isTensorEquilateral() == true);
 }
