@@ -13,6 +13,8 @@
 #define uint64t uint64_t
 #define uint32t uint32_t
 
+namespace Tenz{
+
     // Primitives and simple types
     template class Tensor<bool>;
     template class Tensor<char>;
@@ -706,3 +708,5 @@
 
         std::cout << "\n\n";
     }
+
+}

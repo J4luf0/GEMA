@@ -4,6 +4,8 @@
 
 #include <functional>
 
+namespace Tenz{
+
 //  ===========================================================================================================================
 /**
  * Class for work with generic tensors
@@ -423,5 +425,7 @@ template<class T> class Tensor{
 
     template <>
     void Tensor<bool>::forEach(const std::function<void(bool&)>& apply) noexcept;
+
+}
 
 #endif

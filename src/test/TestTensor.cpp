@@ -7,6 +7,7 @@
 
 #define uint64t uint64_t
 
+using Tenz::Tensor;
 using std::vector, std::make_unique, std::cout, std::endl, std::string;
 
 inline void test_constructor_001(){
