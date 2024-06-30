@@ -184,7 +184,11 @@
 
         for(uint64t i = 0; i < tensor.size(); i++){
 
-            output += std::format("{}{}, {}", beginBracketsOfItem[i], tensor[i], endBracketsOfItem[i]);
+            if(endBracketsOfItem[i].empty()){
+                output += std::format("{}{}, {}", beginBracketsOfItem[i], tensor[i], endBracketsOfItem[i]);
+            }else{
+                output += std::format("{}{}{}", beginBracketsOfItem[i], tensor[i], endBracketsOfItem[i]);
+            }
         }
 
 
