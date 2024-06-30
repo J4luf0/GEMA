@@ -118,7 +118,7 @@ namespace Tenz{
 
     //TODO: split into more methods and maybe make some structs
     template <class T>
-    std::string Tensor<T>::toString() const{
+    std::string Tensor<T>::toString() const noexcept{
 
         std::string output = "";
 

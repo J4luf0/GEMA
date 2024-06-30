@@ -147,7 +147,7 @@ template<class T> class Tensor{
      * 
      * @return - a parsable string representing the tensor
      */
-    std::string toString() const;
+    std::string toString() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
