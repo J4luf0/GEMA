@@ -7,7 +7,7 @@
 
 #define uint64t uint64_t
 
-using std::vector, std::make_unique, std::cout, std::endl;
+using std::vector, std::make_unique, std::cout, std::endl, std::string;
 
 inline void test_constructor_001(){
 
@@ -99,8 +99,6 @@ inline void test_constructor_005(){
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     auto result = make_unique<Tensor<double>>(*tensor);
     //TODO: initialize tensor so the comparison has its point
-    
-    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     assert(*tensor == *result);
 }
@@ -114,9 +112,6 @@ inline void test_operatorEquals_001(){
     tensor->setItems({5.1, 0, -0.000001, 500000});
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
     tensor2->setItems({5.1, -0, -0.000001, 500000});
-
-    
-    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     bool expected = true;
     assert(expected == (*tensor == *tensor));
@@ -254,8 +249,6 @@ inline void test_isTensorEquilateral_004(){
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
-    
-    cout << "\nTest to string: \n" << tensor->toString() << endl;
 
     assert(tensor->isTensorEquilateral() == true);
 }
@@ -313,9 +306,6 @@ inline void test_operatorAssign_001(){
     tensor->setItem(4.5,   {1, 1});
     tensor->setItem(7,    {2, 1});
 
-    
-    cout << "\nTest to string: \n" << tensor->toString() << endl;
-
     Tensor<double> tensor2;
     tensor2 = *tensor;
 
@@ -323,7 +313,6 @@ inline void test_operatorAssign_001(){
 
     auto expected = new Tensor<double>(dimensionSizes);
     expected->setItems({5, 0.55, -0, -2, 4.5, 7});
-    //cout << "ex " << expected->getItem({0, 0}) << " " << tensor2.getItem({0, 0}) << endl;
     assert(*expected == tensor2);
 
     delete expected;
@@ -365,8 +354,6 @@ inline void test_operatorAssign_003(){
     tensor->setItem(0.55,    {1, 0});
     tensor->setItem(-2,      {0, 1});
     tensor->setItem(4.5,   {1, 1});
-
-    cout << "\nTest to string: \n" << tensor->toString() << endl;
     
     Tensor<double>* tensor2;
     tensor2 = tensor;
@@ -379,6 +366,64 @@ inline void test_operatorAssign_003(){
 
     delete expected;
     delete tensor;
+}
+
+inline void test_toString_001(){
+
+    cout << "test_toString_001\n";
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    
+    string expected = "{0, 0}";
+
+    assert(tensor->toString() == expected);
+
+}
+
+inline void test_toString_002(){
+
+    cout << "test_toString_002\n";
+    const vector<int> dimensionSizes{1, 2, 2};
+    
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5.1, 0, -0.000001, 500000});
+    
+    string expected = "{{{5.1, 0}{-1e-06, 5e+05}}}";
+
+    assert(tensor->toString() == expected);
+}
+
+inline void test_toString_003(){
+
+    cout << "test_toString_003\n";
+    const vector<int> dimensionSizes{2, 2, 2};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+    tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
+    
+    string expected = "{{{0, 5}{-1, 100}}{{24, -24}{5, 45}}}";
+
+    assert(tensor->toString() == expected);
+}
+
+inline void test_toString_004(){
+
+    cout << "test_toString_004\n";
+    const vector<int> dimensionSizes{3, 2};
+
+    auto tensor = new Tensor<double>(dimensionSizes);
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {2, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});
+    
+    string expected = "{{5, 0.55, 0}{-2, 4.5, 7}}";
+
+    assert(tensor->toString() == expected);
 }
 
 //Our main <3 -----------------------------------------------------------------------------------------------------------------
@@ -407,6 +452,10 @@ int main(){
     test_operatorAssign_001();
     test_operatorAssign_002();
     test_operatorAssign_003();
+    test_toString_001();
+    test_toString_002();
+    test_toString_003();
+    test_toString_004();
 
     cout << "\nAll test done.\n";
     
