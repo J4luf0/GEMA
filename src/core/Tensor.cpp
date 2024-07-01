@@ -137,6 +137,7 @@ namespace Tenz{
         std::vector<std::string> endBracketsOfItem(tensor.size());
         std::fill(endBracketsOfItem.begin(), endBracketsOfItem.end(), "");
 
+        //Looping through items
         for(uint64t i = 0; i < tensor.size(); i++){
             
             /*std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
@@ -164,7 +165,7 @@ namespace Tenz{
     template <class T>
     void Tensor<T>::getItemsOpeningBrackets(const uint64t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept{
         
-        std::vector<int> itemCoords = getCoords(i);
+        std::vector<int> itemCoords = getCoords(i); //this doesnt have to be here if put right into the toString()
         
         for(uint64t j = 0; j < dimensionSizes.size(); j++){
 
@@ -184,8 +185,9 @@ namespace Tenz{
     template <class T>
     void Tensor<T>::getItemsClosingBrackets(const uint64t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept{
 
+        //Inverting the index to simulate looping backwards through items
         uint64t inverseIndex = tensor.size() - i - 1;
-        std::vector<int> itemCoords = getCoords(inverseIndex);
+        std::vector<int> itemCoords = getCoords(inverseIndex); //this can be just assigment without declaration if put right into toString()
 
         for(uint64t j = 0; j < dimensionSizes.size(); j++){
 

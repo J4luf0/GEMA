@@ -413,8 +413,8 @@ template<class T> class Tensor{
     /**
      * getItemsClosingBrackets() - Private helper method called from toString() to fill given vector of strings argument with 
      * correct amount of closing brackets at the given index
-     * Works by looping backwards through items coordinates, finding highest possible coordinates 
-     * (value of dimension sizes i element - 1) and checks if the items is truly last in the dimension
+     * Works by inverting index to simulate looping backwards through items, looping throught the coordinates, finding highest
+     * possible coordinates (value of dimension sizes i element - 1) and checks if the items is truly last in the dimension
      * 
      * @param i an index of item the method is examining
      * @param itemFromBegin a vector of same size as dimension sizes vector with all items initialized to -1
