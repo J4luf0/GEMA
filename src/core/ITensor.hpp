@@ -4,6 +4,8 @@
 
 #include <functional>
 
+#define uint64t uint64_t
+
 namespace Tenz{
 
 //  ===========================================================================================================================
@@ -73,7 +75,7 @@ template<class T> class Tensor{
      * 
      * @return - a number of dimensions
     */
-    uint64_t getNumberOfDimensions() const noexcept;
+    uint64t getNumberOfDimensions() const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**
@@ -391,6 +393,36 @@ template<class T> class Tensor{
     inline bool compareItems(const T& a, const T& b) const noexcept;
     inline bool compareItems(const double a, const double b) noexcept;
     inline bool compareItems(const float a, const float b) noexcept;
+
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
+     * getItemsOpeningBrackets() - Private helper method called from toString() to fill given vector of strings argument with 
+     * correct amount of opening brackets at the given index
+     * Works by looping through items coordinates, finding lowest possible coordinates (value of 0) and checks if the items is
+     * truly first in the dimension
+     * 
+     * @param i an index of item the method is examining
+     * @param itemFromBegin a vector of same size as dimension sizes vector with all items initialized to -1
+     * @param beginBracketsOfItem a vector of strings storing opening brackets for every item
+     * 
+     * TODO: this method returning number of brackets instead of filling vector would maybe be more convenient
+     */
+    void getItemsOpeningBrackets(const uint64t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept;
+
+    // ------------------------------------------------------------------------------------------------------------------------
+    /**
+     * getItemsClosingBrackets() - Private helper method called from toString() to fill given vector of strings argument with 
+     * correct amount of closing brackets at the given index
+     * Works by looping backwards through items coordinates, finding highest possible coordinates 
+     * (value of dimension sizes i element - 1) and checks if the items is truly last in the dimension
+     * 
+     * @param i an index of item the method is examining
+     * @param itemFromBegin a vector of same size as dimension sizes vector with all items initialized to -1
+     * @param beginBracketsOfItem a vector of strings storing closing brackets for every item
+     * 
+     * TODO: this method returning number of brackets instead of filling vector would maybe be more convenient
+     */
+    void getItemsClosingBrackets(const uint64t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /**

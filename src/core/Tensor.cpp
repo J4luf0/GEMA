@@ -116,7 +116,6 @@ namespace Tenz{
         return std::adjacent_find(dimensionSizes.begin(), dimensionSizes.end(), std::not_equal_to<int>()) == dimensionSizes.end();
     }
 
-    //TODO: split into more methods and maybe make some structs
     template <class T>
     std::string Tensor<T>::toString() const noexcept{
 
@@ -139,49 +138,14 @@ namespace Tenz{
         std::fill(endBracketsOfItem.begin(), endBracketsOfItem.end(), "");
 
         for(uint64t i = 0; i < tensor.size(); i++){
-
-            std::vector<int> itemCoords = getCoords(i);
             
             /*std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
             for(uint64t j = 0; j < itemCoords.size(); j++){
                 std::cout << itemCoords[j] << ", ";
             }
             std::cout << std::endl;*/
-
-            // Get number of opening brackets by looping through item coordinates and detecting presence of lowest coordinate
-            // Also checks if there is a switch to new dimension
-            for(uint64t j = 0; j < dimensionSizes.size(); j++){
-
-                if(itemCoords[j] <= 0){
-
-                    if(itemsFromBegin[j] == itemCoords[j]){
-                        continue;
-                    }
-
-                    beginBracketsOfItem[i] += '{';
-                }
-
-                itemsFromBegin[j] = itemCoords[j];
-            }
-
-            uint64t inverseIndex = tensor.size() - i - 1;
-            itemCoords = getCoords(inverseIndex);
-
-            // Get number of closing brackets by looping through item coordinates and detecting presence of highest coordinate
-            // Also checks if there is a switch to new dimension
-            for(uint64t j = 0; j < dimensionSizes.size(); j++){
-
-                if(itemCoords[j] >= dimensionSizes[j] - 1){
-
-                    if(itemsFromEnd[j] == itemCoords[j]){
-                        continue;
-                    }
-
-                    endBracketsOfItem[inverseIndex] += '}';
-                }
-                
-                itemsFromEnd[j] = itemCoords[j];
-            }
+           getItemsOpeningBrackets(i, itemsFromBegin, beginBracketsOfItem);
+           getItemsClosingBrackets(i, itemsFromEnd, endBracketsOfItem);
         }
 
         for(uint64t i = 0; i < tensor.size(); i++){
@@ -195,6 +159,47 @@ namespace Tenz{
 
 
         return output;
+    }
+
+    template <class T>
+    void Tensor<T>::getItemsOpeningBrackets(const uint64t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept{
+        
+        std::vector<int> itemCoords = getCoords(i);
+        
+        for(uint64t j = 0; j < dimensionSizes.size(); j++){
+
+            if(itemCoords[j] <= 0){
+
+                if(itemsFromBegin[j] == itemCoords[j]){
+                    continue;
+                }
+
+                beginBracketsOfItem[i] += '{';
+            }
+
+            itemsFromBegin[j] = itemCoords[j];
+        }
+    }
+
+    template <class T>
+    void Tensor<T>::getItemsClosingBrackets(const uint64t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept{
+
+        uint64t inverseIndex = tensor.size() - i - 1;
+        std::vector<int> itemCoords = getCoords(inverseIndex);
+
+        for(uint64t j = 0; j < dimensionSizes.size(); j++){
+
+            if(itemCoords[j] >= dimensionSizes[j] - 1){
+
+                if(itemsFromEnd[j] == itemCoords[j]){
+                    continue;
+                }
+
+                endBracketsOfItem[inverseIndex] += '}';
+            }
+            
+            itemsFromEnd[j] = itemCoords[j];
+        }
     }
 
     template <class T>
