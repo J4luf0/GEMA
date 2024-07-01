@@ -433,7 +433,7 @@ template<class T> class Tensor{
     void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 };
 
-    // Specialization declarations
+    // Specialization declarations, no documentation
 
     template <>
     inline void* Tensor<bool>::getPointer(const std::vector<int>& coordinates) const noexcept;
