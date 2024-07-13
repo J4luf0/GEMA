@@ -21,8 +21,8 @@ namespace Tenz{
  * This is inner class that doesnt implement any checking against bad input, that will be implemented in wrapper class - that
  * means working directly with this class might be dangerous if the user is not sure about validity of the data
  * 
- * Warning!, even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
- * of std::vector bit by bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
+ * Warning! Even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
+ * of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
  * forEach(), etc...)
  */
 template<class T> class Tensor{
