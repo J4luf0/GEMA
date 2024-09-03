@@ -31,5 +31,7 @@
 *.out
 *.app
 
-# Target folders
+# Folders
 target/
+run/
+build/
