@@ -267,6 +267,7 @@ namespace GeMa{
         return tensorTransposed;
     }
 
+    // TODO: also compare dimension sizes
     template <class T>
     bool Tensor<T>::operator==(const Tensor<T>& tensor2) const noexcept{
 
@@ -316,8 +317,9 @@ namespace GeMa{
         });
     }
 
-    template <class T>
-    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept{
+    template<typename T>
+    template<typename F, typename std::enable_if<!std::is_floating_point<F>::value, double>::type>
+    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
 
@@ -325,19 +327,12 @@ namespace GeMa{
         });
     }
 
-    template <>
-    Tensor<double>* Tensor<double>::operator|(const Tensor<double>& tensor2) const noexcept{
+    template<typename T>
+    template<typename F, typename std::enable_if<std::is_floating_point<F>::value, double>::type>
+    Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
             return std::bit_cast<uint64t>(tensorItem) | std::bit_cast<uint64t>(tensor2Item);
-        });
-    }
-
-    template <>
-    Tensor<float>* Tensor<float>::operator|(const Tensor<float>& tensor2) const noexcept{
-
-        return applyAndReturn(tensor2, [](const float& tensorItem, const float& tensor2Item){
-            return std::bit_cast<uint32t>(tensorItem) | std::bit_cast<uint32t>(tensor2Item);
         });
     }
 

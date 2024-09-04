@@ -1,5 +1,5 @@
-#ifndef ITENSOR_HPP
-#define ITENSOR_HPP
+#ifndef TENSOR_HPP
+#define TENSOR_HPP
 
 #include <functional>
 
@@ -227,7 +227,11 @@ template<class T> class Tensor{
      * 
      * @return A pointer to new allocated resulting tensor.
      */
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept;
+    template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+
+    template<typename F = T, typename std::enable_if<std::is_floating_point<F>::value, double>::type = 0.>
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise or on each item in a tensor and save result in this tensor.
