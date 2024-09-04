@@ -7,13 +7,13 @@
 #include <bit>
 #include <format>
 
-#include "ITensor.hpp"
+#include "Tensor.hpp"
 
 #define MAX_LOOP_COUNT 1024;
 #define uint64t uint64_t
 #define uint32t uint32_t
 
-namespace Tenz{
+namespace GeMa{
 
     // Primitives and simple types
     template class Tensor<bool>;
