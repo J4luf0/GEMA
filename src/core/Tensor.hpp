@@ -106,7 +106,8 @@ template<class T> class Tensor{
      * @warning Works differently for bool type because how std::vector works - instead it returns address of 
      * the whole vector.
     */
-     inline void* getPointer(const std::vector<int>& coordinates) const noexcept;
+     inline void* getPointer(const std::vector<int>& coordinates) const noexcept requires(!std::is_same<T, bool>::value);
+     inline void* getPointer(const std::vector<int>& coordinates) const noexcept requires(std::is_same<T, bool>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public setter to assign one value into tensor onto the desired coordinates.
@@ -166,7 +167,8 @@ template<class T> class Tensor{
      * 
      * @param fill the value to be filled into all items in tensor.
     */
-    void fillWith(const T& fill) noexcept;
+    void fillWith(const T& fill) noexcept requires(!std::is_same<T, bool>::value);
+    void fillWith(const T& fill) noexcept requires(std::is_same<T, bool>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to swap two dimensions in a tensor.
@@ -227,18 +229,21 @@ template<class T> class Tensor{
      * 
      * @return A pointer to new allocated resulting tensor.
      */
-    template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
-    template<typename F = T, typename std::enable_if<std::is_floating_point<F>::value, double>::type = 0.>
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+    //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
+    //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
+    //template<typename F = T, typename std::enable_if<std::is_floating_point<F>::value, double>::type = 0.>
+    //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise or on each item in a tensor and save result in this tensor.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
-    void operator|=(const Tensor<T>& tensor2) noexcept;
+    void operator|=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
+    void operator|=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise and on each item in a tensor.
@@ -247,14 +252,16 @@ template<class T> class Tensor{
      * 
      * @return A pointer to new allocated resulting tensor.
      */
-    Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept;
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise and on each item in a tensor and save result in this tensor.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
-    void operator&=(const Tensor<T>& tensor2) noexcept;
+    void operator&=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
+    void operator&=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise xor on each item in a tensor.
@@ -263,21 +270,25 @@ template<class T> class Tensor{
      * 
      * @return A pointer to new allocated resulting tensor.
      */
-    Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept;
+    Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise xor on each item in a tensor and save result in this tensor.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
-    void operator^=(const Tensor<T>& tensor2) noexcept;
+    void operator^=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
+    void operator^=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
     
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public overload to perform bitwise negation on each item in a tensor.
      * 
      * @note Has specialization on bool type that uses ! (not) instead of ~.
      */
-    void operator~() noexcept;
+    void operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
+    void operator~() noexcept requires(std::is_same<T, bool>::value);
+    void operator~() noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method that allows to apply custom operation between each item of two tensors, items from this
@@ -288,7 +299,10 @@ template<class T> class Tensor{
      * 
      * @return A pointer to resulting tensor.
      */
-    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const noexcept;
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
+    const noexcept requires(!std::is_floating_point<T>::value);
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
+    const noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method that allowsto apply custom operation between each item of two tensors and then store the result
@@ -297,14 +311,18 @@ template<class T> class Tensor{
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
      */
-    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation) noexcept;
+    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
+    noexcept requires(!std::is_same<T, bool>::value);
+    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
+    noexcept requires(std::is_same<T, bool>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to apply function on all elements thru passed function.
      * 
      * @param apply function that will be applied on all items.
      */
-    void forEach(const std::function<void(T&)>& apply) noexcept;
+    void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
+    void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
     
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to output the whole tensor into std::cout.
@@ -376,9 +394,8 @@ template<class T> class Tensor{
      * 
      * @return Boolean @b true if both operands same and @b false if not.
      */
-    inline bool compareItems(const T& a, const T& b) const noexcept;
-    inline bool compareItems(const double a, const double b) noexcept;
-    inline bool compareItems(const float a, const float b) noexcept;
+    inline bool compareItems(const T& a, const T& b) const noexcept requires(!std::is_floating_point<T>::value);
+    inline bool compareItems(const T a, const T b) const noexcept requires(std::is_floating_point<T>::value);
 
     // ------------------------------------------------------------------------------------------------------------------------
     /***
@@ -420,31 +437,6 @@ template<class T> class Tensor{
     */
     void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 }; // end Tensor
-
-    // Specialization declarations, no documentation
-
-    template <>
-    inline void* Tensor<bool>::getPointer(const std::vector<int>& coordinates) const noexcept;
-
-    template <>
-    void Tensor<bool>::fillWith(const bool& fill) noexcept;
-
-    template <>
-    void Tensor<bool>::operator~() noexcept;
-
-    template <>
-    inline Tensor<double>* 
-    Tensor<double>::applyAndReturn(const Tensor<double>& tensor2, const std::function<double(const double&, const double&)>& operation) const noexcept;
-
-    template <>
-    inline Tensor<float>* 
-    Tensor<float>::applyAndReturn(const Tensor<float>& tensor2, const std::function<float(const float&, const float&)>& operation) const noexcept;
-
-    template <>
-    inline void Tensor<bool>::apply(const Tensor<bool>& tensor2, const std::function<void(bool&, const bool&)>& operation) noexcept;
-
-    template <>
-    void Tensor<bool>::forEach(const std::function<void(bool&)>& apply) noexcept;
 
 } // end GeMa
 
