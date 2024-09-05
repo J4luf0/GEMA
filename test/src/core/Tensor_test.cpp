@@ -7,16 +7,12 @@
 
 #include "Tensor.hpp"
 
-#define uint64t uint64_t
-
 using GeMa::Tensor;
 using std::vector, std::make_unique, std::cout, std::endl, std::string;
 
 TEST(tensor_test, constructor_001){
 
-    //cout << "test_constructor_001\n";
     const vector<int> dimensionSizes{2, 3};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -31,16 +27,14 @@ TEST(tensor_test, constructor_001){
 
     assert(tensor->getNumberOfDimensions() == 2);
 
-    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+    for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
         assert(tensor->getDimensionSizes()[i] == expected[i]);
     }
 }
 
 TEST(tensor_test, constructor_002){
 
-    //cout << "test_constructor_002\n";
     const vector<int> dimensionSizes{2, 2, 3};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItem(7,     {0, 0, 0});
@@ -59,16 +53,14 @@ TEST(tensor_test, constructor_002){
 
     assert(tensor->getNumberOfDimensions() == 3);
 
-    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+    for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
         assert(tensor->getDimensionSizes()[i] == expected[i]);
     }
 }
 
 TEST(tensor_test, constructor_003){
 
-    //cout << "test_constructor_003\n";
     const vector<int> dimensionSizes{2};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItem(2,     {0});
@@ -79,16 +71,14 @@ TEST(tensor_test, constructor_003){
 
     assert(tensor->getNumberOfDimensions() == 1);
 
-    for(uint64t i = 0; i < tensor->getNumberOfDimensions(); i++){
+    for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
         assert(tensor->getDimensionSizes()[i] == expected[i]);
     }
 }
 
 TEST(tensor_test, constructor_004){
 
-    //cout << "test_constructor_004\n";
     const vector<int> dimensionSizes{0};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     assert(tensor->getNumberOfDimensions() == 1);
@@ -96,7 +86,6 @@ TEST(tensor_test, constructor_004){
 
 TEST(tensor_test, constructor_005){
 
-    //cout << "test_constructor_005\n";
     const vector<int> dimensionSizes{2};
 
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
@@ -108,7 +97,6 @@ TEST(tensor_test, constructor_005){
 
 TEST(tensor_test, operatorEquals_001){
 
-    //cout << "test_operatorEquals_001\n";
     const vector<int> dimensionSizes{1, 2, 2};
     
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
@@ -122,7 +110,6 @@ TEST(tensor_test, operatorEquals_001){
 
 TEST(tensor_test, operatorEquals_002){
 
-    //cout << "test_operatorEquals_002\n";
     const vector<int> dimensionSizes{3, 2, 1};
     
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
@@ -136,9 +123,7 @@ TEST(tensor_test, operatorEquals_002){
 
 TEST(tensor_test, operatorEquals_003){
 
-    //cout << "test_operatorEquals_003\n";
     const vector<int> dimensionSizes{1};
-    
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
@@ -148,9 +133,7 @@ TEST(tensor_test, operatorEquals_003){
 
 TEST(tensor_test, setItem_001){
 
-    //cout << "test_setItem_001\n";
     const vector<int> dimensionSizes{2, 3};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -170,9 +153,7 @@ TEST(tensor_test, setItem_001){
 
 TEST(tensor_test, setItem_002){
 
-    //cout << "test_setItem_002\n";
     const vector<int> dimensionSizes{3, 2};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
@@ -194,12 +175,10 @@ TEST(tensor_test, setItem_002){
 
 TEST(tensor_test, setItem_003){
 
-    //cout << "test_setItem_003\n";
     const vector<int> dimensionSizes{2, 2};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setItems({2, 0, -1, 6.4});
 
+    tensor->setItems({2, 0, -1, 6.4});
     tensor->setItem(3.3, {1, 0});
 
     auto expected = make_unique<Tensor<double>>(dimensionSizes);
@@ -209,8 +188,6 @@ TEST(tensor_test, setItem_003){
 }
 
 TEST(tensor_test, isTensorEquilateral_001){
-
-    //cout << "test_isTensorEquilateral_001\n";
 
     const vector<int> dimensionSizes{2, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
@@ -222,8 +199,6 @@ TEST(tensor_test, isTensorEquilateral_001){
 
 TEST(tensor_test, isTensorEquilateral_002){
 
-    //cout << "test_isTensorEquilateral_002\n";
-
     const vector<int> dimensionSizes{2, 2, 1};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
@@ -233,8 +208,6 @@ TEST(tensor_test, isTensorEquilateral_002){
 }
 
 TEST(tensor_test, isTensorEquilateral_003){
-
-    //cout << "test_isTensorEquilateral_003\n";
 
     const vector<int> dimensionSizes{2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
@@ -246,8 +219,6 @@ TEST(tensor_test, isTensorEquilateral_003){
 
 TEST(tensor_test, isTensorEquilateral_004){
 
-    //cout << "test_isTensorEquilateral_004\n";
-
     const vector<int> dimensionSizes{2, 2, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
@@ -257,8 +228,6 @@ TEST(tensor_test, isTensorEquilateral_004){
 }
 
 TEST(tensor_test, transposition_001){
-
-    //cout << "test_transposition_001\n";
 
     const vector<int> dimensionSizes{2, 3};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
@@ -277,8 +246,6 @@ TEST(tensor_test, transposition_001){
 
 TEST(tensor_test, transposition_002){
 
-    //cout << "test_transposition_002\n";
-
     const vector<int> dimensionSizes{1, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
@@ -296,10 +263,7 @@ TEST(tensor_test, transposition_002){
 
 TEST(tensor_test, operatorAssign_001){
 
-    //cout << "test_operatorAssign_001\n";
-
     const vector<int> dimensionSizes{3, 2};
-
     auto tensor = new Tensor<double>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -324,10 +288,7 @@ TEST(tensor_test, operatorAssign_001){
 
 TEST(tensor_test, operatorAssign_002){
 
-    //cout << "test_operatorAssign_002\n";
-
     const vector<int> dimensionSizes{2, 2};
-
     auto tensor = new Tensor<double>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -347,10 +308,7 @@ TEST(tensor_test, operatorAssign_002){
 
 TEST(tensor_test, operatorAssign_003){
 
-    //cout << "test_operatorAssign_003\n";
-
     const vector<int> dimensionSizes{2, 2};
-
     Tensor<double>* tensor = new Tensor<double>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -373,9 +331,7 @@ TEST(tensor_test, operatorAssign_003){
 
 TEST(tensor_test, toString_001){
 
-    //cout << "test_toString_001\n";
     const vector<int> dimensionSizes{2};
-
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     
     string expected = "{0, 0}";
@@ -386,9 +342,7 @@ TEST(tensor_test, toString_001){
 
 TEST(tensor_test, toString_002){
 
-    //cout << "test_toString_002\n";
     const vector<int> dimensionSizes{1, 2, 2};
-    
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     tensor->setItems({5.1, 0, -0.000001, 500000});
     
@@ -399,10 +353,8 @@ TEST(tensor_test, toString_002){
 
 TEST(tensor_test, toString_003){
 
-    //cout << "test_toString_003\n";
     const vector<int> dimensionSizes{2, 2, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
-
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
     
     string expected = "{{{0, 5}{-1, 100}}{{24, -24}{5, 45}}}";
@@ -412,7 +364,6 @@ TEST(tensor_test, toString_003){
 
 TEST(tensor_test, toString_004){
 
-    //cout << "test_toString_004\n";
     const vector<int> dimensionSizes{3, 2};
 
     auto tensor = new Tensor<double>(dimensionSizes);
