@@ -604,7 +604,7 @@ namespace GeMa{
     int Tensor<T>::getNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
 
         int itemCounting = 1;
-        for(const auto& dimensionSize : dimensionSizes){
+        for(const int dimensionSize : dimensionSizes){
             itemCounting *= dimensionSize;
         }
         return itemCounting;
