@@ -84,6 +84,13 @@ template<class T> class Tensor{
     */
     uint64_t getNumberOfDimensions() const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Public getter to get the number of items in a tensor.
+     * 
+     * @return Number of items in a tensor.
+     */
+    uint64_t getNumberOfItems() const noexcept;
+
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public getter to get item on provided coordinates, returns the item by value because large objects should
      * have been already represented by pointer or reference.

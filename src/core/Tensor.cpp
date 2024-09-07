@@ -9,11 +9,9 @@
 
 #include "Tensor.hpp"
 
-#define MAX_LOOP_COUNT 1024;
-#define uint64t uint64_t
-#define uint32t uint32_t
-
 namespace GeMa{
+
+    const int maxLoopCount = 65536; // Will be probably unused.
 
     // Helper converter from floating types to integral
     template<typename F>
@@ -70,8 +68,13 @@ namespace GeMa{
     }
 
     template <class T>
-    uint64t Tensor<T>::getNumberOfDimensions() const noexcept{
+    uint64_t Tensor<T>::getNumberOfDimensions() const noexcept{
         return dimensionSizes_.size();
+    }
+
+    template <class T>
+    uint64_t Tensor<T>::getNumberOfItems() const noexcept{
+        return tensor_.size();
     }
 
     template <class T>
@@ -104,7 +107,7 @@ namespace GeMa{
 
         //int copyLength = fmin(tensorItems.size(), tensor.size()); //readd in safety wrapper
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             tensor_[i] = tensorItems[i];
         }
     }
@@ -146,10 +149,10 @@ namespace GeMa{
         std::fill(endBracketsOfItem.begin(), endBracketsOfItem.end(), "");
 
         // Looping through items
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             
             /*std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
-            for(uint64t j = 0; j < itemCoords.size(); j++){
+            for(uint64_t j = 0; j < itemCoords.size(); j++){
                 std::cout << itemCoords[j] << ", ";
             }
             std::cout << std::endl;*/
@@ -157,7 +160,7 @@ namespace GeMa{
            getItemsClosingBrackets(i, itemsFromEnd, endBracketsOfItem);
         }
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
 
             if(endBracketsOfItem[i].empty()){
                 output += std::format("{}{}, {}", beginBracketsOfItem[i], tensor_[i], endBracketsOfItem[i]);
@@ -171,11 +174,11 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::getItemsOpeningBrackets(const uint64t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept{
+    void Tensor<T>::getItemsOpeningBrackets(const uint64_t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept{
         
         std::vector<int> itemCoords = getCoords(i); // This doesnt have to be here if put right into the toString()
         
-        for(uint64t j = 0; j < dimensionSizes_.size(); j++){
+        for(uint64_t j = 0; j < dimensionSizes_.size(); j++){
 
             if(itemCoords[j] <= 0){
 
@@ -191,13 +194,13 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::getItemsClosingBrackets(const uint64t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept{
+    void Tensor<T>::getItemsClosingBrackets(const uint64_t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept{
 
         // Inverting the index to simulate looping backwards through items
-        uint64t inverseIndex = tensor_.size() - i - 1;
+        uint64_t inverseIndex = tensor_.size() - i - 1;
         std::vector<int> itemCoords = getCoords(inverseIndex); // This can be just assigment without declaration if put right into toString()
 
-        for(uint64t j = 0; j < dimensionSizes_.size(); j++){
+        for(uint64_t j = 0; j < dimensionSizes_.size(); j++){
 
             if(itemCoords[j] >= dimensionSizes_[j] - 1){
 
@@ -217,7 +220,7 @@ namespace GeMa{
 
         Tensor<T>* newTensor = new Tensor<T>(dimensionSizes_);
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             newTensor->tensor_[i] = *(new T(tensor_[i]));
         }
 
@@ -235,7 +238,7 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::fillWith(const T& fill) noexcept  requires(std::is_same<T, bool>::value){
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             tensor_.at(i) = fill;
         }
     }
@@ -259,7 +262,7 @@ namespace GeMa{
         switched.resize(dimensionSizes_.size());
 
         // Looping thru elements in tensor and swapping the desired coordinates
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
             original = getCoords(i);
@@ -339,7 +342,7 @@ namespace GeMa{
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value){
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
-            return std::bit_cast<uint64t>(tensorItem) | std::bit_cast<uint64t>(tensor2Item);
+            return std::bit_cast<uint64_t>(tensorItem) | std::bit_cast<uint64_t>(tensor2Item);
         });
     }
 
@@ -373,7 +376,7 @@ namespace GeMa{
     Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value){
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
-            return std::bit_cast<uint64t>(tensorItem) & std::bit_cast<uint64t>(tensor2Item);
+            return std::bit_cast<uint64_t>(tensorItem) & std::bit_cast<uint64_t>(tensor2Item);
         });
     }
 
@@ -407,7 +410,7 @@ namespace GeMa{
     Tensor<T>* Tensor<T>::operator^(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value){
 
         return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
-            return std::bit_cast<uint64t>(tensorItem) ^ std::bit_cast<uint64t>(tensor2Item);
+            return std::bit_cast<uint64_t>(tensorItem) ^ std::bit_cast<uint64_t>(tensor2Item);
         });
     }
 
@@ -460,7 +463,7 @@ namespace GeMa{
         Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
         tensorOut->tensor_.resize(tensor_.size());
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
         }
 
@@ -474,7 +477,7 @@ namespace GeMa{
         Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
         tensorOut->tensor_.resize(tensor_.size());
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
         }
 
@@ -485,7 +488,7 @@ namespace GeMa{
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
     noexcept requires(!std::is_same<T, bool>::value){
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             operation(tensor_[i], tensor2.tensor_[i]);
         }
     }
@@ -494,7 +497,7 @@ namespace GeMa{
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
     noexcept requires(std::is_same<T, bool>::value){
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             bool tensorItemValue = tensor_.at(i);
             bool tensor2ItemValue = tensor2.tensor_.at(i);
             operation(tensorItemValue, tensor2ItemValue);
@@ -511,7 +514,7 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value){
         
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
             bool value = tensor_.at(i);
             apply(value);
             tensor_.at(i) = value;
@@ -523,7 +526,7 @@ namespace GeMa{
 
         std::cout << "Tensor is as follows:\n\n";
 
-        for(uint64t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){
 
             if((i % dimensionSizes_[0] == 0) && 
                 i > 0){
@@ -559,13 +562,13 @@ namespace GeMa{
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
 
         std::vector<int> coordinates;
-        uint64t dimension = dimensionSizes_.size();
+        uint64_t dimension = dimensionSizes_.size();
         coordinates.resize(dimension);
 
         int dimensionProduct = 1;
 
-        for(uint64t i = 0; i < dimension; i++){
-            for(uint64t j = 0; j < (dimension - i - 1); j++){
+        for(uint64_t i = 0; i < dimension; i++){
+            for(uint64_t j = 0; j < (dimension - i - 1); j++){
                 dimensionProduct *= dimensionSizes_[j];
             }
 
@@ -582,7 +585,7 @@ namespace GeMa{
         
         int itemNumber = 0;
 
-       for(uint64t i = 0; i < dimensionSizes_.size(); i++){
+       for(uint64_t i = 0; i < dimensionSizes_.size(); i++){
 
             if(i == 0){
                 itemNumber += coordinates[i];
@@ -591,7 +594,7 @@ namespace GeMa{
             
             int dimensionProduct = 1;
 
-            for(uint64t j = 0; j < i; j++){
+            for(uint64_t j = 0; j < i; j++){
                 dimensionProduct *= dimensionSizes_[j];
             }
 

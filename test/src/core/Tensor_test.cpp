@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <cassert>
 #include <memory>
 
 #include <gtest/gtest.h>
@@ -25,10 +24,10 @@ TEST(tensor_test, constructor_001){
 
     vector<int> expected = {2, 3};
 
-    assert(tensor->getNumberOfDimensions() == 2);
+    EXPECT_EQ(tensor->getNumberOfDimensions(), 2);
 
     for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
-        assert(tensor->getDimensionSizes()[i] == expected[i]);
+        EXPECT_EQ(tensor->getDimensionSizes()[i], expected[i]);
     }
 }
 
@@ -51,10 +50,10 @@ TEST(tensor_test, constructor_002){
 
     vector<int> expected = {2, 2, 3};
 
-    assert(tensor->getNumberOfDimensions() == 3);
+    EXPECT_EQ(tensor->getNumberOfDimensions(), 3);
 
     for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
-        assert(tensor->getDimensionSizes()[i] == expected[i]);
+        EXPECT_EQ(tensor->getDimensionSizes()[i], expected[i]);
     }
 }
 
@@ -69,10 +68,10 @@ TEST(tensor_test, constructor_003){
 
     vector<int> expected = {2};
 
-    assert(tensor->getNumberOfDimensions() == 1);
+    EXPECT_EQ(tensor->getNumberOfDimensions(), 1);
 
     for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
-        assert(tensor->getDimensionSizes()[i] == expected[i]);
+        EXPECT_EQ(tensor->getDimensionSizes()[i], expected[i]);
     }
 }
 
@@ -81,7 +80,7 @@ TEST(tensor_test, constructor_004){
     const vector<int> dimensionSizes{0};
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
-    assert(tensor->getNumberOfDimensions() == 1);
+    EXPECT_EQ(tensor->getNumberOfDimensions(), 1);
 }
 
 TEST(tensor_test, constructor_005){
@@ -92,7 +91,7 @@ TEST(tensor_test, constructor_005){
     auto result = make_unique<Tensor<double>>(*tensor);
     //TODO: initialize tensor so the comparison has its point
 
-    assert(*tensor == *result);
+    EXPECT_EQ(*tensor, *result);
 }
 
 TEST(tensor_test, operatorEquals_001){
@@ -105,7 +104,7 @@ TEST(tensor_test, operatorEquals_001){
     tensor2->setItems({5.1, -0, -0.000001, 500000});
 
     bool expected = true;
-    assert(expected == (*tensor == *tensor));
+    EXPECT_EQ(expected, (*tensor == *tensor));
 }
 
 TEST(tensor_test, operatorEquals_002){
@@ -118,7 +117,7 @@ TEST(tensor_test, operatorEquals_002){
     tensor2->setItems({5.1, 0, -0, 500000, 1, -1});
 
     bool expected = false;
-    assert(expected == (*tensor == *tensor2));
+    EXPECT_EQ(expected, (*tensor == *tensor2));
 }
 
 TEST(tensor_test, operatorEquals_003){
@@ -128,7 +127,7 @@ TEST(tensor_test, operatorEquals_003){
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
     bool expected = true;
-    assert(expected == (*tensor == *tensor2));
+    EXPECT_EQ(expected, (*tensor == *tensor2));
 }
 
 TEST(tensor_test, setItem_001){
@@ -143,12 +142,12 @@ TEST(tensor_test, setItem_001){
     tensor->setItem(4.5,   {0, 2});
     tensor->setItem(7,    {1, 2});
 
-    assert(tensor->getItem({0, 0}) == 5);
-    assert(tensor->getItem({1, 0}) == 0.55);
-    assert(tensor->getItem({0, 1}) == 0);
-    assert(tensor->getItem({1, 1}) == -2);
-    assert(tensor->getItem({0, 2}) == 4.5);
-    assert(tensor->getItem({1, 2}) == 7);
+    EXPECT_EQ(tensor->getItem({0, 0}), 5);
+    EXPECT_EQ(tensor->getItem({1, 0}), 0.55);
+    EXPECT_EQ(tensor->getItem({0, 1}), 0);
+    EXPECT_EQ(tensor->getItem({1, 1}), -2);
+    EXPECT_EQ(tensor->getItem({0, 2}), 4.5);
+    EXPECT_EQ(tensor->getItem({1, 2}), 7);
 }
 
 TEST(tensor_test, setItem_002){
@@ -170,7 +169,7 @@ TEST(tensor_test, setItem_002){
         cout << item << "; ";
     });
     cout << endl;*/
-    assert(*tensor == *tensor2);
+    EXPECT_EQ(*tensor, *tensor2);
 }
 
 TEST(tensor_test, setItem_003){
@@ -184,7 +183,7 @@ TEST(tensor_test, setItem_003){
     auto expected = make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({2, 3.3, -1, 6.4});
     
-    assert(*tensor == *expected);
+    EXPECT_EQ(*tensor, *expected);
 }
 
 TEST(tensor_test, isTensorEquilateral_001){
@@ -194,7 +193,7 @@ TEST(tensor_test, isTensorEquilateral_001){
 
     tensor->setItems({0, 5, -1, 100});
 
-    assert(tensor->isTensorEquilateral() == true);
+    EXPECT_EQ(tensor->isTensorEquilateral(), true);
 }
 
 TEST(tensor_test, isTensorEquilateral_002){
@@ -204,7 +203,7 @@ TEST(tensor_test, isTensorEquilateral_002){
 
     tensor->setItems({0, 5, 3, -2});
 
-    assert(tensor->isTensorEquilateral() == false);
+    EXPECT_EQ(tensor->isTensorEquilateral(), false);
 }
 
 TEST(tensor_test, isTensorEquilateral_003){
@@ -214,7 +213,7 @@ TEST(tensor_test, isTensorEquilateral_003){
 
     tensor->setItems({200});
 
-    assert(tensor->isTensorEquilateral() == true);
+    EXPECT_EQ(tensor->isTensorEquilateral(), true);
 }
 
 TEST(tensor_test, isTensorEquilateral_004){
@@ -224,7 +223,7 @@ TEST(tensor_test, isTensorEquilateral_004){
 
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
 
-    assert(tensor->isTensorEquilateral() == true);
+    EXPECT_EQ(tensor->isTensorEquilateral(), true);
 }
 
 TEST(tensor_test, transposition_001){
@@ -240,7 +239,7 @@ TEST(tensor_test, transposition_001){
     auto expected = make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({0, -1, -2, 5, 100, -16});
 
-    assert(*result == *expected);
+    EXPECT_EQ(*result, *expected);
     delete result;
 }
 
@@ -257,7 +256,7 @@ TEST(tensor_test, transposition_002){
     auto expected = make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({0, 5});
 
-    assert(*result == *expected);
+    EXPECT_EQ(*result, *expected);
     delete result;
 }
 
@@ -280,7 +279,7 @@ TEST(tensor_test, operatorAssign_001){
 
     auto expected = new Tensor<double>(dimensionSizes);
     expected->setItems({5, 0.55, -0, -2, 4.5, 7});
-    assert(*expected == tensor2);
+    EXPECT_EQ(*expected, tensor2);
 
     delete expected;
     delete tensor;
@@ -301,7 +300,7 @@ TEST(tensor_test, operatorAssign_002){
 
     tensor->setItem(8, {0, 0});
 
-    assert(*tensor != tensor2);
+    EXPECT_NE(*tensor, tensor2);
 
     delete tensor;
 }
@@ -323,7 +322,7 @@ TEST(tensor_test, operatorAssign_003){
 
     Tensor<double>* expected = new Tensor<double>(dimensionSizes);
     expected->setItems({5, 0.55, -2, 4.5});
-    assert(*expected != *tensor2);
+    EXPECT_NE(*expected, *tensor2);
 
     delete expected;
     delete tensor;
@@ -336,7 +335,7 @@ TEST(tensor_test, toString_001){
     
     string expected = "{0, 0}";
 
-    assert(tensor->toString() == expected);
+    EXPECT_EQ(tensor->toString(), expected);
 
 }
 
@@ -348,7 +347,7 @@ TEST(tensor_test, toString_002){
     
     string expected = "{{{5.1, 0}{-1e-06, 5e+05}}}";
 
-    assert(tensor->toString() == expected);
+    EXPECT_EQ(tensor->toString(), expected);
 }
 
 TEST(tensor_test, toString_003){
@@ -359,7 +358,7 @@ TEST(tensor_test, toString_003){
     
     string expected = "{{{0, 5}{-1, 100}}{{24, -24}{5, 45}}}";
 
-    assert(tensor->toString() == expected);
+    EXPECT_EQ(tensor->toString(), expected);
 }
 
 TEST(tensor_test, toString_004){
@@ -377,7 +376,7 @@ TEST(tensor_test, toString_004){
     
     string expected = "{{5, 0.55, 0}{-2, 4.5, 7}}";
 
-    assert(tensor->toString() == expected);
+    EXPECT_EQ(tensor->toString(), expected);
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
