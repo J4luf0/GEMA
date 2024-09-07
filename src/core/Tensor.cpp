@@ -45,7 +45,7 @@ namespace GeMa{
     Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept
     : dimensionSizes_(newTensorDimensionSizes) {
 
-        int itemCounting = getNumberOfItems(newTensorDimensionSizes);
+        int itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
 
         tensor_.resize(itemCounting);
 
@@ -605,7 +605,7 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::getNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
+    int Tensor<T>::calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
 
         int itemCounting = 1;
         for(const int dimensionSize : dimensionSizes){

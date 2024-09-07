@@ -390,7 +390,7 @@ template<class T> class Tensor{
      * 
      * @return Total number of items that can fit into a tensor.
     */
-    int getNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
+    int calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
 
     // ------------------------------------------------------------------------------------------------------------------------
     /***
