@@ -41,11 +41,11 @@ template<class T> class Tensor{
 
     private:
 
-    std::vector<T> tensor;                  // The tensor itself, represented by vector containing all the elements
-    std::vector<int> dimensionSizes;        // Size od every tensor dimension
+    std::vector<T> tensor_;                  // The tensor itself, represented by vector containing all the elements
+    std::vector<int> dimensionSizes_;        // Size od every tensor dimension
 
-    std::function<void(const T&)> tensorOutput;
-    std::function<void(const T&)> itemOutput;
+    std::function<void(const T&)> tensorOutput_;
+    std::function<void(const T&)> itemOutput_;
 
     public:
 
