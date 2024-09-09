@@ -83,7 +83,7 @@ namespace GeMa{
         return tensor_[getIndex(coordinates)];
     }
 
-    template <class T>
+    /*template <class T>
     inline void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const noexcept requires(!std::is_same<T, bool>::value){
         
         return (void*)&tensor_[getIndex(coordinates)];
@@ -93,7 +93,7 @@ namespace GeMa{
     inline void* Tensor<T>::getPointer(const std::vector<int>& coordinates) const noexcept requires(std::is_same<T, bool>::value){
         
         return (void*)&tensor_;
-    }
+    }*/
     
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates) noexcept{
