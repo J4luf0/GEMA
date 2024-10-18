@@ -102,20 +102,6 @@ template<class T> class Tensor{
     T getItem(const std::vector<int>& coordinates) const noexcept;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
-     * @brief Public getter that returns address of item. Use with caution, because it casts to (void*) and if the item is 
-     * already of pointer type, then it might need to dereference twice.
-     * 
-     * @param coordinates vector of coordinates specifying the item to be returned.
-     * 
-     * @return Address of item on the provided coordinates.
-     * 
-     * @warning Works differently for bool type because how std::vector works - instead it returns address of 
-     * the whole vector.
-    */
-    //inline void* getPointer(const std::vector<int>& coordinates) const noexcept requires(!std::is_same<T, bool>::value);
-    //inline void* getPointer(const std::vector<int>& coordinates) const noexcept requires(std::is_same<T, bool>::value);
-
-    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public setter to assign one value into tensor onto the desired coordinates.
      *  
      * @param value a value of generic type that will be stored in the tensor.
