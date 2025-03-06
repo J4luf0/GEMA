@@ -224,7 +224,7 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::fillWith(const T& fill) noexcept  requires(std::is_same<T, bool>::value){
+    void Tensor<T>::fillWith(const T& fill) noexcept requires(std::is_same<T, bool>::value){
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
             tensor_.at(i) = fill;

@@ -1,0 +1,1 @@
+./build/GEMA.exe --gtest_color=yes

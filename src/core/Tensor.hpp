@@ -9,13 +9,13 @@ namespace GeMa{
 
 // ============================================================================================================================
 /***
- * @brief Class for work with generic tensors.
+ * @brief Class representing generic tensor.
  *
  * @par
  * Tensor is represented inside class as one dimensional vector with two key methods: Tesor::getCoords that calculates 
  * the made-up coordinates of the tensor, and inverse method Tensor::getIndex that returns actual vector index when provided 
  * with coordinates. 
- * Those methods are hidden implementation and thus, the tensor can act on the outside more like actual tensor.
+ * Those methods are hidden implementation and thus, the tensor can act on the outside like actual tensor.
  * 
  * @par
  * Terminology:
@@ -26,9 +26,9 @@ namespace GeMa{
  * Index is items number starting from zero in the vector representation of tensor.
  * 
  * @par
- * Defensive philosophy:
+ * 
  * @par
- * This is inner class that doesn't implement any checking against bad input, that will be implemented in wrapper class - meaning
+ * This is inner class that doesn't implement any checking against problematic input, that will be implemented in wrapper class - meaning
  * working directly with this class might be dangerous if the user is not sure about validity of the data.
  * 
  * @tparam Type of items that are stored in the tensor.
@@ -297,7 +297,7 @@ template<class T> class Tensor{
     const noexcept requires(std::is_floating_point<T>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that allowsto apply custom operation between each item of two tensors and then store the result
+     * @brief Public method that allows to apply custom operation between each item of two tensors and then store the result
      * into the fisrt tensor.
      * 
      * @param tensor2 a second tensor to use the operation against as second operand.
