@@ -145,6 +145,8 @@ template<class T> class Tensor{
      */
     std::string toString() const noexcept;
 
+    std::string experimentalToString() const noexcept;
+
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored
      * in a tensor, then the values pointed to by those pointers will be copied too.

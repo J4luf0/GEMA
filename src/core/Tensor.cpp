@@ -115,7 +115,7 @@ namespace GeMa{
         return std::adjacent_find(dimensionSizes_.begin(), dimensionSizes_.end(), std::not_equal_to<int>()) == dimensionSizes_.end();
     }
 
-    template <class T>
+    /*template <class T>
     std::string Tensor<T>::toString() const noexcept{
 
         std::string output = "";
@@ -137,13 +137,13 @@ namespace GeMa{
         std::fill(endBracketsOfItem.begin(), endBracketsOfItem.end(), "");
 
         // Looping through items
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); i++){*/
             
             /*std::cout << "item: " << tensor[i] << " item coords: " << std::endl;
             for(uint64_t j = 0; j < itemCoords.size(); j++){
                 std::cout << itemCoords[j] << ", ";
             }
-            std::cout << std::endl;*/
+            std::cout << std::endl;*//*
            getItemsOpeningBrackets(i, itemsFromBegin, beginBracketsOfItem);
            getItemsClosingBrackets(i, itemsFromEnd, endBracketsOfItem);
         }
@@ -159,9 +159,9 @@ namespace GeMa{
 
 
         return output;
-    }
+    }*/
 
-    template <class T>
+    /* template <class T>
     void Tensor<T>::getItemsOpeningBrackets(const uint64_t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept{
         
         std::vector<int> itemCoords = getCoords(i); // This doesnt have to be here if put right into the toString()
@@ -179,9 +179,9 @@ namespace GeMa{
 
             itemsFromBegin[j] = itemCoords[j];
         }
-    }
+    } */
 
-    template <class T>
+    /* template <class T>
     void Tensor<T>::getItemsClosingBrackets(const uint64_t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept{
 
         // Inverting the index to simulate looping backwards through items
@@ -201,6 +201,44 @@ namespace GeMa{
             
             itemsFromEnd[j] = itemCoords[j];
         }
+    } */
+
+    template <class T>
+    std::string Tensor<T>::toString() const noexcept{
+
+        std::vector<std::string> openingBrackets(tensor_.size());
+        std::fill(openingBrackets.begin(), openingBrackets.end(), "");
+
+        std::vector<std::string> closingBrackets(tensor_.size());
+        std::fill(closingBrackets.begin(), closingBrackets.end(), "");
+
+        uint64_t dimensionProduct = 1;
+
+        for(uint64_t i = 0; i < dimensionSizes_.size(); i++){
+
+            //uint64_t dimensionProduct = std::accumulate(dimensionSizes_.begin(), dimensionSizes_.begin() + i, 1, std::multiplies<uint64_t>());
+            dimensionProduct *= dimensionSizes_[i];
+
+            for(uint64_t j = 0; j < tensor_.size(); j++){
+
+                if(j % dimensionProduct == 0){
+                    openingBrackets[j] += "{";
+                }
+
+                if(j % dimensionProduct == (dimensionProduct - 1)){
+                    closingBrackets[j] += "}";
+                }
+            }
+        }
+
+        std::string output = "";
+
+        for(uint64_t i = 0; i < tensor_.size(); i++){
+            output += 
+                std::format("{}{}{}{}", openingBrackets[i], tensor_[i], closingBrackets[i], (((i + 1) >= tensor_.size()) ? "" : ", "));
+        }
+
+        return output; 
     }
 
     template <class T>
