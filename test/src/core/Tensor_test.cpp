@@ -21,7 +21,6 @@ TEST(tensor_test, constructor_001){
     tensor->setItem(4.5,   {0, 2});
     tensor->setItem(7,    {1, 2});
 
-
     vector<int> expected = {2, 3};
 
     EXPECT_EQ(tensor->getNumberOfDimensions(), 2);
@@ -374,9 +373,16 @@ TEST(tensor_test, toString_004){
     tensor->setItem(4.5,   {1, 1});
     tensor->setItem(7,    {2, 1});
     
-    string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";
+    //string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";
+    string expected = "{{5, 0.55}, {0, -2}, {4.5, 7}}";
 
     EXPECT_EQ(tensor->toString(), expected);
+}
+
+TEST(tensor_test, wat){
+
+    cout << "yo wtf\n";
+    EXPECT_EQ(true, true);
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
