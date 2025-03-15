@@ -31,7 +31,7 @@ namespace GeMa{
  * This is inner class that doesn't implement any checking against problematic input, that will be implemented in wrapper class - meaning
  * working directly with this class might be dangerous if the user is not sure about validity of the data.
  * 
- * @tparam Type of items that are stored in the tensor.
+ * @tparam Type that is stored in the tensor.
  * 
  * @warning Even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
  * of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like

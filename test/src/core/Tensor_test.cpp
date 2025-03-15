@@ -345,7 +345,7 @@ TEST(tensor_test, toString_002){
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     tensor->setItems({5.1, 0, -0.000001, 500000});
     
-    string expected = "{{{5.1, 0}{-1e-06, 5e+05}}}";
+    string expected = "{{{5.1, 0}, {-1e-06, 5e+05}}}";
 
     EXPECT_EQ(tensor->toString(), expected);
 }
@@ -356,7 +356,7 @@ TEST(tensor_test, toString_003){
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
     
-    string expected = "{{{0, 5}{-1, 100}}{{24, -24}{5, 45}}}";
+    string expected = "{{{0, 5}, {-1, 100}}, {{24, -24}, {5, 45}}}";
 
     EXPECT_EQ(tensor->toString(), expected);
 }
@@ -374,7 +374,7 @@ TEST(tensor_test, toString_004){
     tensor->setItem(4.5,   {1, 1});
     tensor->setItem(7,    {2, 1});
     
-    string expected = "{{5, 0.55, 0}{-2, 4.5, 7}}";
+    string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";
 
     EXPECT_EQ(tensor->toString(), expected);
 }
