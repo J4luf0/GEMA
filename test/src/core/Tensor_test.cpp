@@ -212,9 +212,9 @@ TEST(tensor_test, isEquilateral_001){
 TEST(tensor_test, isEquilateral_002){
 
     const vector<int> dimensionSizes{2, 2, 1};
-    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+    auto tensor = make_unique<Tensor<bool>>(dimensionSizes);
 
-    tensor->setItems({0, 5, 3, -2});
+    tensor->setItems({false, true, false, false});
 
     EXPECT_EQ(tensor->isEquilateral(), false);
 }
@@ -239,17 +239,43 @@ TEST(tensor_test, isEquilateral_004){
     EXPECT_EQ(tensor->isEquilateral(), true);
 }
 
-TEST(tensor_test, transposition_001){
+TEST(tensor_test, fillWith_001){
 
     const vector<int> dimensionSizes{2, 3};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
+    tensor->fillWith(69);
+    
+    auto expected = make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({69, 69, 69, 69, 69, 69});
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, fillWith_002){
+
+    const vector<int> dimensionSizes{2, 3};
+    auto tensor = make_unique<Tensor<bool>>(dimensionSizes);
+
+    tensor->fillWith(true);
+    
+    auto expected = make_unique<Tensor<bool>>(dimensionSizes);
+    expected->setItems({true, true, true, true, true, true});
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, transposition_001){
+
+    const vector<int> dimensionSizes{2, 3};
+
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
     tensor->setItems({0, 5, -1, 100, -2, -16});
 
     Tensor<int>* result = tensor->transposition();
     
     const vector<int> expectedDimensionSizes{3, 2};
-    auto expected = make_unique<Tensor<int>>(dimensionSizes);
+    auto expected = make_unique<Tensor<int>>(expectedDimensionSizes);
     expected->setItems({0, -1, -2, 5, 100, -16});
 
     EXPECT_EQ(*result, *expected);
@@ -266,7 +292,7 @@ TEST(tensor_test, transposition_002){
     Tensor<int>* result = tensor->transposition();
     
     const vector<int> expectedDimensionSizes{2, 1};
-    auto expected = make_unique<Tensor<int>>(dimensionSizes);
+    auto expected = make_unique<Tensor<int>>(expectedDimensionSizes);
     expected->setItems({0, 5});
 
     EXPECT_EQ(*result, *expected);
@@ -391,6 +417,56 @@ TEST(tensor_test, toString_004){
     string expected = "{{5, 0.55}, {0, -2}, {4.5, 7}}";
 
     EXPECT_EQ(tensor->toString(), expected);
+}
+
+TEST(tensor_test, operatorCompare_001){
+
+    const vector<int> dimensionSizes{2, 3};
+
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({0, 5, -1, 100, -2, -16});
+
+    bool result = (*tensor == *tensor2);
+    bool expected = true;
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorCompare_002){
+
+    const vector<int> dimensionSizes{2, 2};
+
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    const vector<int> dimensionSizes2{1, 4};
+
+    auto tensor2 = make_unique<Tensor<int>>(dimensionSizes2);
+    tensor2->setItems({0, 5, -1, 100, -2, -16});
+
+    bool result = (*tensor == *tensor2);
+    bool expected = false;
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorCompare_003){
+
+    const vector<int> dimensionSizes{2, 1};
+
+    auto tensor = make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setItems({true, false});
+
+    auto tensor2 = make_unique<Tensor<bool>>(dimensionSizes);
+    tensor2->setItems({true, true});
+
+    bool result = (*tensor == *tensor2);
+    bool expected = false;
+
+    EXPECT_EQ(result, expected);
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------

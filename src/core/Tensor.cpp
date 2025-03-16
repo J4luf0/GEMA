@@ -232,7 +232,10 @@ namespace GeMa{
     template <class T>
     bool Tensor<T>::operator==(const Tensor<T>& tensor2) const noexcept{
 
-        if(this->tensor_.size() != tensor2.tensor_.size()){
+        return (this->tensor_ == tensor2.tensor_) && (this->dimensionSizes_ == tensor2.dimensionSizes_);
+
+        // Too complicated
+        /*if(this->tensor_.size() != tensor2.tensor_.size()){
             return false;
         }
 
@@ -240,7 +243,7 @@ namespace GeMa{
         return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [&](const auto& a, const auto& b){
 
             return compareItems(a, b);
-        });
+        });*/
 
         // This one line does the same thing and gets rid of branching, yet is unreadable and the performance difference may be negligible
         //return !(this->tensor.size() - tensor2.tensor.size()) && std::equal(this->tensor.begin(), this->tensor.end(), tensor2.tensor.begin());
