@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "Tensor.hpp"
+#include "core/Tensor.hpp"
 
 using GeMa::Tensor;
 using std::vector, std::make_unique, std::cout, std::endl, std::string;
@@ -63,7 +63,7 @@ TEST(tensor_test, constructor_003){
 
     tensor->setItem(2,     {0});
     tensor->setItem(-0.3,  {1});
-    tensor->setItem(4,     {2});
+    //tensor->setItem(4,     {2}); // proc?, dyt to unese jen 2 prvky
 
     vector<int> expected = {2};
 
@@ -377,12 +377,6 @@ TEST(tensor_test, toString_004){
     string expected = "{{5, 0.55}, {0, -2}, {4.5, 7}}";
 
     EXPECT_EQ(tensor->toString(), expected);
-}
-
-TEST(tensor_test, wat){
-
-    cout << "yo wtf\n";
-    EXPECT_EQ(true, true);
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------

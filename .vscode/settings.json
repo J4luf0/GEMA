@@ -84,6 +84,7 @@
         "iomanip": "cpp",
         "mutex": "cpp",
         "numbers": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "text_encoding": "cpp"
     }
 }
