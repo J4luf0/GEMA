@@ -394,38 +394,6 @@ template<class T> class Tensor{
 
     // ------------------------------------------------------------------------------------------------------------------------
     /***
-     * @brief Private helper method called from toString() to fill given vector of strings argument with correct amount of 
-     * opening brackets at the given index.
-     * @par
-     * Works by looping through items coordinates, finding lowest possible coordinates (value of 0) and checks if the items is
-     * truly first in the dimension.
-     * 
-     * @param i an index of item the method is examining.
-     * @param itemFromBegin a vector of same size as dimension sizes vector with all items initialized to -1.
-     * @param beginBracketsOfItem a vector of strings storing opening brackets for every item.
-     * 
-     * @todo This method returning number of brackets instead of filling vector would maybe be more convenient.
-     */
-    void getItemsOpeningBrackets(const uint64_t i, std::vector<int>& itemsFromBegin, std::vector<std::string>& beginBracketsOfItem) const noexcept;
-
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
-     * @brief Private helper method called from toString() to fill given vector of strings argument with correct amount of 
-     * closing brackets at the given index.
-     * @par
-     * Works by inverting index to simulate looping backwards through items, looping throught the coordinates, finding highest
-     * possible coordinates (value of dimension sizes i element - 1) and checks if the items is truly last in the dimension.
-     * 
-     * @param i an index of item the method is examining.
-     * @param itemFromBegin a vector of same size as dimension sizes vector with all items initialized to -1.
-     * @param beginBracketsOfItem a vector of strings storing closing brackets for every item.
-     * 
-     * @todo This method returning number of brackets instead of filling vector would maybe be more convenient.
-     */
-    void getItemsClosingBrackets(const uint64_t i, std::vector<int>& itemsFromEnd, std::vector<std::string>& endBracketsOfItem) const noexcept;
-
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
      * @brief Private method to output message to console about the object creation.
      * 
      * @param dimensionSizes the dimension sizes to be output.
