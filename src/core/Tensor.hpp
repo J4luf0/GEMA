@@ -134,9 +134,9 @@ template<class T> class Tensor{
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to calculate, if the tensor dimensions have the same sizes.
      * 
-     * @return Boolean true if the tensor is equilateral and false if not.
+     * @return Bool true if the tensor is equilateral and false if not.
     */
-    bool isTensorEquilateral() const noexcept;
+    bool isEquilateral() const noexcept;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method that generates a string from tensor items in form of parsable curly bracket hierarchy.
@@ -145,7 +145,12 @@ template<class T> class Tensor{
      */
     std::string toString() const noexcept;
 
-    std::string experimentalToString() const noexcept;
+    /*** ----------------------------------------------------------------------------------------------------------------------
+     * @brief Public method that parses std::string specifying the tensor dimension sizes and values.
+     * 
+     * @param tensor string in correct format to be parsed.
+     */
+    void parse(const std::string& tensor) const noexcept;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored

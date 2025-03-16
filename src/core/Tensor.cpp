@@ -90,14 +90,18 @@ namespace GeMa{
         tensor_[itemNumber] = value;
     }
 
+    //
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems) noexcept{
 
         //int copyLength = fmin(tensorItems.size(), tensor.size()); //readd in safety wrapper
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        // why to use this?
+        /*for(uint64_t i = 0; i < tensor_.size(); i++){
             tensor_[i] = tensorItems[i];
-        }
+        }*/
+
+        tensor_ = tensorItems;
     }
 
     template <class T>
@@ -111,7 +115,7 @@ namespace GeMa{
     }
 
     template <class T>
-    bool Tensor<T>::isTensorEquilateral() const noexcept{
+    bool Tensor<T>::isEquilateral() const noexcept{
         return std::adjacent_find(dimensionSizes_.begin(), dimensionSizes_.end(), std::not_equal_to<int>()) == dimensionSizes_.end();
     }
 
@@ -153,6 +157,7 @@ namespace GeMa{
         return output; 
     }
 
+    // TODO: check is this is actually needed
     template <class T>
     inline constexpr Tensor<T>* Tensor<T>::copy() const noexcept{
 
@@ -168,17 +173,23 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::fillWith(const T& fill) noexcept requires(!std::is_same<T, bool>::value){
 
-        for(T& item : tensor_){
+        // could use assign method on everything thus dodging the specialization but std::fill is probably faster
+        tensor_.assign(tensor_.size(), fill); 
+
+        /*for(T& item : tensor_){
             item = fill;
-        }
+        }*/
     }
 
     template <class T>
     void Tensor<T>::fillWith(const T& fill) noexcept requires(std::is_same<T, bool>::value){
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        std::fill(tensor_.begin(), tensor_.end(), fill); // probably better optimalized
+
+        // 
+        /*for(uint64_t i = 0; i < tensor_.size(); i++){
             tensor_.at(i) = fill;
-        }
+        }*/
     }
 
     template <class T>
@@ -217,7 +228,7 @@ namespace GeMa{
         return tensorTransposed;
     }
 
-    // TODO: also compare dimension sizes
+    // TODO: also compare dimension sizes, just simplify it to vector == vector and end this madness
     template <class T>
     bool Tensor<T>::operator==(const Tensor<T>& tensor2) const noexcept{
 

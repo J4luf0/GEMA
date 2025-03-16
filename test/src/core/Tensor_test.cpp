@@ -87,10 +87,24 @@ TEST(tensor_test, constructor_005){
     const vector<int> dimensionSizes{2};
 
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({2, -3});
+
     auto result = make_unique<Tensor<double>>(*tensor);
-    //TODO: initialize tensor so the comparison has its point
 
     EXPECT_EQ(*tensor, *result);
+}
+
+TEST(tensor_test, constructor_006){
+
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({2, -3});
+
+    auto result = make_unique<Tensor<double>>(*tensor);
+    result->setItem(5, {1});
+
+    EXPECT_NE(*tensor, *result);
 }
 
 TEST(tensor_test, operatorEquals_001){
@@ -185,44 +199,44 @@ TEST(tensor_test, setItem_003){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, isTensorEquilateral_001){
+TEST(tensor_test, isEquilateral_001){
 
     const vector<int> dimensionSizes{2, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({0, 5, -1, 100});
 
-    EXPECT_EQ(tensor->isTensorEquilateral(), true);
+    EXPECT_EQ(tensor->isEquilateral(), true);
 }
 
-TEST(tensor_test, isTensorEquilateral_002){
+TEST(tensor_test, isEquilateral_002){
 
     const vector<int> dimensionSizes{2, 2, 1};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({0, 5, 3, -2});
 
-    EXPECT_EQ(tensor->isTensorEquilateral(), false);
+    EXPECT_EQ(tensor->isEquilateral(), false);
 }
 
-TEST(tensor_test, isTensorEquilateral_003){
+TEST(tensor_test, isEquilateral_003){
 
     const vector<int> dimensionSizes{2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({200});
 
-    EXPECT_EQ(tensor->isTensorEquilateral(), true);
+    EXPECT_EQ(tensor->isEquilateral(), true);
 }
 
-TEST(tensor_test, isTensorEquilateral_004){
+TEST(tensor_test, isEquilateral_004){
 
     const vector<int> dimensionSizes{2, 2, 2};
     auto tensor = make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setItems({0, 5, -1, 100, 24, -24, 5, 45});
 
-    EXPECT_EQ(tensor->isTensorEquilateral(), true);
+    EXPECT_EQ(tensor->isEquilateral(), true);
 }
 
 TEST(tensor_test, transposition_001){
@@ -396,10 +410,10 @@ int main(){
     test_setItem_001();
     test_setItem_002();
     test_setItem_003();
-    test_isTensorEquilateral_001();
-    test_isTensorEquilateral_002();
-    test_isTensorEquilateral_003();
-    test_isTensorEquilateral_004();
+    test_isEquilateral_001();
+    test_isEquilateral_002();
+    test_isEquilateral_003();
+    test_isEquilateral_004();
     test_transposition_001();
     test_transposition_002();
     test_operatorAssign_001();
