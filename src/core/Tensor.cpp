@@ -228,10 +228,21 @@ namespace GeMa{
         return tensorTransposed;
     }
 
+    template <class T>
+    Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor2) noexcept{
+        
+        this->tensor_ = tensor2.tensor_;
+        this->dimensionSizes_ = tensor2.dimensionSizes_;
+
+        // TODO: decide what to do with tensorOutput and itemOutput
+        return *this;
+    }
+
     // TODO: also compare dimension sizes, just simplify it to vector == vector and end this madness
     template <class T>
     bool Tensor<T>::operator==(const Tensor<T>& tensor2) const noexcept{
 
+        // Values should be compared first, as tensors of same dimensions are more likely to be compared
         return (this->tensor_ == tensor2.tensor_) && (this->dimensionSizes_ == tensor2.dimensionSizes_);
 
         // Too complicated

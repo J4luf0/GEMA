@@ -487,6 +487,24 @@ TEST(tensor_test, operatorCompare_004){
     EXPECT_EQ(result, expected);
 }
 
+TEST(tensor_test, operatorAdd_001){
+
+    const vector<int> dimensionSizes{2, 3};
+
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({3, -3, -3, 0, -7, -16});
+
+    auto result = *tensor + *tensor2;
+
+    EXPECT_EQ(*result, *expected);
+}
+
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 

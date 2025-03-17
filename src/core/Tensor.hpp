@@ -170,6 +170,15 @@ template<class T> class Tensor{
     void fillWith(const T& fill) noexcept requires(std::is_same<T, bool>::value);
 
     /*** ----------------------------------------------------------------------------------------------------------------------
+     * @brief Public overload to deep copy one tensor to another.
+     * 
+     * @param tensor2 tensor which values are deep copied into this tensor.
+     * 
+     * @return Reference to this tensor after the copying.
+     */
+    Tensor<T>& operator=(const Tensor<T>& tensor2) noexcept;
+
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to swap two dimensions in a tensor.
      * 
      * @param dim1 first dimension to swap, default value is 0.

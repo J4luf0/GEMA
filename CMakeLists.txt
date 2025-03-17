@@ -15,6 +15,10 @@ file(GLOB_RECURSE TEST_FILES "${PROJECT_SOURCE_DIR}/test/*.cpp")
 
 add_executable(GEMA_tests ${SRC_FILES} ${TEST_FILES})
 
+# Compiled release?
+# add_executable(GEMA ${SRC_FILES})
+# target_compile_options(GEMA PRIVATE -O3 -march=native)
+
 target_include_directories(GEMA_tests PRIVATE ${PROJECT_SOURCE_DIR}/src ${GTEST_DIR}/include)
 target_link_libraries(GEMA_tests PRIVATE gtest gtest_main)
 
