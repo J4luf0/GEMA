@@ -47,6 +47,9 @@ template<class T> class Tensor{
     std::function<void(const T&)> tensorOutput_;
     std::function<void(const T&)> itemOutput_;
 
+    std::function<bool(const T&, const T&)> equals_;
+    std::function<int(const T&, const T&)> order_;
+
     public:
 
     /*** ----------------------------------------------------------------------------------------------------------------------

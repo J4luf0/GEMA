@@ -505,6 +505,31 @@ TEST(tensor_test, operatorAdd_001){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorAdd_002){
+
+    const vector<int> dimensionSizes{1, 2};
+
+    auto tensor = make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({0.1, 5.8});
+
+    auto tensor2 = make_unique<Tensor<float>>(dimensionSizes);
+    tensor2->setItems({0.2, -8.3});
+
+    auto expected = make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({0.3, -2.5});
+
+    vector<float> bruh(1);
+    vector<float> brug(1);
+    bruh = {0.1 + 0.2};
+    bruh = {0.3};
+
+    bool wat = bruh == brug;
+
+    auto result = *tensor + *tensor2;
+
+    EXPECT_EQ(*result, *expected);
+}
+
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 
