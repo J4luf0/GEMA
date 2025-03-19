@@ -49,7 +49,7 @@ namespace GeMa{
 
         tensor_.resize(itemCounting);
 
-        //constructorMessage(dimensionSizes);
+        defaultFunctions();
     }
 
     template <class T>
@@ -59,7 +59,7 @@ namespace GeMa{
 
     template <class T>
     Tensor<T>::Tensor() noexcept{
-        
+        defaultFunctions();
     }
 
     template <class T>
@@ -257,9 +257,9 @@ namespace GeMa{
         });*/
 
         // This is the implementation similar to std::vector::oprator== workings, but with possibility of custom comparison function
-        return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [&](const auto& a, const auto& b){
+        return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [this](const auto& a, const auto& b){
 
-            return compareItems(a, b);
+            return equals_(a, b); //was: compareItems
 
         }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
@@ -592,6 +592,28 @@ namespace GeMa{
         
         T veightedEpsilon = std::numeric_limits<T>::epsilon();
         return std::fabs(a - b) < veightedEpsilon;
+    }
+
+    template <class T>
+    void Tensor<T>::defaultFunctions() noexcept{
+
+        if constexpr (std::is_floating_point<T>::value){
+
+            equals_ = [](const T a, const T b){
+                T epsilon = std::numeric_limits<T>::epsilon();
+                return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
+                
+                // this does not work: std::fabs(a - b) < (epsilon * std::max(std::fabs(a), std::fabs(b)));
+                // but this does: std::fabs(a - b) < epsilon;
+                // luckily this works: std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
+            };
+
+        }else{
+
+            equals_ = [](const T& a, const T& b){
+                return a == b;
+            };
+        }
     }
 
     template <class T>

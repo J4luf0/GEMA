@@ -47,8 +47,8 @@ template<class T> class Tensor{
     std::function<void(const T&)> tensorOutput_;
     std::function<void(const T&)> itemOutput_;
 
-    std::function<bool(const T&, const T&)> equals_;
-    std::function<int(const T&, const T&)> order_;
+    std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and decides equality by bool
+    std::function<int(const T&, const T&)> order_;      // Function orders items, first is: (less, equal, more) -> (-1, 0, 1)
 
     public:
 
@@ -339,6 +339,8 @@ template<class T> class Tensor{
      * @brief Public method to output the whole tensor into std::cout.
      * 
      * @note Is currently working only for 1d, 2d and maybe 3d tensors.
+     * 
+     * @deprecated It was just for early stage debug.
     */
     void showTensor() const noexcept;
 
@@ -346,6 +348,8 @@ template<class T> class Tensor{
      * @brief Public method to write into cout the item index based on the coordinates input.
      * 
      * @param coordinates address of coordinates in a tensor.
+     * 
+     * @deprecated It was just for early stage debug.
     */
     void showItem(const std::vector<int>& coordinates) const noexcept;
 
@@ -358,8 +362,7 @@ template<class T> class Tensor{
 
     private:
 
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to get coordinates from itemNumber in tensor, this is inverse method of "getIndex()" method.
      * 
      * @param itemNumber it is the index of item that is stored in the tensor.
@@ -371,8 +374,7 @@ template<class T> class Tensor{
     */
     std::vector<int> getCoords(int itemNumber) const noexcept;
 
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to get items index number in tensor, this is inverse method of "getCoords()".
      * 
      * @param coordinates an array of coordinates of one item in tensor.
@@ -384,8 +386,7 @@ template<class T> class Tensor{
     */
     int getIndex(const std::vector<int>& coordinates) const noexcept;
 
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to calculate the number of possible items in a tensor based on given dimension sizes.
      * @par
      * This method calculates the number of items before the tensor itself is allocated, and should be useless afterwards.
@@ -396,8 +397,7 @@ template<class T> class Tensor{
     */
     int calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
 
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to compare two items using "==", it has two specializations for double and float using epsilon
      * comparison.
      * 
@@ -409,11 +409,17 @@ template<class T> class Tensor{
     inline bool compareItems(const T& a, const T& b) const noexcept requires(!std::is_floating_point<T>::value);
     inline bool compareItems(const T a, const T b) const noexcept requires(std::is_floating_point<T>::value);
 
-    // ------------------------------------------------------------------------------------------------------------------------
-    /***
+    /*** ----------------------------------------------------------------------------------------------------------------------
+     * @brief Private method supposed to run from constructor that sets std::function attributes of this class.
+     */
+    void defaultFunctions() noexcept;
+
+    /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to output message to console about the object creation.
      * 
      * @param dimensionSizes the dimension sizes to be output.
+     * 
+     * @deprecated It was just for early stage debug.
     */
     void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 }; // end Tensor
