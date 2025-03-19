@@ -53,8 +53,9 @@ template<class T> class Tensor{
     public:
 
     /*** ----------------------------------------------------------------------------------------------------------------------
-     * @brief Sets dimensionSizes, calculates number of items and then allocates them on tensor, 
-     * the result is empty tensor, with defined dimensions and allocated space.
+     * @brief Sets dimensionSizes, calculates number of items and then allocates them on tensor, then sets functional
+     * attributes values yet the default lambda itself is decided at compile time. The result is empty tensor, with defined 
+     * dimensions and allocated space.
      *
      * @param newTensorDimensionSizes a vector filled with sizes of dimensions.
     */

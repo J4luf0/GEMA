@@ -29,7 +29,7 @@ namespace GeMa{
     template class Tensor<long long int>;
     template class Tensor<float>;
     template class Tensor<double>;
-    // The tensor itself and basically any object, O meaning Object
+    // The tensor itself and basically any object, O for Object
     template <typename T> class Tensor<Tensor<T>*>;
     template <typename O> class Tensor<O&>;
     template <typename O> class Tensor<O*>;
@@ -59,7 +59,7 @@ namespace GeMa{
 
     template <class T>
     Tensor<T>::Tensor() noexcept{
-        defaultFunctions();
+        
     }
 
     template <class T>
