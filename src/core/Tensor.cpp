@@ -234,6 +234,9 @@ namespace GeMa{
         this->tensor_ = tensor2.tensor_;
         this->dimensionSizes_ = tensor2.dimensionSizes_;
 
+        this->equals_ = tensor2.equals_;
+        this->order_ = tensor2.order_;
+
         // TODO: decide what to do with tensorOutput and itemOutput
         return *this;
     }
