@@ -22,20 +22,22 @@ namespace GeMa{
     };
 
     // Primitives and simple types
-    template class Tensor<bool>;
+    //template <typename T> class Tensor;
+    //template class Tensor<T>;
+    /*template class Tensor<bool>;
     template class Tensor<char>;
     template class Tensor<short>;
     template class Tensor<int>;
     template class Tensor<long long int>;
     template class Tensor<float>;
-    template class Tensor<double>;
-    // The tensor itself and basically any object, O for Object
-    template <typename T> class Tensor<Tensor<T>*>;
-    template <typename O> class Tensor<O&>;
-    template <typename O> class Tensor<O*>;
+    template class Tensor<double>;*/
+    
+    //template <typename T> class Tensor<Tensor<T>*>;
+    //template <typename O> class Tensor<O&>;
+    //template <typename O> class Tensor<O*>;
     // Others
-    template <typename O> class Tensor<std::vector<O>>;
-    template <typename O> class Tensor<std::unique_ptr<O>>;
+    //template <typename O> class Tensor<std::vector<O>>;
+    //template <typename O> class Tensor<std::unique_ptr<O>>;
 
 
 
@@ -234,6 +236,7 @@ namespace GeMa{
         this->tensor_ = tensor2.tensor_;
         this->dimensionSizes_ = tensor2.dimensionSizes_;
 
+        // TODO: decide if to actually copy this
         this->equals_ = tensor2.equals_;
         this->order_ = tensor2.order_;
 

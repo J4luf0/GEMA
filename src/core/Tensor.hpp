@@ -28,8 +28,8 @@ namespace GeMa{
  * @par
  * 
  * @par
- * This is inner class that doesn't implement any checking against problematic input, that will be implemented in wrapper class - meaning
- * working directly with this class might be dangerous if the user is not sure about validity of the data.
+ * This is inner class that doesn't implement any checking against problematic input, that will be implemented in wrapper class
+ * - meaning working directly with this class might be dangerous if the user is not sure about validity of the data.
  * 
  * @tparam Type that is stored in the tensor.
  * 

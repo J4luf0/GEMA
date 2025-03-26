@@ -4,7 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "core/Tensor.hpp"
+//#include "core/Tensor.hpp"
+#include "core/Tensor.cpp"
 
 using GeMa::Tensor;
 using std::vector, std::make_unique, std::cout, std::endl, std::string;
@@ -76,13 +77,35 @@ TEST(tensor_test, constructor_003){
 
 TEST(tensor_test, constructor_004){
 
+    const vector<int> dimensionSizes{2};
+    auto tensor = make_unique<Tensor<Tensor<int>>>(dimensionSizes);
+
+    auto tensorIn1 = make_unique<Tensor<int>>(dimensionSizes);
+    tensorIn1->setItems({1, -2});
+    auto tensorIn2 = make_unique<Tensor<int>>(dimensionSizes);
+    tensorIn2->setItems({0, 5});
+
+    tensor->setItem(*tensorIn1,  {0});
+    tensor->setItem(*tensorIn2,  {1});
+
+    vector<int> expected = {2};
+
+    EXPECT_EQ(tensor->getNumberOfDimensions(), 1);
+
+    for(uint64_t i = 0; i < tensor->getNumberOfDimensions(); i++){
+        EXPECT_EQ(tensor->getDimensionSizes()[i], expected[i]);
+    }
+}
+
+TEST(tensor_test, constructor_005){
+
     const vector<int> dimensionSizes{0};
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     EXPECT_EQ(tensor->getNumberOfDimensions(), 1);
 }
 
-TEST(tensor_test, constructor_005){
+TEST(tensor_test, constructor_006){
 
     const vector<int> dimensionSizes{2};
 
@@ -94,7 +117,7 @@ TEST(tensor_test, constructor_005){
     EXPECT_EQ(*tensor, *result);
 }
 
-TEST(tensor_test, constructor_006){
+TEST(tensor_test, constructor_007){
 
     const vector<int> dimensionSizes{2};
 
@@ -518,13 +541,24 @@ TEST(tensor_test, operatorAdd_002){
     auto expected = make_unique<Tensor<float>>(dimensionSizes);
     expected->setItems({0.3, -2.5});
 
-    vector<float> bruh(1);
-    vector<float> brug(1);
-    bruh = {0.1 + 0.2};
-    bruh = {0.3};
+    auto result = *tensor + *tensor2;
 
-    bool wat = bruh == brug;
+    EXPECT_EQ(*result, *expected);
+}
 
+TEST(tensor_test, operatorAdd_003){
+
+    const vector<int> dimensionSizes{1, 1};
+
+    auto tensor = make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setItems({true});
+
+    auto tensor2 = make_unique<Tensor<bool>>(dimensionSizes);
+    tensor2->setItems({false});
+
+    auto expected = make_unique<Tensor<bool>>(dimensionSizes);
+    expected->setItems({true});
+    
     auto result = *tensor + *tensor2;
 
     EXPECT_EQ(*result, *expected);
