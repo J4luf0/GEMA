@@ -4,8 +4,7 @@
 
 #include <gtest/gtest.h>
 
-//#include "core/Tensor.hpp"
-#include "core/Tensor.cpp"
+#include "core/Tensor.hpp"
 
 using GeMa::Tensor;
 using std::vector, std::make_unique, std::cout, std::endl, std::string;
@@ -128,6 +127,52 @@ TEST(tensor_test, constructor_007){
     result->setItem(5, {1});
 
     EXPECT_NE(*tensor, *result);
+}
+
+TEST(tensor_test, constructor_008){
+
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<Tensor<int>>>(dimensionSizes);
+
+    Tensor<int> tenVal1({2});
+    tenVal1.setItems({1, -2});
+    Tensor<int> tenVal2({2});
+    tenVal2.setItems({0, 4});
+
+    tensor->setItems({tenVal1, tenVal2});
+
+    auto result = make_unique<Tensor<Tensor<int>>>(*tensor);
+
+    Tensor<int> tenVal3({2});
+    tenVal3.setItems({1, 2});
+
+    result->setItem(tenVal3, {0});
+
+    EXPECT_NE(*tensor, *result);
+}
+
+TEST(tensor_test, constructor_009){
+
+    const vector<int> dimensionSizes{2};
+
+    auto tensor = make_unique<Tensor<Tensor<int>*>>(dimensionSizes);
+
+    Tensor<int>* tenVal1 = new Tensor<int>(dimensionSizes);
+    tenVal1->setItems({1, -2});
+    Tensor<int>* tenVal2 = new Tensor<int>(dimensionSizes);
+    tenVal2->setItems({0, 4});
+
+    tensor->setItems({tenVal1, tenVal2});
+
+    auto tensor2 = make_unique<Tensor<Tensor<int>*>>(*tensor);
+
+    tensor2->getItem({0})->setItem(6, {0});
+
+    EXPECT_EQ(*tensor, *tensor2);
+
+    delete tenVal1;
+    delete tenVal2;
 }
 
 TEST(tensor_test, operatorEquals_001){

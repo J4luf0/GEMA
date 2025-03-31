@@ -427,4 +427,6 @@ template<class T> class Tensor{
 
 } // end GeMa
 
+#include "Tensor.tpp"
+
 #endif

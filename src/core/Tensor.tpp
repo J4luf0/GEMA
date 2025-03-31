@@ -7,7 +7,7 @@
 #include <bit>
 #include <format>
 
-#include "Tensor.hpp"
+#include "Tensor.hpp" // I dont even know if to keep this or not
 
 namespace GeMa{
 
@@ -22,7 +22,7 @@ namespace GeMa{
     };
 
     // Primitives and simple types
-    //template <typename T> class Tensor;
+    //template <typename T> class Tensor<T>;
     //template class Tensor<T>;
     /*template class Tensor<bool>;
     template class Tensor<char>;
