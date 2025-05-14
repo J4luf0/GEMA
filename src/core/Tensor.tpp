@@ -573,11 +573,7 @@ namespace GeMa{
     template <class T>
     int Tensor<T>::calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
 
-        int itemCounting = 1;
-        for(const int dimensionSize : dimensionSizes){
-            itemCounting *= dimensionSize;
-        }
-        return itemCounting;
+        return std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), 1, std::multiplies<int>());
     }
 
     template <class T>
