@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <bit>
 #include <format>
+#include <numeric>
 
 #include "Tensor.hpp" // I dont even know if to keep this or not
 
@@ -540,20 +541,15 @@ namespace GeMa{
     std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
 
         std::vector<int> coordinates;
-        uint64_t dimension = dimensionSizes_.size();
-        coordinates.resize(dimension);
+        coordinates.resize(dimensionSizes_.size());
 
-        int dimensionProduct = 1;
+        uint64_t divisor = std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), 1, std::multiplies<int>());
+        
+        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
-        for(uint64_t i = 0; i < dimension; i++){
-
-            for(uint64_t j = 0; j < (dimension - i - 1); j++){
-                dimensionProduct *= dimensionSizes_[j];
-            }
-
-            coordinates[dimension - i - 1] = itemNumber / dimensionProduct;
-            itemNumber -= coordinates[dimension - i - 1] * dimensionProduct;
-            dimensionProduct = 1;
+            divisor /= dimensionSizes_[i];
+            coordinates[i] = itemNumber / divisor;
+            itemNumber %= divisor;
         }
 
         return coordinates;
@@ -565,17 +561,7 @@ namespace GeMa{
         int itemNumber = 0;
         int dimensionProduct = 1;
 
-       for(uint64_t i = 0; i < dimensionSizes_.size(); i++){
-
-            /*if(i == 0){
-                itemNumber += coordinates[i];
-                continue;
-            }*/
-            
-
-            //for(uint64_t j = 0; j < i; j++){
-            //    dimensionProduct *= dimensionSizes_[j];
-            //}
+       for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
             itemNumber += coordinates[i] * dimensionProduct;
             dimensionProduct *= dimensionSizes_[i];
