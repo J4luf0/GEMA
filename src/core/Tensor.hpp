@@ -154,7 +154,7 @@ template<class T> class Tensor{
      * 
      * @param tensor string in correct format to be parsed.
      */
-    void parse(const std::string& tensor) const noexcept;
+    void parse(const std::string& tensor) noexcept;
 
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Public method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored

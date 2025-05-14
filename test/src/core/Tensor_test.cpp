@@ -609,6 +609,13 @@ TEST(tensor_test, operatorAdd_003){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, showDebug){
+
+    const vector<int> dimensionSizes{2, 3};
+    auto tensor = make_unique<Tensor<int>>(dimensionSizes);
+
+}
+
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
 int main(){
 

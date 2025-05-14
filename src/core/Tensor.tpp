@@ -159,6 +159,11 @@ namespace GeMa{
         return output; 
     }
 
+    template <class T>
+    void Tensor<T>::parse(const std::string& tensor) noexcept{
+        
+    }
+
     // TODO: check is this is actually needed
     template <class T>
     inline constexpr Tensor<T>* Tensor<T>::copy() const noexcept{
@@ -541,6 +546,7 @@ namespace GeMa{
         int dimensionProduct = 1;
 
         for(uint64_t i = 0; i < dimension; i++){
+
             for(uint64_t j = 0; j < (dimension - i - 1); j++){
                 dimensionProduct *= dimensionSizes_[j];
             }
@@ -557,21 +563,22 @@ namespace GeMa{
     int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
         
         int itemNumber = 0;
+        int dimensionProduct = 1;
 
        for(uint64_t i = 0; i < dimensionSizes_.size(); i++){
 
-            if(i == 0){
+            /*if(i == 0){
                 itemNumber += coordinates[i];
                 continue;
-            }
+            }*/
             
-            int dimensionProduct = 1;
 
-            for(uint64_t j = 0; j < i; j++){
-                dimensionProduct *= dimensionSizes_[j];
-            }
+            //for(uint64_t j = 0; j < i; j++){
+            //    dimensionProduct *= dimensionSizes_[j];
+            //}
 
             itemNumber += coordinates[i] * dimensionProduct;
+            dimensionProduct *= dimensionSizes_[i];
        }
 
         return itemNumber;
