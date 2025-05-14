@@ -133,7 +133,8 @@ namespace GeMa{
 
         uint64_t dimensionProduct = 1;
 
-        for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); i--){
+        //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); i--){ // from little to big
+        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){   // show identical
 
             //uint64_t dimensionProduct = std::accumulate(dimensionSizes_.begin(), dimensionSizes_.begin() + i, 1, std::multiplies<uint64_t>());
             dimensionProduct *= dimensionSizes_[i];
