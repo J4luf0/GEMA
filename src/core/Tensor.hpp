@@ -387,6 +387,10 @@ template<class T> class Tensor{
     */
     int getIndex(const std::vector<int>& coordinates) const noexcept;
 
+    std::vector<int> bigGetCoords(int itemNumber) const noexcept;
+    
+    int bigGetIndex(const std::vector<int>& coordinates) const noexcept;
+
     /*** ----------------------------------------------------------------------------------------------------------------------
      * @brief Private method to calculate the number of possible items in a tensor based on given dimension sizes.
      * @par

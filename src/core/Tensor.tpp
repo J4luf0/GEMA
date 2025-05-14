@@ -542,10 +542,9 @@ namespace GeMa{
 
         std::vector<int> coordinates;
         coordinates.resize(dimensionSizes_.size());
-
-        uint64_t divisor = std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), 1, std::multiplies<int>());
+        uint64_t divisor = tensor_.size();
         
-        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
+        for(int i = dimensionSizes_.size() - 1; i >= 0; --i){
 
             divisor /= dimensionSizes_[i];
             coordinates[i] = itemNumber / divisor;
@@ -562,6 +561,39 @@ namespace GeMa{
         int dimensionProduct = 1;
 
        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
+
+            itemNumber += coordinates[i] * dimensionProduct;
+            dimensionProduct *= dimensionSizes_[i];
+       }
+
+        return itemNumber;
+    }
+
+    template <class T>
+    std::vector<int> Tensor<T>::bigGetCoords(int itemNumber) const noexcept{
+
+        std::vector<int> coordinates;
+        coordinates.resize(dimensionSizes_.size());
+
+        uint64_t divisor = tensor_.size();
+        
+        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
+
+            divisor /= dimensionSizes_[i];
+            coordinates[i] = itemNumber / divisor;
+            itemNumber %= divisor;
+        }
+
+        return coordinates;
+    }
+
+    template <class T>
+    int Tensor<T>::bigGetIndex(const std::vector<int>& coordinates) const noexcept{
+        
+        int itemNumber = 0;
+        int dimensionProduct = 1;
+
+       for(int i = dimensionSizes_.size() - 1; i >= 0 ; --i){
 
             itemNumber += coordinates[i] * dimensionProduct;
             dimensionProduct *= dimensionSizes_[i];
