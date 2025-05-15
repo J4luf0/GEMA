@@ -8,32 +8,46 @@
 namespace GeMa{
 
 // ============================================================================================================================
-/***
+/**
  * @brief Class representing generic tensor.
  *
  * @par
- * Tensor is represented inside class as one dimensional vector with two key methods: Tesor::getCoords that calculates 
- * the made-up coordinates of the tensor, and inverse method Tensor::getIndex that returns actual vector index when provided 
- * with coordinates. 
- * Those methods are hidden implementation and thus, the tensor can act on the outside like actual tensor.
+ * Inner workings - algorithms
+ * @par
+ * Tensor is represented inside class as one dimensional vector with two most important methods: Tesor<T>::getCoords that
+ * calculates made-up coordinates of the tensor as if it actually was N-dimensional array, and inverse method
+ * Tensor<t>::getIndex that returns actual vector index when provided with coordinates. These methods are hidden implementation
+ * and thus, the tensor can act on the outside like actual tensor with N dimensions.
  * 
  * @par
- * Terminology:
+ * Inner workings - data
  * @par
- * Tensor is made out of items, every item has unique coordinates. The tensor has dimensions (number of dimensions
- * is mathematically known as rank), and each dimension corresponds to one coordinate needed to precisely get one item.
- * The bounds of each coordinate is the dimension size.
- * Index is items number starting from zero in the vector representation of tensor.
- * 
- * @par
+ * To achieve this, the class stores two main attributes: 1. The tensor data vector itself, that is accessed by index that can
+ * be obtained from coordinates using Tensor<t>::getIndex method. 2. Vector storing dimension sizes that defines tensors number
+ * of dimensions by its length and size of each dimension by every item integer value in the vector.
  * 
  * @par
- * This is inner class that doesn't implement any checking against problematic input, that will be implemented in wrapper class
- * - meaning working directly with this class might be dangerous if the user is not sure about validity of the data.
+ * Mathematical conventions
+ * @par
+ * By default, the tensor uses something that could be called "big endian" representation. That means the change of first 
+ * coordinate will shift the resulting index by largest amount and the last coordinate should only shift the index by one.
  * 
- * @tparam Type that is stored in the tensor.
+ * @par
+ * Terminology
+ * @par
+ * Item of tensor is unit of data of generic type. Its index is index in tensors physical vector representation. Coordinates
+ * are how tensor communicates with the outside and to access item in a tensor, they must be converted to index using 
+ * Tensor<t>::getIndex.
  * 
- * @warning Even though the bool is supported, it is advised to use char instead, unless the user is looking to take advantage
+ * @par
+ * Safety
+ * @par
+ * For speed purposes, this class doesn´t implement any checking against bad input. A wrapper class will be implemented for
+ * safe use. Working directly with this class might be dangerous if the user is not sure about validity of the data.
+ * 
+ * @tparam Type of data that is stored in the tensor.
+ * 
+ * @warning Even though the bool is supported, it is advised to use char instead, unless user is looking to take advantage
  * of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
  * forEach(), etc...) and thus slower.
  */
@@ -41,14 +55,14 @@ template<class T> class Tensor{
 
     private:
 
-    std::vector<T> tensor_;                  // The tensor itself, represented by vector containing all the elements
-    std::vector<int> dimensionSizes_;        // Size od every tensor dimension
+    std::vector<T> tensor_;                  // The tensor data itself, represented by vector containing all the elements.
+    std::vector<int> dimensionSizes_;        // Size od every tensor dimension.
 
     std::function<void(const T&)> tensorOutput_;
     std::function<void(const T&)> itemOutput_;
 
-    std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and decides equality by bool
-    std::function<int(const T&, const T&)> order_;      // Function orders items, first is: (less, equal, more) -> (-1, 0, 1)
+    std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and represents equality by bool.
+    std::function<int(const T&, const T&)> order_;      // Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
 
     public:
 
@@ -364,73 +378,78 @@ template<class T> class Tensor{
     private:
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method to get coordinates from itemNumber in tensor, this is inverse method of "getIndex()" method.
+     * @brief Calculates coordinates from items index in a tensor, this is inverse method of "getIndex()" method.
      * 
-     * @param itemNumber it is the index of item that is stored in the tensor.
+     * @param itemIndex it is the index of item that is stored in the tensor.
+     * 
+     * @return Coordinates of the item in the tensor.
+    */
+    std::vector<int> getCoords(int itemIndex) const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Get items index in a tensor, this is inverse method of "getCoords()".
+     * 
+     * @param coordinates an array of coordinates of one item in the tensor.
+     * 
+     * @return Index of one item in the tensor.
+    */
+    int getIndex(const std::vector<int>& coordinates) const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Little endian implementation, thus not used by default. Calculates coordinates from items index in tensor, this
+     * is inverse method of "littleGetIndex()" method.
+     * 
+     * @param itemIndex it is the index of item that is stored in the tensor.
      * 
      * @return Coordinates of the item in the tensor.
      * 
-     * @note Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate 
-     * system or by just index in the actual array.
-    */
-    std::vector<int> getCoords(int itemNumber) const noexcept;
-
+     * @note Not in use.
+     */
+    std::vector<int> littleGetCoords(int itemIndex) const noexcept;
+    
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method to get items index number in tensor, this is inverse method of "getCoords()".
+     * @brief Little endian implementation, thus not used by default. Get items index number in tensor, this is inverse method
+     * of "littleGetCoords()".
      * 
      * @param coordinates an array of coordinates of one item in tensor.
      * 
      * @return Index of one item in tensor when represented in one dimension.
      * 
-     * @note Tensor is actually stored as one-dimensional array so any item can be represented either in artificial coordinate
-     * system or by just index in the actual array.
-    */
-    int getIndex(const std::vector<int>& coordinates) const noexcept;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * 
-     * 
+     * @note Not in use.
      */
-    std::vector<int> littleGetCoords(int itemNumber) const noexcept;
-    
     int littleGetIndex(const std::vector<int>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method to calculate the number of possible items in a tensor based on given dimension sizes.
+     * @brief Calculates the number of possible items in a tensor based on given dimension sizes.
      * @par
-     * This method calculates the number of items before the tensor itself is allocated, and should be useless afterwards.
+     * Is used to calculate the number of items before the tensor itself is allocated, and should be useless afterwards.
      * 
      * @param dimensionSizes vector containing size of each dimension.
      * 
      * @return Total number of items that can fit into a tensor.
+     * 
+     * @warning Do not use outside of constructor! Same result can be achieved by getting size of the tensor itself!
     */
     int calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method to compare two items using "==", it has two specializations for double and float using epsilon
-     * comparison.
+     * @brief Compares two items using "==" and has two specializations for double and float using epsilon-abs comparison.
      * 
      * @param a first operand to compare.
      * @param b second operand to compare.
      * 
-     * @return Boolean @b true if both operands same and @b false if not.
+     * @return Boolean @b true if both operands are same and @b false if not.
      */
     inline bool compareItems(const T& a, const T& b) const noexcept requires(!std::is_floating_point<T>::value);
     inline bool compareItems(const T a, const T b) const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method supposed to run from constructor that sets std::function attributes of this class.
+     * @brief Supposed to only run from constructor and set std::function attributes of this class. It just assigns values
+     * already chosen during compile time.
+     * 
+     * @warning Do not use outside of constructor!
      */
     void defaultFunctions() noexcept;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Private method to output message to console about the object creation.
-     * 
-     * @param dimensionSizes the dimension sizes to be output.
-     * 
-     * @deprecated It was just for early stage debug.
-    */
-    void constructorMessage(const std::vector<int>& dimensionSizes) const noexcept;
 }; // end Tensor
 
 } // end GeMa

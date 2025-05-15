@@ -89,8 +89,8 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates) noexcept{
 
-        int itemNumber = getIndex(coordinates);
-        tensor_[itemNumber] = value;
+        int itemIndex = getIndex(coordinates);
+        tensor_[itemIndex] = value;
     }
 
     // Secure version will need to check for correct tensorItems size
@@ -524,8 +524,8 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::showItem(const std::vector<int>& coordinates) const noexcept{
         
-        int itemNumber = getIndex(coordinates);
-        std::cout << "Item: " << tensor_[itemNumber] << '\n';
+        int itemIndex = getIndex(coordinates);
+        std::cout << "Item: " << tensor_[itemIndex] << '\n';
     }
 
     template <class T>
@@ -538,7 +538,7 @@ namespace GeMa{
     // private methods
 
     template <class T>
-    std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
+    std::vector<int> Tensor<T>::getCoords(int itemIndex) const noexcept{
 
         std::vector<int> coordinates;
         coordinates.resize(dimensionSizes_.size());
@@ -548,8 +548,8 @@ namespace GeMa{
         for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
             divisor /= dimensionSizes_[i];
-            coordinates[i] = itemNumber / divisor;
-            itemNumber %= divisor;
+            coordinates[i] = itemIndex / divisor;
+            itemIndex %= divisor;
         }
 
         return coordinates;
@@ -558,20 +558,20 @@ namespace GeMa{
     template <class T>
     int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
         
-        int itemNumber = 0;
+        int itemIndex = 0;
         int dimensionProduct = 1;
 
        for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
 
-            itemNumber += coordinates[i] * dimensionProduct;
+            itemIndex += coordinates[i] * dimensionProduct;
             dimensionProduct *= dimensionSizes_[i];
        }
 
-        return itemNumber;
+        return itemIndex;
     }
 
     template <class T>
-    std::vector<int> Tensor<T>::littleGetCoords(int itemNumber) const noexcept{
+    std::vector<int> Tensor<T>::littleGetCoords(int itemIndex) const noexcept{
 
         std::vector<int> coordinates;
         coordinates.resize(dimensionSizes_.size());
@@ -580,8 +580,8 @@ namespace GeMa{
         for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
 
             divisor /= dimensionSizes_[i];
-            coordinates[i] = itemNumber / divisor;
-            itemNumber %= divisor;
+            coordinates[i] = itemIndex / divisor;
+            itemIndex %= divisor;
         }
 
         return coordinates;
@@ -590,16 +590,16 @@ namespace GeMa{
     template <class T>
     int Tensor<T>::littleGetIndex(const std::vector<int>& coordinates) const noexcept{
         
-        int itemNumber = 0;
+        int itemIndex = 0;
         int dimensionProduct = 1;
 
        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
-            itemNumber += coordinates[i] * dimensionProduct;
+            itemIndex += coordinates[i] * dimensionProduct;
             dimensionProduct *= dimensionSizes_[i];
        }
 
-        return itemNumber;
+        return itemIndex;
     }
 
     template <class T>
@@ -642,18 +642,4 @@ namespace GeMa{
             };
         }
     }
-
-    template <class T>
-    void Tensor<T>::constructorMessage(const std::vector<int>& dimensionSizes) const noexcept{
-
-        // Message
-        std::cout << "A tensor of " << tensor_.size() << " items and " << dimensionSizes.size() << " dimensions been allocated.\n";
-        std::cout << "A tensor dimensions are as follows: ";
-        for(const auto& dimensionSize : dimensionSizes){
-            std::cout << dimensionSize << " ";
-        }
-
-        std::cout << "\n\n";
-    }
-
 }
