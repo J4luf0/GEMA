@@ -55,14 +55,14 @@ template<class T> class Tensor{
 
     private:
 
-    std::vector<T> tensor_;                  // The tensor data itself, represented by vector containing all the elements.
+    std::vector<T> tensor_;                  // The tensor data itself, represented by vector containing all the items.
     std::vector<int> dimensionSizes_;        // Size od every tensor dimension.
-
-    std::function<void(const T&)> tensorOutput_;
-    std::function<void(const T&)> itemOutput_;
 
     std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and represents equality by bool.
     std::function<int(const T&, const T&)> order_;      // Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
+    
+    std::function<void(const T&)> tensorOutput_;
+    std::function<void(const T&, const std::vector<int>&)> itemOutput_;
 
     public:
 
@@ -76,7 +76,8 @@ template<class T> class Tensor{
     Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Copy constructor, makes the object the same as the parameter object.
+     * @brief Copy constructor, makes the object the same as the parameter object. For reference data types, it only copies
+     * the references.
      * 
      * @param otherTensor a tensor to be copied.
      */
@@ -85,33 +86,35 @@ template<class T> class Tensor{
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Empty constructor so it can be declared without being initalized - trying to do something with
      * uninitialized tensor is sure undefined behavior, not recommended.
+     * 
+     * @warning Not recommended to use.
      */
     Tensor() noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public getter to get all dimension sizes.
+     * @brief Gets all dimension sizes.
      * 
      * @return Vector containing one int per dimension with value of its size.
     */
     const std::vector<int>& getDimensionSizes() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public getter to get the number of dimensions of a tensor.
+     * @brief Gets the number of dimensions of a tensor.
      * 
      * @return A number of dimensions.
     */
     uint64_t getNumberOfDimensions() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public getter to get the number of items in a tensor.
+     * @brief Gets the number of items in a tensor.
      * 
      * @return Number of items in a tensor.
      */
     uint64_t getNumberOfItems() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public getter to get item on provided coordinates, returns the item by value because large objects should
-     * have been already represented by pointer or reference.
+     * @brief Gets item on provided coordinates, returns the item by value because large objects should have been already 
+     * represented by pointer or reference.
      * 
      * @param coordinates vector of coordinates specifying the item to be returned.
      * 
@@ -120,67 +123,71 @@ template<class T> class Tensor{
     T getItem(const std::vector<int>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public setter to assign one value into tensor onto the desired coordinates.
+     * @brief Sets one value into tensor onto the desired coordinates.
      *  
      * @param value a value of generic type that will be stored in the tensor.
-     * @param coordinates a vector of coordinates that the value will be assigned to.
+     * @param coordinates a vector of coordinates to place the value to.
     */
     void setItem(const T& value, const std::vector<int>& coordinates) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public setter that takes in one dimensional array and puts its items into tensor by order, if the array is 
-     * longer than number of items in a tensor, only those that fit will be added.
+     * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
+     * in a tensor, only those that fit will be added.
      * 
      * @param tensorItems one dimensional vector of items to be added by order.
+     * 
+     * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
+     * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
     void setItems(const std::vector<T>& tensorItems) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public setter that allows the user to set the output of the tensor through this->showTensor() method.
+     * @brief Sets the output of the tensor through this->showTensor() method.
      * 
      * @param tensorOutput function that defines the output of the tensor.
     */
     void setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public setter that allows the user to set the output of the items through this->showItem() method.
+     * @brief Sets the output of the items through this->showItem() method.
      * 
      * @param tensorOutput function that defines the output of the tensor.
     */
-    void setItemOutput(const std::function<void(const T&)> itemOutput) noexcept;
+    void setItemOutput(const std::function<void(const T&, const std::vector<int>&)> itemOutput) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to calculate, if the tensor dimensions have the same sizes.
+     * @brief Calculates, if all tensor dimensions have the same size.
      * 
-     * @return Bool true if the tensor is equilateral and false if not.
+     * @return Bool @b true if the tensor is equilateral and @b false if not.
     */
     bool isEquilateral() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that generates a string from tensor items in form of parsable curly bracket hierarchy.
+     * @brief Generates a string from tensor items in form of parsable curly bracket hierarchy. Inverse to "parse".
      * 
      * @return A parsable string representing the tensor.
      */
     std::string toString() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that parses std::string specifying the tensor dimension sizes and values.
+     * @brief Parses std::string specifying the tensor dimension sizes and values. Inverse to "toString".
      * 
      * @param tensor string in correct format to be parsed.
      */
     void parse(const std::string& tensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to deep copy a tensor, meaning the items in it get copied, and if there is a pointer type stored
+     * @brief Copies a tensor, meaning the items in it get copied, and if there is a pointer type stored
      * in a tensor, then the values pointed to by those pointers will be copied too.
      * 
      * @return Pointer to deep copy of this tensor.
+     * 
+     * @warning Do not use, will be deprecated and probably does not work correctly.
     */
     constexpr Tensor<T>* copy() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that fills tensor with passed value. Has specialization for bool because of how std::vector 
-     * is implemented.
+     * @brief Fills tensor with passed value. Has specialization for bool because of how std::vector is implemented.
      * 
      * @param fill the value to be filled into all items in tensor.
     */
@@ -188,36 +195,35 @@ template<class T> class Tensor{
     void fillWith(const T& fill) noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to deep copy one tensor to another.
+     * @brief Copies one tensor to another by value.
      * 
-     * @param tensor2 tensor which values are deep copied into this tensor.
+     * @param tensor2 tensor which values are copied into this tensor.
      * 
      * @return Reference to this tensor after the copying.
      */
     Tensor<T>& operator=(const Tensor<T>& tensor2) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to swap two dimensions in a tensor.
+     * @brief Swaps two dimensions in a tensor.
      * 
      * @param dim1 first dimension to swap, default value is 0.
      * @param dim2 second dimension to swap, default value is 1.
      * 
-     * @return A pointer to new allocated tensor, that has got transposed two dimensions.
+     * @return A pointer to new allocated tensor, that got two dimensions transposed.
     */
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to compare two tensors, iterating through all items the return value is bool true if items
-     * are all the same and false if there is atleast one different or the dimensions didnt match.
+     * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal.
      * 
-     * @param tensor2 a second tensor to be compared.
+     * @param tensor2 a second tensor to be compared by value.
      * 
      * @return Boolean @b true if the tensors are the same and @b false in not.
      */
     bool operator==(const Tensor<T>& tensor2) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to add two tensors of the same size, both by reference.
+     * @brief Adds two tensors of the same size, both by reference.
      * 
      * @param tensor2 a second tensor to be added as reference (the same as the first).
      * 
@@ -226,7 +232,7 @@ template<class T> class Tensor{
     Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to substract parameter tensor from this tensor.
+     * @brief Substracts parameter tensor from this tensor.
      * 
      * @param tensor2 a second tensor to be substracted.
      * 
@@ -235,21 +241,22 @@ template<class T> class Tensor{
     Tensor<T>* operator-(const Tensor<T>& tensor2) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to add tensor to tensor.
+     * @brief Adds tensor to tensor.
      * 
      * @param tensor2 a tensor to be added to this tensor.
     */
     void operator+=(const Tensor<T>& tensor2) noexcept;
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to substract a tensor from a tensor.
+     * @brief Substracts a tensor from a tensor.
      * 
      * @param tensor2 a tensor to be substracted from this tensor.
      */
     void operator-=(const Tensor<T>& tensor2) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise or on each item in a tensor.
+     * @brief Performs bitwise "or" on each item in a tensor. Is specialized for floating values so it can do bitwise operation
+     * on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      * 
@@ -264,7 +271,8 @@ template<class T> class Tensor{
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise or on each item in a tensor and save result in this tensor.
+     * @brief Performs bitwise "or" on each item in a tensor and save result in this tensor. Is specialized for floating values
+     * so it can do bitwise operation on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
@@ -272,7 +280,8 @@ template<class T> class Tensor{
     void operator|=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise and on each item in a tensor.
+     * @brief Performs bitwise "and" on each item in a tensor. Is specialized for floating values so it can do bitwise
+     * operation on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      * 
@@ -282,7 +291,8 @@ template<class T> class Tensor{
     Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise and on each item in a tensor and save result in this tensor.
+     * @brief Performs bitwise "and" on each item in a tensor and save result in this tensor. Is specialized for floating 
+     * values so it can do bitwise operation on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
@@ -290,7 +300,8 @@ template<class T> class Tensor{
     void operator&=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise xor on each item in a tensor.
+     * @brief Performs bitwise "xor" on each item in a tensor. Is specialized for floating values so it can do bitwise
+     * operation on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      * 
@@ -300,7 +311,8 @@ template<class T> class Tensor{
     Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise xor on each item in a tensor and save result in this tensor.
+     * @brief Performs bitwise "xor" on each item in a tensor and saves result in this tensor. Is specialized for floating 
+     * values so it can do bitwise operation on them too.
      * 
      * @param tensor2 a second tensor to perform operation against.
      */
@@ -308,17 +320,17 @@ template<class T> class Tensor{
     void operator^=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public overload to perform bitwise negation on each item in a tensor.
+     * @brief Performs bitwise negation on each item in a tensor. Is specialized for floating values so it can do bitwise
+     * operation on them too. Has specialization on bool type that uses ! (not) instead of ~ on the inside, user always uses ~.
      * 
-     * @note Has specialization on bool type that uses ! (not) instead of ~.
      */
     void operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
     void operator~() noexcept requires(std::is_same<T, bool>::value);
     void operator~() noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that allows to apply custom operation between each item of two tensors, items from this
-     * tensor as first operand and items from the second tensor passed as parameter as second operand.
+     * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
+     * and items from the second tensor passed as parameter as second operand.
      * 
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
@@ -331,8 +343,8 @@ template<class T> class Tensor{
     const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method that allows to apply custom operation between each item of two tensors and then store the result
-     * into the fisrt tensor.
+     * @brief Allows to apply custom operation between each item of two tensors and then store the result
+     * into the caller tensor.
      * 
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
@@ -343,7 +355,7 @@ template<class T> class Tensor{
     noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to apply function on all elements thru passed function.
+     * @brief Apply function on all items thru passed function.
      * 
      * @param apply function that will be applied on all items.
      */
@@ -360,7 +372,7 @@ template<class T> class Tensor{
     private:
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Calculates coordinates from items index in a tensor, this is inverse method of "getIndex()" method.
+     * @brief Calculates coordinates from items index in a tensor, this is inverse method of "getIndex" method.
      * 
      * @param itemIndex it is the index of item that is stored in the tensor.
      * 
@@ -369,7 +381,7 @@ template<class T> class Tensor{
     std::vector<int> getCoords(int itemIndex) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Get items index in a tensor, this is inverse method of "getCoords()".
+     * @brief Get items index in a tensor, this is inverse method of "getCoords".
      * 
      * @param coordinates an array of coordinates of one item in the tensor.
      * 

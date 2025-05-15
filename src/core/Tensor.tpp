@@ -113,7 +113,7 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::setItemOutput(const std::function<void(const T&)> itemOutput) noexcept{
+    void Tensor<T>::setItemOutput(const std::function<void(const T&, const std::vector<int>&)> itemOutput) noexcept{
         this->itemOutput_ = itemOutput;
     }
 
