@@ -349,24 +349,6 @@ template<class T> class Tensor{
      */
     void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
     void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
-    
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to output the whole tensor into std::cout.
-     * 
-     * @note Is currently working only for 1d, 2d and maybe 3d tensors.
-     * 
-     * @deprecated It was just for early stage debug.
-    */
-    void showTensor() const noexcept;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Public method to write into cout the item index based on the coordinates input.
-     * 
-     * @param coordinates address of coordinates in a tensor.
-     * 
-     * @deprecated It was just for early stage debug.
-    */
-    void showItem(const std::vector<int>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

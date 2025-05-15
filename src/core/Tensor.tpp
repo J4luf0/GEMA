@@ -501,34 +501,6 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::showTensor() const noexcept{
-
-        std::cout << "Tensor is as follows:\n\n";
-
-        for(uint64_t i = 0; i < tensor_.size(); i++){
-
-            if((i % dimensionSizes_[0] == 0) && 
-                i > 0){
-                std::cout << '\n';
-                if(i % dimensionSizes_[1] == 0){
-                    std::cout << '\n';
-                }
-            }
-
-            std::cout << "[" << tensor_[i] << "] ";
-        }
-
-        std::cout << "\n\n";
-    }
-
-    template <class T>
-    void Tensor<T>::showItem(const std::vector<int>& coordinates) const noexcept{
-        
-        int itemIndex = getIndex(coordinates);
-        std::cout << "Item: " << tensor_[itemIndex] << '\n';
-    }
-
-    template <class T>
     Tensor<T>::~Tensor() noexcept{
         //
     }
