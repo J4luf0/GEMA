@@ -237,11 +237,19 @@ TEST(tensor_test, setItem_002){
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
     auto tensor2 = make_unique<Tensor<double>>(dimensionSizes);
 
-    tensor->setItem(5,     {0, 0});
+    // Little endian
+    /*tensor->setItem(5,     {0, 0});
     tensor->setItem(0.55,    {1, 0});
     tensor->setItem(-0,     {2, 0});
     tensor->setItem(-2,      {0, 1});
     tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});*/
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {0, 1});
+    tensor->setItem(-0,     {1, 0});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {2, 0});
     tensor->setItem(7,    {2, 1});
 
     tensor2->setItems({5, 0.55, -0, -2, 4.5, 7});
@@ -259,7 +267,7 @@ TEST(tensor_test, setItem_003){
     auto tensor = make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItems({2, 0, -1, 6.4});
-    tensor->setItem(3.3, {1, 0});
+    tensor->setItem(3.3, {0, 1});// swtich coords for little endian
 
     auto expected = make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({2, 3.3, -1, 6.4});
@@ -344,7 +352,8 @@ TEST(tensor_test, transposition_001){
     
     const vector<int> expectedDimensionSizes{3, 2};
     auto expected = make_unique<Tensor<int>>(expectedDimensionSizes);
-    expected->setItems({0, -1, -2, 5, 100, -16});
+    //expected->setItems({0, -1, -2, 5, 100, -16}); //little endian
+    expected->setItems({0, 100, 5, -2, -1, -16});
 
     EXPECT_EQ(*result, *expected);
     delete result;
@@ -372,11 +381,19 @@ TEST(tensor_test, operatorAssign_001){
     const vector<int> dimensionSizes{3, 2};
     auto tensor = new Tensor<double>(dimensionSizes);
 
-    tensor->setItem(5,     {0, 0});
+    // Little endian
+    /*tensor->setItem(5,     {0, 0});
     tensor->setItem(0.55,    {1, 0});
     tensor->setItem(-0,     {2, 0});
     tensor->setItem(-2,      {0, 1});
     tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});*/
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {0, 1});
+    tensor->setItem(-0,     {1, 0});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {2, 0});
     tensor->setItem(7,    {2, 1});
 
     Tensor<double> tensor2;
@@ -474,11 +491,19 @@ TEST(tensor_test, toString_004){
 
     auto tensor = new Tensor<double>(dimensionSizes);
 
-    tensor->setItem(5,     {0, 0});
+    // Little endian approach
+    /*tensor->setItem(5,     {0, 0});
     tensor->setItem(0.55,    {1, 0});
     tensor->setItem(-0,     {2, 0});
     tensor->setItem(-2,      {0, 1});
     tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});*/
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {0, 1});
+    tensor->setItem(-0,     {1, 0});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {2, 0});
     tensor->setItem(7,    {2, 1});
     
     //string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";

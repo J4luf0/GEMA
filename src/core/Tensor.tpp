@@ -131,13 +131,14 @@ namespace GeMa{
         std::vector<std::string> closingBrackets(tensor_.size());
         std::fill(closingBrackets.begin(), closingBrackets.end(), "");
 
-        uint64_t dimensionProduct = 1;
+        //uint64_t dimensionProduct = 1;
+        uint64_t dimensionProduct = tensor_.size();
 
-        //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); i--){ // from little to big
-        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){   // show identical
+        //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); i--){
+        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
             //uint64_t dimensionProduct = std::accumulate(dimensionSizes_.begin(), dimensionSizes_.begin() + i, 1, std::multiplies<uint64_t>());
-            dimensionProduct *= dimensionSizes_[i];
+            //dimensionProduct *= dimensionSizes_[i];
 
             for(uint64_t j = 0; j < tensor_.size(); j++){
 
@@ -149,6 +150,8 @@ namespace GeMa{
                     closingBrackets[j] += "}";
                 }
             }
+
+            dimensionProduct /= dimensionSizes_[i];
         }
 
         std::string output = "";
@@ -539,13 +542,13 @@ namespace GeMa{
     // private methods
 
     template <class T>
-    std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
+    std::vector<int> Tensor<T>::littleGetCoords(int itemNumber) const noexcept{
 
         std::vector<int> coordinates;
         coordinates.resize(dimensionSizes_.size());
         uint64_t divisor = tensor_.size();
         
-        for(int i = dimensionSizes_.size() - 1; i >= 0; --i){
+        for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
 
             divisor /= dimensionSizes_[i];
             coordinates[i] = itemNumber / divisor;
@@ -556,7 +559,7 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
+    int Tensor<T>::littleGetIndex(const std::vector<int>& coordinates) const noexcept{
         
         int itemNumber = 0;
         int dimensionProduct = 1;
@@ -571,7 +574,7 @@ namespace GeMa{
     }
 
     template <class T>
-    std::vector<int> Tensor<T>::bigGetCoords(int itemNumber) const noexcept{
+    std::vector<int> Tensor<T>::getCoords(int itemNumber) const noexcept{
 
         std::vector<int> coordinates;
         coordinates.resize(dimensionSizes_.size());
@@ -589,12 +592,12 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::bigGetIndex(const std::vector<int>& coordinates) const noexcept{
+    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
         
         int itemNumber = 0;
         int dimensionProduct = 1;
 
-       for(int i = dimensionSizes_.size() - 1; i >= 0 ; --i){
+       for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
 
             itemNumber += coordinates[i] * dimensionProduct;
             dimensionProduct *= dimensionSizes_[i];
