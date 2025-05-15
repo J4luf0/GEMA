@@ -86,6 +86,8 @@
         "numbers": "cpp",
         "semaphore": "cpp",
         "text_encoding": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

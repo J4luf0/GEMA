@@ -1,14 +1,15 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <memory>
 #include <algorithm>
-#include <cstdint>
 #include <bit>
+#include <cmath>
+#include <cstdint>
 #include <format>
+#include <functional>
+#include <iostream>
+#include <memory>
 #include <numeric>
+#include <vector>
 
-#include "Tensor.hpp" // I dont even know if to keep this or not
+#include "Tensor.hpp" // Not needed, just keep it for intelisense
 
 namespace GeMa{
 
@@ -108,12 +109,12 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept{
+    void Tensor<T>::setTensorOutput(const std::function<void(const T&)>& tensorOutput) noexcept{
         this->tensorOutput_ = tensorOutput;
     }
 
     template <class T>
-    void Tensor<T>::setItemOutput(const std::function<void(const T&, const std::vector<int>&)> itemOutput) noexcept{
+    void Tensor<T>::setItemOutput(const std::function<void(const T&, const std::vector<int>&)>& itemOutput) noexcept{
         this->itemOutput_ = itemOutput;
     }
 
@@ -161,8 +162,12 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::parse(const std::string& tensor) noexcept{
+    void Tensor<T>::parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem) noexcept{
         
+        uint64_t i;
+        for(i = 0; tensorString[i] == '{'; ++i){}
+        std::vector<int> parsedDimensionSizes(i);
+
     }
 
     // TODO: check is this is actually needed

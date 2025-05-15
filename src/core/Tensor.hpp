@@ -1,8 +1,6 @@
 #ifndef TENSOR_HPP
 #define TENSOR_HPP
 
-#include <functional>
-
 //#define uint64t uint64_t
 
 namespace GeMa{
@@ -146,14 +144,14 @@ template<class T> class Tensor{
      * 
      * @param tensorOutput function that defines the output of the tensor.
     */
-    void setTensorOutput(const std::function<void(const T&)> tensorOutput) noexcept;
+    void setTensorOutput(const std::function<void(const T&)>& tensorOutput) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the items through this->showItem() method.
      * 
      * @param tensorOutput function that defines the output of the tensor.
     */
-    void setItemOutput(const std::function<void(const T&, const std::vector<int>&)> itemOutput) noexcept;
+    void setItemOutput(const std::function<void(const T&, const std::vector<int>&)>& itemOutput) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.
@@ -172,9 +170,10 @@ template<class T> class Tensor{
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Parses std::string specifying the tensor dimension sizes and values. Inverse to "toString".
      * 
-     * @param tensor string in correct format to be parsed.
+     * @param tensorString string in correct format to be parsed.
+     * @param parseItem function to convert string to item.
      */
-    void parse(const std::string& tensor) noexcept;
+    void parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copies a tensor, meaning the items in it get copied, and if there is a pointer type stored
