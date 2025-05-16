@@ -317,7 +317,6 @@ namespace GeMa{
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value){
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
-
             return tensorItem | tensor2Item;
         });
     }
@@ -325,8 +324,10 @@ namespace GeMa{
     template<typename T> //template<typename F, typename std::enable_if<std::is_floating_point<F>::value, double>::type>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value){
 
-        return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
-            return std::bit_cast<uint64_t>(tensorItem) | std::bit_cast<uint64_t>(tensor2Item);
+        return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){
+            auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
+            auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
+            return std::bit_cast<T>(itemBits | item2Bits);
         });
     }
 
@@ -342,9 +343,9 @@ namespace GeMa{
     void Tensor<T>::operator|=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value){
 
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            auto newItem = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
-            tensorItem = newItem | std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
-            return tensorItem;
+            auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
+            auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
+            tensorItem = std::bit_cast<T>(itemBits | item2Bits);
         });
     }
 
@@ -359,8 +360,10 @@ namespace GeMa{
     template <class T>
     Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value){
 
-        return applyAndReturn(tensor2, [](const double& tensorItem, const double& tensor2Item){
-            return std::bit_cast<uint64_t>(tensorItem) & std::bit_cast<uint64_t>(tensor2Item);
+        return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){
+            auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
+            auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
+            return std::bit_cast<T>(itemBits & item2Bits);
         });
     }
 
@@ -378,7 +381,7 @@ namespace GeMa{
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             auto newItem = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
             tensorItem = newItem & std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
-            return tensorItem;
+            return tensorItem;// TODO: keep fixing those terrible bit casts so they do what they are supposed to
         });
     }
 
