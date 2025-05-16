@@ -8,11 +8,18 @@ namespace GeMa{
 // ============================================================================================================================
 /**
  * @brief Class representing generic tensor.
- *
+ * 
+ * @par
+ * This class is a dynamic N-dimensional array also known as tensor. At construction user specifies by vector argument how many
+ * dimensions the tensor will have - size of that vector argument, and size of each dimension - defined dimension by dimension
+ * as whole positive number in the vector argument. User uses coordinates to work with items inside tensor. Coordinates is 
+ * a vector of same size as number of dimensions and number from 0 to highest allowed index in corresponding dimension 
+ * (dimension size - 1). For simple operations, most important user methods are Tensor<T>::getItem and Tensor<T>::setItem.
+ * 
  * @par
  * Inner workings - algorithms
  * @par
- * Tensor is represented inside class as one dimensional vector with two most important methods: Tesor<T>::getCoords that
+ * Tensor is represented inside class as one dimensional vector with two most important methods: Tensor<T>::getCoords that
  * calculates made-up coordinates of the tensor as if it actually was N-dimensional array, and inverse method
  * Tensor<t>::getIndex that returns actual vector index when provided with coordinates. These methods are hidden implementation
  * and thus, the tensor can act on the outside like actual tensor with N dimensions.
