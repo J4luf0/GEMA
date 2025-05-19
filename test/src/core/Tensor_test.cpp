@@ -903,6 +903,42 @@ TEST(tensor_test, operatorBitwiseAnd_002){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorBitwiseAndAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setItems({0, 0, -2, 4, -6, 0});
+
+    *tensor &= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseAndAssing_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({0., std::bit_cast<float>(0x40140000)});
+
+    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor2->setItems({3., std::bit_cast<float>(0xC0200000)});
+
+    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({0., std::bit_cast<float>(0x40000000)});
+
+    *tensor &= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
 TEST(tensor_test, showDebug){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
