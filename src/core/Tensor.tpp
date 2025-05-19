@@ -46,7 +46,7 @@ namespace GeMa{
     // public methods
 
     template <class T>
-    Tensor<T>::Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept
+    Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) noexcept
     : dimensionSizes_(newTensorDimensionSizes) {
 
         int itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
@@ -67,7 +67,7 @@ namespace GeMa{
     }
 
     template <class T>
-    const std::vector<int>& Tensor<T>::getDimensionSizes() const noexcept{
+    const std::vector<uint64_t>& Tensor<T>::getDimensionSizes() const noexcept{
         return dimensionSizes_;
     }
 
@@ -82,13 +82,13 @@ namespace GeMa{
     }
 
     template <class T>
-    T Tensor<T>::getItem(const std::vector<int>& coordinates) const noexcept{
+    T Tensor<T>::getItem(const std::vector<uint64_t>& coordinates) const noexcept{
 
         return tensor_[getIndex(coordinates)];
     }
     
     template <class T>
-    void Tensor<T>::setItem(const T& value, const std::vector<int>& coordinates) noexcept{
+    void Tensor<T>::setItem(const T& value, const std::vector<uint64_t>& coordinates) noexcept{
 
         int itemIndex = getIndex(coordinates);
         tensor_[itemIndex] = value;
@@ -114,7 +114,7 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::setItemOutput(const std::function<void(const T&, const std::vector<int>&)>& itemOutput) noexcept{
+    void Tensor<T>::setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput) noexcept{
         this->itemOutput_ = itemOutput;
     }
 
@@ -210,7 +210,7 @@ namespace GeMa{
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
-        std::vector<int> transposedDimensionSizes = dimensionSizes_; 
+        std::vector<uint64_t> transposedDimensionSizes = dimensionSizes_; 
 
         // Swapping the dimension sizes
         transposedDimensionSizes[dim1] = dimensionSizes_[dim2]; 
@@ -219,7 +219,7 @@ namespace GeMa{
         // Initializing the new tensor
         Tensor<T>* tensorTransposed = new Tensor<T>(transposedDimensionSizes);
 
-        std::vector<int> original, switched;
+        std::vector<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
 
@@ -520,9 +520,9 @@ namespace GeMa{
     // private methods
 
     template <class T>
-    std::vector<int> Tensor<T>::getCoords(int itemIndex) const noexcept{
+    std::vector<uint64_t> Tensor<T>::getCoords(int itemIndex) const noexcept{
 
-        std::vector<int> coordinates;
+        std::vector<uint64_t> coordinates;
         coordinates.resize(dimensionSizes_.size());
 
         uint64_t divisor = tensor_.size();
@@ -538,7 +538,7 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::getIndex(const std::vector<int>& coordinates) const noexcept{
+    int Tensor<T>::getIndex(const std::vector<uint64_t>& coordinates) const noexcept{
         
         int itemIndex = 0;
         int dimensionProduct = 1;
@@ -553,9 +553,9 @@ namespace GeMa{
     }
 
     template <class T>
-    std::vector<int> Tensor<T>::littleGetCoords(int itemIndex) const noexcept{
+    std::vector<uint64_t> Tensor<T>::littleGetCoords(int itemIndex) const noexcept{
 
-        std::vector<int> coordinates;
+        std::vector<uint64_t> coordinates;
         coordinates.resize(dimensionSizes_.size());
         uint64_t divisor = tensor_.size();
         
@@ -570,7 +570,7 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::littleGetIndex(const std::vector<int>& coordinates) const noexcept{
+    int Tensor<T>::littleGetIndex(const std::vector<uint64_t>& coordinates) const noexcept{
         
         int itemIndex = 0;
         int dimensionProduct = 1;
@@ -585,7 +585,7 @@ namespace GeMa{
     }
 
     template <class T>
-    int Tensor<T>::calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept{
+    int Tensor<T>::calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const noexcept{
 
         return std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), 1, std::multiplies<int>());
     }

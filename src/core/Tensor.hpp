@@ -61,13 +61,13 @@ template<class T> class Tensor{
     private:
 
     std::vector<T> tensor_;                  // The tensor data itself, represented by vector containing all the items.
-    std::vector<int> dimensionSizes_;        // Size od every tensor dimension.
+    std::vector<uint64_t> dimensionSizes_;        // Size od every tensor dimension.
 
     std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and represents equality by bool.
     std::function<int(const T&, const T&)> order_;      // Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
     
     std::function<void(const T&)> tensorOutput_;
-    std::function<void(const T&, const std::vector<int>&)> itemOutput_;
+    std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
 
     public:
 
@@ -78,7 +78,7 @@ template<class T> class Tensor{
      *
      * @param newTensorDimensionSizes a vector filled with sizes of dimensions.
     */
-    Tensor(const std::vector<int>& newTensorDimensionSizes) noexcept;
+    Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object. For reference data types, it only copies
@@ -101,7 +101,7 @@ template<class T> class Tensor{
      * 
      * @return Vector containing one int per dimension with value of its size.
     */
-    const std::vector<int>& getDimensionSizes() const noexcept;
+    const std::vector<uint64_t>& getDimensionSizes() const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Gets the number of dimensions of a tensor.
@@ -125,7 +125,7 @@ template<class T> class Tensor{
      * 
      * @return Item on the provided coordinates.
     */
-    T getItem(const std::vector<int>& coordinates) const noexcept;
+    T getItem(const std::vector<uint64_t>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one value into tensor onto the desired coordinates.
@@ -133,7 +133,7 @@ template<class T> class Tensor{
      * @param value a value of generic type that will be stored in the tensor.
      * @param coordinates a vector of coordinates to place the value to.
     */
-    void setItem(const T& value, const std::vector<int>& coordinates) noexcept;
+    void setItem(const T& value, const std::vector<uint64_t>& coordinates) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
@@ -158,7 +158,7 @@ template<class T> class Tensor{
      * 
      * @param tensorOutput function that defines the output of the tensor.
     */
-    void setItemOutput(const std::function<void(const T&, const std::vector<int>&)>& itemOutput) noexcept;
+    void setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.
@@ -384,7 +384,7 @@ template<class T> class Tensor{
      * 
      * @return Coordinates of the item in the tensor.
     */
-    std::vector<int> getCoords(int itemIndex) const noexcept;
+    std::vector<uint64_t> getCoords(int itemIndex) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Get items index in a tensor, this is inverse method of "getCoords".
@@ -393,7 +393,7 @@ template<class T> class Tensor{
      * 
      * @return Index of one item in the tensor.
     */
-    int getIndex(const std::vector<int>& coordinates) const noexcept;
+    int getIndex(const std::vector<uint64_t>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Calculates coordinates from items index in tensor, this
@@ -405,7 +405,7 @@ template<class T> class Tensor{
      * 
      * @note Not in use.
      */
-    std::vector<int> littleGetCoords(int itemIndex) const noexcept;
+    std::vector<uint64_t> littleGetCoords(int itemIndex) const noexcept;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Get items index number in tensor, this is inverse method
@@ -417,7 +417,7 @@ template<class T> class Tensor{
      * 
      * @note Not in use.
      */
-    int littleGetIndex(const std::vector<int>& coordinates) const noexcept;
+    int littleGetIndex(const std::vector<uint64_t>& coordinates) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates the number of possible items in a tensor based on given dimension sizes.
@@ -430,7 +430,7 @@ template<class T> class Tensor{
      * 
      * @warning Do not use outside of constructor! Same result can be achieved by getting size of the tensor itself!
     */
-    int calculateNumberOfItems(const std::vector<int>& dimensionSizes) const noexcept;
+    int calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two items using "==" and has two specializations for double and float using epsilon-abs comparison.
