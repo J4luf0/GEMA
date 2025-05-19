@@ -759,6 +759,42 @@ TEST(tensor_test, operatorBitwiseOrAssing_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
+TEST(tensor_test, operatorBitwiseAnd_001){
+
+    const std::vector<int> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, 0, -2, 4, -6, 0});
+
+    std::unique_ptr<Tensor<int>> result(*tensor & *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseAnd_002){
+
+    const std::vector<int> dimensionSizes{3, 1};
+
+    auto tensor = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setItems({true, false, false});
+
+    auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor2->setItems({true, true, false});
+
+    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
+    expected->setItems({true, false, false});
+
+    std::unique_ptr<Tensor<bool>> result(*tensor & *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
 TEST(tensor_test, showDebug){
 
     const std::vector<int> dimensionSizes{2, 3};
