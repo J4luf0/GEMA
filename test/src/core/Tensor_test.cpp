@@ -633,6 +633,24 @@ TEST(tensor_test, operatorAdd_003){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorAdd_004){
+
+    const std::vector<uint64_t> dimensionSizes{1, 1};
+
+    auto tensor = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    tensor->setItems({"yee"});
+
+    auto tensor2 = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    tensor2->setItems({"haw"});
+
+    auto expected = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    expected->setItems({"yeehaw"});
+    
+    std::unique_ptr<Tensor<std::string>> result(*tensor + *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
 TEST(tensor_test, operatorAddAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -665,6 +683,96 @@ TEST(tensor_test, operatorAddAssign_002){
     expected->setItems({true});
     
     *tensor += *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorAddAssign_003){
+
+    const std::vector<uint64_t> dimensionSizes{1, 1};
+
+    auto tensor = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    tensor->setItems({"yee"});
+
+    auto tensor2 = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    tensor2->setItems({"haw"});
+
+    auto expected = std::make_unique<Tensor<std::string>>(dimensionSizes);
+    expected->setItems({"yeehaw"});
+    
+    *tensor += *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorSubstract_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({-3, 13, 1, 200, 3, -16});
+
+    std::unique_ptr<Tensor<int>> result(*tensor - *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorSubstract_002){
+
+    const std::vector<uint64_t> dimensionSizes{3};
+
+    auto tensor = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setItems({true, true, false});
+
+    auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor2->setItems({true, false, false});
+
+    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
+    expected->setItems({false, true, false});
+
+    std::unique_ptr<Tensor<bool>> result(*tensor - *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorSubstractAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({-3, 13, 1, 200, 3, -16});
+
+    *tensor -= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorSubstractAssign_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({0.2, 5.01});
+
+    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor2->setItems({3e+2, -8.});
+
+    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({-299.8, 13.01});
+
+    *tensor -= *tensor2;
 
     EXPECT_EQ(*tensor, *expected);
 }
