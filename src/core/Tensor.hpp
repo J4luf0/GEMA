@@ -330,9 +330,9 @@ template<class T> class Tensor{
      * operation on them too. Has specialization on bool type that uses ! (not) instead of ~ on the inside, user always uses ~.
      * 
      */
-    void operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
-    void operator~() noexcept requires(std::is_same<T, bool>::value);
-    void operator~() noexcept requires(std::is_floating_point<T>::value);
+    Tensor<T>* operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
+    Tensor<T>* operator~() noexcept requires(std::is_same<T, bool>::value);
+    Tensor<T>* operator~() noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
@@ -361,12 +361,23 @@ template<class T> class Tensor{
     noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Apply function on all items thru passed function.
+     * @brief Applies function on all items thru passed function.
      * 
      * @param apply function that will be applied on all items.
      */
     void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
     void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Copies this as new instance and applies function on all items in new instance thru passed function, then returns
+     * the new instance.
+     * 
+     * @param apply function that will be applied on all items.
+     * 
+     * @return Pointer to new instance upon its instances was the function used.
+     */
+    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
+    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

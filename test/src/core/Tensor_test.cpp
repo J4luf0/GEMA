@@ -1,3 +1,4 @@
+#include <bitset>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -849,7 +850,7 @@ TEST(tensor_test, operatorBitwiseOrAssign_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorBitwiseOrAssing_002){
+TEST(tensor_test, operatorBitwiseOrAssign_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
@@ -921,7 +922,7 @@ TEST(tensor_test, operatorBitwiseAndAssign_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorBitwiseAndAssing_002){
+TEST(tensor_test, operatorBitwiseAndAssign_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
@@ -937,6 +938,108 @@ TEST(tensor_test, operatorBitwiseAndAssing_002){
     *tensor &= *tensor2;
 
     EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseXor_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({3, -3, 1, -8, 5, -16});
+
+    std::unique_ptr<Tensor<int>> result(*tensor ^ *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseXor_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
+    tensor->setItems({0b1100, 0b1010});
+
+    auto tensor2 = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
+    tensor2->setItems({0b1010, 0b0011});
+
+    auto expected = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
+    expected->setItems({0b0110, 0b1001});
+
+    std::unique_ptr<Tensor<std::bitset<4>>> result(*tensor ^ *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseXorAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setItems({3, -3, 1, -8, 5, -16});
+
+    *tensor ^= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseXorAssign_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({0., std::bit_cast<float>(0x40140000)});
+
+    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor2->setItems({3., std::bit_cast<float>(0xC0200000)});
+
+    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({3., std::bit_cast<float>(0x80340000)});
+
+    *tensor ^= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorNegation_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    std::unique_ptr<Tensor<int64_t>> tensor2(~*tensor);
+
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setItems({-1, -6, 0, -101, 1, 15});
+
+    EXPECT_EQ(*tensor2, *expected);
+}
+
+TEST(tensor_test, operatorNegation_002){
+
+    const std::vector<uint64_t> dimensionSizes{3};
+
+    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({std::bit_cast<float>(0x40140000), std::numeric_limits<float>::infinity(), 2.520999908447265625, 2.51});
+
+    std::unique_ptr<Tensor<float>> tensor2(~*tensor);
+
+    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({std::bit_cast<float>(0xBFEBFFFF), std::bit_cast<float>(0x807FFFFF), -1.73949992656707763671875, -1.7449999});
+
+    EXPECT_EQ(*tensor2, *expected);
 }
 
 TEST(tensor_test, showDebug){

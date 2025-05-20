@@ -422,25 +422,25 @@ namespace GeMa{
     }
 
     template <class T>
-    void Tensor<T>::operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value){
+    Tensor<T>* Tensor<T>::operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value){
         
-        forEach([](T& item){
+        return forEachAndReturn([](T& item){
             item = ~item;
         });
     }
 
     template <class T>
-    void Tensor<T>::operator~() noexcept requires(std::is_same<T, bool>::value){
+    Tensor<T>* Tensor<T>::operator~() noexcept requires(std::is_same<T, bool>::value){
         
-        forEach([](T& item){
+        return forEachAndReturn([](T& item){
             item = !item;
         });
     }
 
     template <class T>
-    void Tensor<T>::operator~() noexcept requires(std::is_floating_point<T>::value){
-        
-        forEach([](T& item){
+    Tensor<T>* Tensor<T>::operator~() noexcept requires(std::is_floating_point<T>::value){
+
+        return forEachAndReturn([](T& item){
             item = std::bit_cast<T>(~std::bit_cast<typename float_to_integral<T>::type>(item));
         });
     }
@@ -508,6 +508,36 @@ namespace GeMa{
             apply(value);
             tensor_.at(i) = value;
         }
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value){
+
+        Tensor<T>* newTensor = new Tensor<T>(*this); // TODO: decide if this is better approach that the one in applyAndReturn
+
+        newTensor->forEach(apply);
+
+        /*for(T& item : newTensor->tensor_){
+            apply(item);
+        }*/
+
+        return newTensor;
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value){
+        
+        Tensor<T>* newTensor = new Tensor<T>(*this);
+
+        newTensor->forEach(apply);
+
+        /*for(uint64_t i = 0; i < newTensor->tensor_.size(); i++){
+            bool value = newTensor->tensor_.at(i);
+            apply(value);
+            newTensor->tensor_.at(i) = value;
+        }*/
+
+        return newTensor;
     }
 
     template <class T>
