@@ -450,7 +450,6 @@ namespace GeMa{
     const noexcept requires(!std::is_floating_point<T>::value){
 
         Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
-        tensorOut->tensor_.resize(tensor_.size());
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
@@ -464,7 +463,6 @@ namespace GeMa{
     const noexcept requires(std::is_floating_point<T>::value){
 
         Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
-        tensorOut->tensor_.resize(tensor_.size());
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
