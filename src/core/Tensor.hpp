@@ -60,11 +60,17 @@ template<class T> class Tensor{
 
     private:
 
-    std::vector<T> tensor_;                  // The tensor data itself, represented by vector containing all the items.
-    std::vector<uint64_t> dimensionSizes_;        // Size od every tensor dimension.
+    std::vector<T> tensor_;                     /// The tensor data itself, represented by vector containing all the items.
+    std::vector<uint64_t> dimensionSizes_;      /// Size od every tensor dimension.
 
-    std::function<bool(const T&, const T&)> equals_;    // Function compares items in tensor and represents equality by bool.
-    std::function<int(const T&, const T&)> order_;      // Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
+    static std::function<bool(const T&, const T&)> defaultEquals_;
+    static std::function<int(const T&, const T&)> defaultOrder_;
+
+    /// Function compares items in tensor and represents equality by bool.
+    std::function<bool(const T&, const T&)>* equals_ = &defaultEquals_;
+    /// Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
+    std::function<int(const T&, const T&)>* order_ = &defaultOrder_;
+
     
     std::function<void(const T&)> tensorOutput_;
     std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
@@ -76,7 +82,7 @@ template<class T> class Tensor{
      * attributes values yet the default lambda itself is decided at compile time. The result is empty tensor, with defined 
      * dimensions and allocated space.
      *
-     * @param newTensorDimensionSizes a vector filled with sizes of dimensions.
+     * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
     */
     Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) noexcept;
 
@@ -84,9 +90,17 @@ template<class T> class Tensor{
      * @brief Copy constructor, makes the object the same as the parameter object. For reference data types, it only copies
      * the references.
      * 
-     * @param otherTensor a tensor to be copied.
+     * @param otherTensor Tensor to be copied.
      */
     Tensor(const Tensor<T>& otherTensor) noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Similar use to copy constructor but it does not copy values. Instead it creates tensor of the same dimension size
+     * and item count as the one in parameter. Useful when copy of values is not important but performance is.
+     * 
+     * @param otherTensor Tensor whose dimension sizes and item count is copied.
+     */
+    Tensor(const Tensor<T>* otherTensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Empty constructor so it can be declared without being initalized - trying to do something with
@@ -237,6 +251,12 @@ template<class T> class Tensor{
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
 
+    /**
+     * TODO: impement one value overloads
+     */
+    friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept;
+    friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts parameter tensor from this tensor.
      * 
@@ -259,6 +279,18 @@ template<class T> class Tensor{
      * @param tensor2 a tensor to be substracted from this tensor.
      */
     void operator-=(const Tensor<T>& tensor2) noexcept;
+
+    Tensor<T>* operator*(const Tensor<T>& tensor2) const noexcept;
+
+    void operator*=(const Tensor<T>& tensor2) noexcept;
+
+    Tensor<T>* operator/(const Tensor<T>& tensor2) const noexcept;
+
+    void operator/=(const Tensor<T>& tensor2) noexcept;
+
+    Tensor<T>* operator%(const Tensor<T>& tensor2) const noexcept;
+
+    void operator%=(const Tensor<T>& tensor2) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "or" on each item in a tensor. Is specialized for floating values so it can do bitwise operation
@@ -324,6 +356,14 @@ template<class T> class Tensor{
      */
     void operator^=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
     void operator^=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
+
+    Tensor<T>* operator<<(const Tensor<T>& tensor2) const noexcept;
+
+    void operator<<=(const Tensor<T>& tensor2) noexcept;
+
+    Tensor<T>* operator>>(const Tensor<T>& tensor2) const noexcept;
+
+    void operator>>=(const Tensor<T>& tensor2) noexcept;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise negation on each item in a tensor. Is specialized for floating values so it can do bitwise
@@ -333,6 +373,35 @@ template<class T> class Tensor{
     Tensor<T>* operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
     Tensor<T>* operator~() noexcept requires(std::is_same<T, bool>::value);
     Tensor<T>* operator~() noexcept requires(std::is_floating_point<T>::value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise negation on each item in a tensor.
+     */
+    void complementInPlace() noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary plus on a tensor and returns it as new object. Does nothing to items so it is basically a copy.
+     * 
+     * @return Pointer to new object.
+     */
+    Tensor<T>* operator+() const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary plus on a tensor. Does actually nothing. Is here only for completeness.
+     */
+    void plusInPlace() const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary minus on all items of copy of this object. Returns the pointer to the new object.
+     * 
+     * @return New object with items from this object negated.
+     */
+    Tensor<T>* operator-() const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary minus on all items of the tensor.
+     */
+    inline void negateInPlace() noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
@@ -376,8 +445,8 @@ template<class T> class Tensor{
      * 
      * @return Pointer to new instance upon its instances was the function used.
      */
-    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
-    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
+    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept;// requires(!std::is_same<T, bool>::value);
+    //Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

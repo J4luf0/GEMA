@@ -41,24 +41,58 @@ namespace GeMa{
     //template <typename O> class Tensor<std::vector<O>>;
     //template <typename O> class Tensor<std::unique_ptr<O>>;
 
+    // static private default values
 
+    template <class T>
+    std::function<bool(const T&, const T&)> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
+        if constexpr (std::is_floating_point<T>::value) {
+            T epsilon = std::numeric_limits<T>::epsilon();
+            return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
+        } else {
+            return a == b;
+        }
+    };
+
+    template <class T>
+    std::function<int(const T&, const T&)> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
+        if constexpr (std::is_floating_point<T>::value) {
+
+            T epsilon = std::numeric_limits<T>::epsilon();
+            if (std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)))){
+                return 0;
+            }else if(a > b){
+                return 1;
+            }else{
+                return -1;
+            }
+
+        } else if constexpr (std::is_arithmetic<T>::value){
+            return (a != b) * ((a > b) + -(a < b));
+        }else{
+            return 0;
+        }
+    };
 
     // public methods
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) noexcept
     : dimensionSizes_(newTensorDimensionSizes) {
-
+    
         int itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
 
         tensor_.resize(itemCounting);
-
-        defaultFunctions();
     }
 
     template <class T>
     Tensor<T>::Tensor(const Tensor<T>& otherTensor) noexcept{
         *this = otherTensor;
+    }
+
+    template <class T>
+    Tensor<T>::Tensor(const Tensor<T>* otherTensor) noexcept{
+        tensor_.resize(otherTensor->tensor_.size());
+        dimensionSizes_ = otherTensor->dimensionSizes_;
     }
 
     template <class T>
@@ -98,7 +132,7 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems) noexcept{
 
-        //int copyLength = fmin(tensorItems.size(), tensor.size()); //readd in safety wrapper
+        //int copyLength = fmin(tensorItems.size(), tensor.size()); //read in safety wrapper
 
         // why to use this?
         /*for(uint64_t i = 0; i < tensor_.size(); i++){
@@ -248,6 +282,7 @@ namespace GeMa{
         this->dimensionSizes_ = tensor2.dimensionSizes_;
 
         // TODO: decide if to actually copy this
+        // Argument for yes: tensor that does not have these functions defined is not comparable
         this->equals_ = tensor2.equals_;
         this->order_ = tensor2.order_;
 
@@ -276,7 +311,7 @@ namespace GeMa{
         // This is the implementation similar to std::vector::oprator== workings, but with possibility of custom comparison function
         return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [this](const auto& a, const auto& b){
 
-            return equals_(a, b); //was: compareItems
+            return (*equals_)(a, b); //was: compareItems
 
         }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
@@ -446,10 +481,44 @@ namespace GeMa{
     }
 
     template <class T>
+    void Tensor<T>::complementInPlace() noexcept{
+
+        forEach([](T& item){
+            item = ~item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::operator+() const noexcept{
+        return new Tensor<T>(*this);
+    }
+
+    template <class T>
+    void Tensor<T>::plusInPlace() const noexcept{
+
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::operator-() const noexcept{
+
+        Tensor<T>* newTensor = new Tensor<T>(*this);
+        newTensor->negateInPlace();
+        return newTensor;
+    }
+
+    template <class T>
+    inline void Tensor<T>::negateInPlace() noexcept{
+
+        forEach([](T& item){
+            item = -item;
+        });
+    }
+
+    template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
     const noexcept requires(!std::is_floating_point<T>::value){
 
-        Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
+        Tensor<T>* tensorOut = new Tensor<T>(this);
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
@@ -462,7 +531,7 @@ namespace GeMa{
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
     const noexcept requires(std::is_floating_point<T>::value){
 
-        Tensor<T>* tensorOut = new Tensor<T>(dimensionSizes_);
+        Tensor<T>* tensorOut = new Tensor<T>(this);
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
@@ -509,34 +578,20 @@ namespace GeMa{
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value){
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept{// requires(!std::is_same<T, bool>::value){
 
-        Tensor<T>* newTensor = new Tensor<T>(*this); // TODO: decide if this is better approach that the one in applyAndReturn
-
+        Tensor<T>* newTensor = new Tensor<T>(*this);
         newTensor->forEach(apply);
-
-        /*for(T& item : newTensor->tensor_){
-            apply(item);
-        }*/
-
         return newTensor;
     }
 
-    template <class T>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value){
+    /*template <class T>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept requires(std::is_same<T, bool>::value){
         
         Tensor<T>* newTensor = new Tensor<T>(*this);
-
         newTensor->forEach(apply);
-
-        /*for(uint64_t i = 0; i < newTensor->tensor_.size(); i++){
-            bool value = newTensor->tensor_.at(i);
-            apply(value);
-            newTensor->tensor_.at(i) = value;
-        }*/
-
         return newTensor;
-    }
+    }*/
 
     template <class T>
     Tensor<T>::~Tensor() noexcept{
@@ -634,7 +689,9 @@ namespace GeMa{
     template <class T>
     void Tensor<T>::defaultFunctions() noexcept{
 
-        if constexpr (std::is_floating_point<T>::value){
+        //equals_ = &defaultEquals_;
+
+        /*if constexpr (std::is_floating_point<T>::value){
 
             equals_ = [](const T a, const T b){
                 T epsilon = std::numeric_limits<T>::epsilon();
@@ -650,6 +707,6 @@ namespace GeMa{
             equals_ = [](const T& a, const T& b){
                 return a == b;
             };
-        }
+        }*/
     }
 }
