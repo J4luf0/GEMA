@@ -63,13 +63,15 @@ template<class T> class Tensor{
     std::vector<T> tensor_;                     /// The tensor data itself, represented by vector containing all the items.
     std::vector<uint64_t> dimensionSizes_;      /// Size od every tensor dimension.
 
-    static std::function<bool(const T&, const T&)> defaultEquals_;
-    static std::function<int(const T&, const T&)> defaultOrder_;
-
     /// Function compares items in tensor and represents equality by bool.
+    static std::function<bool(const T&, const T&)> defaultEquals_;
     std::function<bool(const T&, const T&)>* equals_ = &defaultEquals_;
+    std::function<bool(const T&, const T&)> userEquals_;
+
     /// Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
+    static std::function<int(const T&, const T&)> defaultOrder_;
     std::function<int(const T&, const T&)>* order_ = &defaultOrder_;
+    std::function<int(const T&, const T&)> userOrder_;
 
     
     std::function<void(const T&)> tensorOutput_;
@@ -159,6 +161,13 @@ template<class T> class Tensor{
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
     void setItems(const std::vector<T>& tensorItems) noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * 
+     */
+    void setEquals(const std::function<bool(const T&, const T&)>& equals) noexcept;
+
+    void setOrder(const std::function<int(const T&, const T&)>& order) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the tensor through this->showTensor() method.

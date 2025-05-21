@@ -44,7 +44,7 @@ namespace GeMa{
     // static private default values
 
     template <class T>
-    std::function<bool(const T&, const T&)> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
+    inline std::function<bool(const T&, const T&)> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
             return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
@@ -54,7 +54,7 @@ namespace GeMa{
     };
 
     template <class T>
-    std::function<int(const T&, const T&)> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
+    inline std::function<int(const T&, const T&)> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
         if constexpr (std::is_floating_point<T>::value) {
 
             T epsilon = std::numeric_limits<T>::epsilon();
@@ -97,7 +97,7 @@ namespace GeMa{
 
     template <class T>
     Tensor<T>::Tensor() noexcept{
-        
+
     }
 
     template <class T>
@@ -131,15 +131,21 @@ namespace GeMa{
     // Secure version will need to check for correct tensorItems size
     template <class T>
     void Tensor<T>::setItems(const std::vector<T>& tensorItems) noexcept{
-
-        //int copyLength = fmin(tensorItems.size(), tensor.size()); //read in safety wrapper
-
-        // why to use this?
-        /*for(uint64_t i = 0; i < tensor_.size(); i++){
-            tensor_[i] = tensorItems[i];
-        }*/
-
         tensor_ = tensorItems;
+    }
+
+    template <class T>
+    void Tensor<T>::setEquals(const std::function<bool(const T&, const T&)>& equals) noexcept{
+        
+        userEquals_ = equals;
+        equals_ = &userEquals_;
+    }
+
+    template <class T>
+    void Tensor<T>::setOrder(const std::function<int(const T&, const T&)>& order) noexcept{
+
+        userOrder_ = order;
+        order_ = &userOrder_;
     }
 
     template <class T>
