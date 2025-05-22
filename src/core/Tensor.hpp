@@ -260,12 +260,6 @@ template<class T> class Tensor{
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
 
-    /**
-     * TODO: impement one value overloads
-     */
-    friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept;
-    friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept;
-
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts parameter tensor from this tensor.
      * 
@@ -412,6 +406,12 @@ template<class T> class Tensor{
      */
     inline void negateInPlace() noexcept;
 
+    /**
+     * TODO: impement one value overloads
+     */
+    friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept;
+    friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
      * and items from the second tensor passed as parameter as second operand.
@@ -422,9 +422,9 @@ template<class T> class Tensor{
      * @return A pointer to resulting tensor.
      */
     inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
-    const noexcept requires(!std::is_floating_point<T>::value);
-    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
-    const noexcept requires(std::is_floating_point<T>::value);
+    const noexcept;// requires(!std::is_floating_point<T>::value);
+    /*inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
+    const noexcept requires(std::is_floating_point<T>::value);*/
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors and then store the result
@@ -439,14 +439,6 @@ template<class T> class Tensor{
     noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Applies function on all items thru passed function.
-     * 
-     * @param apply function that will be applied on all items.
-     */
-    void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
-    void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copies this as new instance and applies function on all items in new instance thru passed function, then returns
      * the new instance.
      * 
@@ -454,8 +446,15 @@ template<class T> class Tensor{
      * 
      * @return Pointer to new instance upon its instances was the function used.
      */
-    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept;// requires(!std::is_same<T, bool>::value);
-    //Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept requires(std::is_same<T, bool>::value);
+    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Applies function on all items thru passed function.
+     * 
+     * @param apply function that will be applied on all items.
+     */
+    void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
+    void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

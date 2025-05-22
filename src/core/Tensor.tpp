@@ -288,9 +288,15 @@ namespace GeMa{
         this->dimensionSizes_ = tensor2.dimensionSizes_;
 
         // TODO: decide if to actually copy this
+        // TODO: can it be done without if statements?
         // Argument for yes: tensor that does not have these functions defined is not comparable
-        this->equals_ = tensor2.equals_;
-        this->order_ = tensor2.order_;
+        if(tensor2.userEquals_){
+            setEquals(tensor2.userEquals_);
+        }
+
+        if(tensor2.userOrder_){
+            setOrder(tensor2.userOrder_);
+        }
 
         // TODO: decide what to do with tensorOutput and itemOutput
         return *this;
@@ -522,18 +528,20 @@ namespace GeMa{
 
     template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
-    const noexcept requires(!std::is_floating_point<T>::value){
+    const noexcept{// requires(!std::is_floating_point<T>::value){
 
-        Tensor<T>* tensorOut = new Tensor<T>(this);
+        Tensor<T>* resultTensor = new Tensor<T>(this);
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
+
+        /*for(uint64_t i = 0; i < tensor_.size(); i++){
             tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
-        }
+        }*/
 
-        return tensorOut;
+        return resultTensor;
     }
 
-    template <class T>
+    /*template <class T>
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
     const noexcept requires(std::is_floating_point<T>::value){
 
@@ -544,7 +552,7 @@ namespace GeMa{
         }
 
         return tensorOut;
-    }
+    }*/
 
     template <class T>
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
@@ -567,6 +575,14 @@ namespace GeMa{
     }
 
     template <class T>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept{
+
+        Tensor<T>* newTensor = new Tensor<T>(*this);
+        newTensor->forEach(apply);
+        return newTensor;
+    }
+
+    template <class T>
     void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value){
         for(T& item : tensor_){
             apply(item);
@@ -583,21 +599,6 @@ namespace GeMa{
         }
     }
 
-    template <class T>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept{// requires(!std::is_same<T, bool>::value){
-
-        Tensor<T>* newTensor = new Tensor<T>(*this);
-        newTensor->forEach(apply);
-        return newTensor;
-    }
-
-    /*template <class T>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept requires(std::is_same<T, bool>::value){
-        
-        Tensor<T>* newTensor = new Tensor<T>(*this);
-        newTensor->forEach(apply);
-        return newTensor;
-    }*/
 
     template <class T>
     Tensor<T>::~Tensor() noexcept{

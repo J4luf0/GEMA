@@ -1047,6 +1047,8 @@ TEST(tensor_test, showDebug){
     const std::vector<uint64_t> dimensionSizes{2, 3};
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
 
+    //std::cout << "alive still" << std::endl;
+
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
