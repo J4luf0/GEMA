@@ -332,12 +332,12 @@ template<class T> class Tensor{
     void operator%=(const Tensor<T>& tensor2) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor. Is specialized for floating values so it can do bitwise operation
-     * on them too.
+     * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor. Is specialized for floating 
+     * values so it can do bitwise operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      * 
-     * @return A pointer to new allocated resulting tensor.
+     * @return Pointer to new resulting tensor.
      */
     Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
     Tensor<T>* operator|(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
@@ -348,66 +348,93 @@ template<class T> class Tensor{
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor and save result in this tensor. Is specialized for floating values
+     * @brief Performs bitwise "or" on each item in a tensor in place. Is specialized for floating values
      * so it can do bitwise operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      */
     void operator|=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
     void operator|=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor. Is specialized for floating values so it can do bitwise
-     * operation on them too.
+     * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor. Is specialized for floating 
+     * values so it can do bitwise operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      * 
-     * @return A pointer to new allocated resulting tensor.
+     * @return Pointer to new resulting tensor.
      */
     Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
     Tensor<T>* operator&(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor and save result in this tensor. Is specialized for floating 
-     * values so it can do bitwise operation on them too.
+     * @brief Performs bitwise "and" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
+     * operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      */
     void operator&=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
     void operator&=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor. Is specialized for floating values so it can do bitwise
-     * operation on them too.
+     * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor. Is specialized for floating 
+     * values so it can do bitwise operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      * 
-     * @return A pointer to new allocated resulting tensor.
+     * @return Pointer to new resulting tensor.
      */
     Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
     Tensor<T>* operator^(const Tensor<T>& tensor2) const noexcept requires(std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor and saves result in this tensor. Is specialized for floating 
-     * values so it can do bitwise operation on them too.
+     * @brief Performs bitwise "xor" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
+     * operation on them too.
      * 
-     * @param tensor2 a second tensor to perform operation against.
+     * @param tensor2 second tensor to perform operation against.
      */
     void operator^=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
     void operator^=(const Tensor<T>& tensor2) noexcept requires(std::is_floating_point<T>::value);
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item and returns result 
+     * as new tensor. Does not size checking.
+     * 
+     * @param tensor2 tensor specifying bit shift amount.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     Tensor<T>* operator<<(const Tensor<T>& tensor2) const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
+     * size checking.
+     * 
+     * @param tensor2 tensor specifying bit shift amount.
+     */
     void operator<<=(const Tensor<T>& tensor2) noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item and returns result 
+     * as new tensor. Does not size checking.
+     * 
+     * @param tensor2 tensor specifying bit shift amount.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     Tensor<T>* operator>>(const Tensor<T>& tensor2) const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
+     * size checking.
+     * 
+     * @param tensor2 tensor specifying bit shift amount.
+     */
     void operator>>=(const Tensor<T>& tensor2) noexcept;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise negation on each item in a tensor. Is specialized for floating values so it can do bitwise
      * operation on them too. Has specialization on bool type that uses ! (not) instead of ~ on the inside, user always uses ~.
-     * 
      */
     Tensor<T>* operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
     Tensor<T>* operator~() noexcept requires(std::is_same<T, bool>::value);
