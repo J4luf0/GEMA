@@ -11,7 +11,7 @@
 
 #include "Tensor.hpp" // Not needed, just keep it for intelisense
 
-namespace GeMa{
+namespace gema{
 
     const int maxLoopCount = 65536; // Will be probably unused.
 
@@ -23,6 +23,7 @@ namespace GeMa{
                      void>>;
     };
 
+    // probably delete this
     // Primitives and simple types
     //template <typename T> class Tensor<T>;
     //template class Tensor<T>;
@@ -651,9 +652,14 @@ namespace GeMa{
 
     template <class T>
     void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value){
+
+        // TODO: what approach is better?
+        // 1.
         for(T& item : tensor_){
             apply(item);
         }
+        // 2.
+        //std::transform(tensor_.begin(), tensor_.end(), tensor_.begin(), apply);
     }
 
     template <class T>

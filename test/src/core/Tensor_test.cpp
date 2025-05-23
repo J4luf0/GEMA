@@ -7,7 +7,7 @@
 
 #include "core/Tensor.hpp"
 
-using GeMa::Tensor;
+using gema::Tensor;
 
 TEST(tensor_test, constructor_001){
 

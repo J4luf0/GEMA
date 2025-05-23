@@ -1,9 +1,15 @@
 #ifndef TENSOR_HPP
 #define TENSOR_HPP
 
-//#define uint64t uint64_t
+namespace gema{
 
-namespace GeMa{
+// Forward declaration just for the concepts.
+template<class T>
+class Tensor;
+    
+// Concept that checks if type X is of type T or Tensor<T>.
+template <typename X, typename T>
+concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
 
 // ============================================================================================================================
 /**
@@ -56,7 +62,8 @@ namespace GeMa{
  * of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
  * forEach(), etc...) and thus slower.
  */
-template<class T> class Tensor{
+template<class T> 
+class Tensor{
 
     private:
 
@@ -259,6 +266,12 @@ template<class T> class Tensor{
      * @return Pointer to new resulting tensor.
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
+
+    /**
+     * TODO: impement one value overloads
+     */
+    friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept;
+    friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds tensor to tensor item by item in place. Does no size checking.
@@ -469,12 +482,6 @@ template<class T> class Tensor{
      */
     inline void negateInPlace() noexcept;
 
-    /**
-     * TODO: impement one value overloads
-     */
-    friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept;
-    friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept;
-
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
      * and items from the second tensor passed as parameter as second operand.
@@ -488,6 +495,18 @@ template<class T> class Tensor{
     const noexcept;// requires(!std::is_floating_point<T>::value);
     /*inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
     const noexcept requires(std::is_floating_point<T>::value);*/
+
+    /*template <class A, class B> static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2l,  
+    const std::function<void(T&, const T&)>& operation) noexcept
+    requires((std::is_same<A, T>::value || std::is_same<A, Tensor<T>>::value) && 
+             (std::is_same<B, T>::value || std::is_same<B, Tensor<T>>::value) && 
+             !std::is_same<A, B>::value);*/
+
+    
+
+    template <class A, class B> 
+    static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<void(T&, const T&)>& operation)
+    noexcept requires(is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors and then store the result
