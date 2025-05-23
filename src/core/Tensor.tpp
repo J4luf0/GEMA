@@ -666,6 +666,8 @@ namespace gema{
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B>
     inline Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2,
     const std::function<T(const T&, const T&)> &operation) noexcept requires(!std::is_same_v<A, B>){
+    /* TODO: maybe delete the requires to make it absolutely generic, or do: requires(!std::is_same_v<A, B> && !std::is_same_v<A, T>)
+    for stricter rules*/
         
         constexpr uint64_t iIncrement = (uint64_t)std::is_same_v<A, Tensor<T>>;
         constexpr uint64_t jIncrement = (uint64_t)std::is_same_v<B, Tensor<T>>;
