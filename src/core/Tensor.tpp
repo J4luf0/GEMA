@@ -15,13 +15,53 @@ namespace gema{
 
     const int maxLoopCount = 65536; // Will be probably unused.
 
+    // Meta helpers:
+
     // Helper converter from floating types to integral
     template<typename F>
-    struct float_to_integral{
+    struct float_to_integral {
         using type = std::conditional_t<sizeof(F) == 4, uint32_t, 
                      std::conditional_t<sizeof(F) == 8, uint64_t,
                      void>>;
     };
+
+    /*template<auto F, typename T>
+    constexpr T* extractData(){
+
+        using type = decltype(F);
+
+        if constexpr (std::is_same_v<type, T>){
+            return &F;
+        }
+
+        if constexpr (std::is_same_v<type, Tensor<T>>){
+            return F.tensor_.data();
+        }
+
+        return nullptr;
+    }*/
+
+    // Helper that gives item pointer no matter if Tensor<T> or T itself is provided
+    template<typename F, typename T>
+    consteval T* extractData(F& object){
+
+        if constexpr (std::is_same_v<F, T>){
+            return &object;
+        }
+
+        if constexpr (std::is_same_v<F, Tensor<T>>){
+            return object.tensor_.data();
+        }
+
+        return nullptr;
+    }
+
+    /*template<typename F>
+    struct is_iterable{
+        using type = std::conditional_t<sizeof(F) == 4, uint32_t, 
+                     std::conditional_t<sizeof(F) == 8, uint64_t,
+                     void>>;
+    };*/
 
     // probably delete this
     // Primitives and simple types
@@ -623,13 +663,29 @@ namespace gema{
     }
 
     template <class T>
-    template <class A, class B>
-    inline Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2, 
-    const std::function<void(T &, const T &)> &operation) noexcept requires(is_tensor_or_t<A, T> 
-                                                                        && is_tensor_or_t<B, T> 
-                                                                        && !std::is_same_v<A, B>){
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B>
+    inline Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2,
+    const std::function<T(const T&, const T&)> &operation) noexcept requires(!std::is_same_v<A, B>){
+        
+        constexpr uint64_t iIncrement = (uint64_t)std::is_same_v<A, Tensor<T>>;
+        constexpr uint64_t jIncrement = (uint64_t)std::is_same_v<B, Tensor<T>>;
+        const T* operandData1 = extractData(operand1);
+        const T* operandData2 = extractData(operand2);
+        
+        Tensor<T>* tensorOperand;
+        if constexpr (std::is_same_v<A, Tensor<T>>){
+            tensorOperand = &operand1;
+        } else{
+            tensorOperand = &operand2;
+        }
 
-        return nullptr;
+        Tensor<T>* resultTensor = new Tensor<T>(tensorOperand);
+
+        for(uint64_t i = 0, j = 0; i < tensorOperand->tensor_.size(); i += iIncrement, j += jIncrement){
+            resultTensor->tensor_[i] = operation(*(operandData1 + i), *(operandData2 + j));
+        }
+
+        return resultTensor;
     }
 
     template <class T>

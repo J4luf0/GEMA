@@ -63,7 +63,7 @@ concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
  * forEach(), etc...) and thus slower.
  */
 template<class T> 
-class Tensor{
+class Tensor {
 
     private:
 
@@ -504,9 +504,9 @@ class Tensor{
 
     
 
-    template <class A, class B> 
-    static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<void(T&, const T&)>& operation)
-    noexcept requires(is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>);
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
+    static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<T(const T&, const T&)> &operation)
+    noexcept requires(!std::is_same_v<A, B>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors and then store the result
