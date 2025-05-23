@@ -252,47 +252,83 @@ template<class T> class Tensor{
     bool operator==(const Tensor<T>& tensor2) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds two tensors of the same size, both by reference.
+     * @brief Adds tensor with tensor item by item and returns result as new tensor. Does no size checking.
      * 
-     * @param tensor2 a second tensor to be added as reference (the same as the first).
+     * @param tensor2 addend tensor.
      * 
-     * @return A pointer to new allocated tensor that is the sum of the both.
+     * @return Pointer to new resulting tensor.
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts parameter tensor from this tensor.
+     * @brief Adds tensor to tensor item by item in place. Does no size checking.
      * 
-     * @param tensor2 a second tensor to be substracted.
-     * 
-     * @return A pointer to new allocated tensor that the result of substraction.
-     */
-    Tensor<T>* operator-(const Tensor<T>& tensor2) const noexcept;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds tensor to tensor.
-     * 
-     * @param tensor2 a tensor to be added to this tensor.
+     * @param tensor2 addend tensor.
     */
     void operator+=(const Tensor<T>& tensor2) noexcept;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Substracts tensor with tensor item by item and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor2 substrahend tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    Tensor<T>* operator-(const Tensor<T>& tensor2) const noexcept;
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts a tensor from a tensor.
+     * @brief Substracts tensor from a tensor item by item in place. Does no size checking.
      * 
-     * @param tensor2 a tensor to be substracted from this tensor.
+     * @param tensor2 substrahend tensor.
      */
     void operator-=(const Tensor<T>& tensor2) noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies tensor with tensor item by item and returns result as new tensor. Does not size checking.
+     * 
+     * @param tensor2 multiplier tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     Tensor<T>* operator*(const Tensor<T>& tensor2) const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies tensor from a tensor item by item in place. Does no size checking.
+     * 
+     * @param tensor2 product tensor.
+     */
     void operator*=(const Tensor<T>& tensor2) noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Divides tensor with tensor item by item and returns result as new tensor. Does not size checking.
+     * 
+     * @param tensor2 divisor tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     Tensor<T>* operator/(const Tensor<T>& tensor2) const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Divides tensor from a tensor item by item in place. Does no size checking.
+     * 
+     * @param tensor2 divisor tensor.
+     */
     void operator/=(const Tensor<T>& tensor2) noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs modulo item by item and returns result as new tensor. Does not size checking.
+     * 
+     * @param tensor2 divisor tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     Tensor<T>* operator%(const Tensor<T>& tensor2) const noexcept;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs modulo item by item in place. Does no size checking.
+     * 
+     * @param tensor2 divisor tensor.
+     */
     void operator%=(const Tensor<T>& tensor2) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------

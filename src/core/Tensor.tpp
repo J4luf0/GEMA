@@ -360,6 +360,54 @@ namespace GeMa{
         });
     }
 
+    template <class T>
+    Tensor<T> *Tensor<T>::operator*(const Tensor<T> &tensor2) const noexcept{
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem * tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator*=(const Tensor<T> &tensor2) noexcept{
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem *= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T> *Tensor<T>::operator/(const Tensor<T> &tensor2) const noexcept{
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem / tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator/=(const Tensor<T> &tensor2) noexcept{
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem /= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T> *Tensor<T>::operator%(const Tensor<T> &tensor2) const noexcept{
+        
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem % tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator%=(const Tensor<T> &tensor2) noexcept{
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem %= tensor2Item;
+        });
+    }
+
     template<typename T> //template<typename F, typename std::enable_if<!std::is_floating_point<F>::value, double>::type>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value){
 
@@ -540,19 +588,6 @@ namespace GeMa{
 
         return resultTensor;
     }
-
-    /*template <class T>
-    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
-    const noexcept requires(std::is_floating_point<T>::value){
-
-        Tensor<T>* tensorOut = new Tensor<T>(this);
-
-        for(uint64_t i = 0; i < tensor_.size(); i++){
-            tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
-        }
-
-        return tensorOut;
-    }*/
 
     template <class T>
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
