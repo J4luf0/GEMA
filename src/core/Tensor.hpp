@@ -404,7 +404,7 @@ template<class T> class Tensor{
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator<<(const Tensor<T>& tensor2) const noexcept;
+    Tensor<T>* operator<<(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -412,7 +412,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 tensor specifying bit shift amount.
      */
-    void operator<<=(const Tensor<T>& tensor2) noexcept;
+    void operator<<=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item and returns result 
@@ -422,7 +422,7 @@ template<class T> class Tensor{
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator>>(const Tensor<T>& tensor2) const noexcept;
+    Tensor<T>* operator>>(const Tensor<T>& tensor2) const noexcept requires(!std::is_floating_point<T>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -430,7 +430,7 @@ template<class T> class Tensor{
      * 
      * @param tensor2 tensor specifying bit shift amount.
      */
-    void operator>>=(const Tensor<T>& tensor2) noexcept;
+    void operator>>=(const Tensor<T>& tensor2) noexcept requires(!std::is_floating_point<T>::value);
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise negation on each item in a tensor. Is specialized for floating values so it can do bitwise

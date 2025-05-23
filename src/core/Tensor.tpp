@@ -517,8 +517,40 @@ namespace GeMa{
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value){
+    Tensor<T> *Tensor<T>::operator<<(const Tensor<T> &tensor2) const noexcept requires(!std::is_floating_point<T>::value){
+
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem << tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator<<=(const Tensor<T> &tensor2) noexcept requires(!std::is_floating_point<T>::value){
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem <<= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T> *Tensor<T>::operator>>(const Tensor<T> &tensor2) const noexcept requires(!std::is_floating_point<T>::value){
         
+        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+            return tensorItem >> tensor2Item;
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator>>=(const Tensor<T> &tensor2) noexcept requires(!std::is_floating_point<T>::value){
+
+        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+            tensorItem >>= tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T> *Tensor<T>::operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value){
+
         return forEachAndReturn([](T& item){
             item = ~item;
         });
