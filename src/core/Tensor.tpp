@@ -623,6 +623,16 @@ namespace gema{
     }
 
     template <class T>
+    template <class A, class B>
+    inline Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2, 
+    const std::function<void(T &, const T &)> &operation) noexcept requires(is_tensor_or_t<A, T> 
+                                                                        && is_tensor_or_t<B, T> 
+                                                                        && !std::is_same_v<A, B>){
+
+        return nullptr;
+    }
+
+    template <class T>
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
     noexcept requires(!std::is_same<T, bool>::value){
 

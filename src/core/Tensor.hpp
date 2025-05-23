@@ -622,7 +622,7 @@ class Tensor{
     void defaultFunctions() noexcept;
 }; // end Tensor
 
-} // end GeMa
+} // end gema
 
 #include "Tensor.tpp"
 
