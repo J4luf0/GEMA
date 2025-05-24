@@ -7,7 +7,7 @@ namespace gema{
 template<class T>
 class Tensor;
     
-// Concept that checks if type X is of type T or Tensor<T>.
+// Concept that checks if type X is of type T or Tensor<T>. Useful for operator overloads.
 template <typename X, typename T>
 concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
 
@@ -506,7 +506,7 @@ class Tensor {
 
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
     static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<T(const T&, const T&)> &operation)
-    noexcept requires(!std::is_same_v<A, B>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
+    noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors and then store the result
@@ -519,6 +519,10 @@ class Tensor {
     noexcept requires(!std::is_same<T, bool>::value);
     inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
     noexcept requires(std::is_same<T, bool>::value);
+
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
+    static void apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)> &operation)
+    noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copies this as new instance and applies function on all items in new instance thru passed function, then returns

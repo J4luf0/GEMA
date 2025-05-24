@@ -56,6 +56,58 @@ namespace gema{
         return nullptr;
     }
 
+    // Helper to apply operation in specified item in one or both of the operands
+    template<typename T, typename A, typename B>
+    consteval void genericOperation(T* resultTensor, const A& operand1, const B& operand2, 
+    const std::function<T(const T&, const T&)>& operation, const uint64_t i){
+
+        if constexpr (std::is_same_v<A, B>){
+            resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+        }else if constexpr (std::is_same_v<A, T>){
+            resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
+        }else if constexpr (std::is_same_v<B, T>){
+            resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
+        }
+    }
+
+    // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
+    template<typename T, typename A, typename B>
+    consteval uint64_t tensor_size(const A& operand1, const B& operand2){
+
+        if constexpr (std::is_same_v<A, Tensor<T>>){
+            return operand1.tensor_.size();
+        } else if constexpr (std::is_same_v<B, Tensor<T>>){
+            return operand2.tensor_.size();
+        }else{
+            return 1;
+        }
+    }
+
+    template<typename X, typename T, typename A, typename B>
+    consteval Tensor<T>* type_pick_b(const A& operand1, const B& operand2){
+        
+        if constexpr (std::is_same_v<A, X>){
+            return &operand1;
+        } else if constexpr (std::is_same_v<B, X>){
+            return &operand2;
+        } else {
+            return nullptr;
+        }
+    }
+
+    template<typename X, typename F, typename... R>
+    consteval X* type_pick(F&& first, R&&... rest) {
+
+        if constexpr (std::is_same_v<std::decay_t<F>, X>) {
+            return &first;
+        } else if constexpr (sizeof...(rest) > 0) {
+            return first_of_type<X>(std::forward<R>(rest)...);
+        } else {
+            return nullptr; // No match found
+        }
+    }
+    
+
     /*template<typename F>
     struct is_iterable{
         using type = std::conditional_t<sizeof(F) == 4, uint32_t, 
@@ -665,11 +717,10 @@ namespace gema{
     template <class T>
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B>
     inline Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2,
-    const std::function<T(const T&, const T&)> &operation) noexcept requires(!std::is_same_v<A, B>){
-    /* TODO: maybe delete the requires to make it absolutely generic, or do: requires(!std::is_same_v<A, B> && !std::is_same_v<A, T>)
-    for stricter rules*/
+    const std::function<T(const T&, const T&)> &operation) noexcept 
+    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
         
-        constexpr uint64_t iIncrement = (uint64_t)std::is_same_v<A, Tensor<T>>;
+        /*constexpr uint64_t iIncrement = (uint64_t)std::is_same_v<A, Tensor<T>>;
         constexpr uint64_t jIncrement = (uint64_t)std::is_same_v<B, Tensor<T>>;
         const T* operandData1 = extractData(operand1);
         const T* operandData2 = extractData(operand2);
@@ -685,6 +736,28 @@ namespace gema{
 
         for(uint64_t i = 0, j = 0; i < tensorOperand->tensor_.size(); i += iIncrement, j += jIncrement){
             resultTensor->tensor_[i] = operation(*(operandData1 + i), *(operandData2 + j));
+        }
+
+        return resultTensor;*/
+
+        /*Tensor<T>* tensorOperand;
+        if constexpr (std::is_same_v<A, Tensor<T>>){
+            tensorOperand = &operand1;
+        } else{
+            tensorOperand = &operand2;
+        }*/
+
+        Tensor<T>* resultTensor = new Tensor<T>(type_pick<Tensor<T>>(operand1, operand2));
+
+        for(uint64_t i = 0; i < type_pick<Tensor<T>>(operand1, operand2)->tensor_.size(); ++i){
+
+            if constexpr (std::is_same_v<A, B>){
+                resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<A, T>){
+                resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<B, T>){
+                resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
+            }
         }
 
         return resultTensor;
@@ -711,20 +784,37 @@ namespace gema{
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& apply) const noexcept{
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
+    inline void Tensor<T>::apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)> &operation)
+    noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
+
+        for(uint64_t i = 0; i < tensor_size(operand1, operand2); ++i){
+
+            if constexpr (std::is_same_v<A, B>){
+                operation(operand1.tensor_[i], operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<A, T>){
+                operation(operand1, operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<B, T>){
+                operation(operand1.tensor_[i], operand2);
+            }
+        }
+    }
+
+    template <class T>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<void(T&)>& operation) const noexcept{
 
         Tensor<T>* newTensor = new Tensor<T>(*this);
-        newTensor->forEach(apply);
+        newTensor->forEach(operation);
         return newTensor;
     }
 
     template <class T>
-    void Tensor<T>::forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value){
+    void Tensor<T>::forEach(const std::function<void(T&)>& operation) noexcept requires(!std::is_same<T, bool>::value){
 
         // TODO: what approach is better?
         // 1.
         for(T& item : tensor_){
-            apply(item);
+            operation(item);
         }
         // 2.
         //std::transform(tensor_.begin(), tensor_.end(), tensor_.begin(), apply);
