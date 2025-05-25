@@ -429,6 +429,12 @@ namespace gema{
         });
     }
 
+    template<class T>
+    Tensor<T> *operator+(const Tensor<T> &tensor, const T &value) noexcept
+    {
+        return nullptr;
+    }
+
     template <class T>
     void Tensor<T>::operator+=(const Tensor<T>& tensor2) noexcept{
 
@@ -644,24 +650,24 @@ namespace gema{
     template <class T>
     Tensor<T> *Tensor<T>::operator~() noexcept requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value){
 
-        return forEachAndReturn([](T& item){
-            item = ~item;
+        return forEachAndReturn([](const T& item){
+            return ~item;
         });
     }
 
     template <class T>
     Tensor<T>* Tensor<T>::operator~() noexcept requires(std::is_same<T, bool>::value){
         
-        return forEachAndReturn([](T& item){
-            item = !item;
+        return forEachAndReturn([](const T& item){
+            return !item;
         });
     }
 
     template <class T>
     Tensor<T>* Tensor<T>::operator~() noexcept requires(std::is_floating_point<T>::value){
 
-        return forEachAndReturn([](T& item){
-            item = std::bit_cast<T>(~std::bit_cast<typename float_to_integral<T>::type>(item));
+        return forEachAndReturn([](const T& item){
+            return std::bit_cast<T>(~std::bit_cast<typename float_to_integral<T>::type>(item));
         });
     }
 
