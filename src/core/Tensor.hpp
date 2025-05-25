@@ -532,7 +532,7 @@ class Tensor {
      * 
      * @return Pointer to new instance upon its instances was the function used.
      */
-    Tensor<T>* forEachAndReturn(const std::function<void(T&)>& apply) const noexcept;
+    Tensor<T>* forEachAndReturn(const std::function<T(const T&)>& operation) const noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Applies function on all items thru passed function.
