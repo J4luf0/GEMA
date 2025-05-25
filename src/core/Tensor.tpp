@@ -430,9 +430,19 @@ namespace gema{
     }
 
     template<class T>
-    Tensor<T> *operator+(const Tensor<T> &tensor, const T &value) noexcept
+    Tensor<T>* operator+(const Tensor<T>& tensor, const T& value) noexcept
     {
-        return nullptr;
+        return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
+            return tensorItem + singularValue;
+        });
+    }
+
+    template<class T>
+    Tensor<T>* operator+(const T& value, const Tensor<T>& tensor) noexcept
+    {
+        return applyAndReturn(value, tensor, [](const T& singularValue, const T& tensorItem){
+            return singularValue + tensorItem;
+        });
     }
 
     template <class T>
@@ -817,6 +827,11 @@ namespace gema{
         }
     }
 
+    template <class T>
+    void Tensor<T>::forEach(const Tensor<T>& tensor, const std::function<void(T&)>& apply) noexcept{
+
+        tensor.forEach(apply);
+    }
 
     template <class T>
     Tensor<T>::~Tensor() noexcept{

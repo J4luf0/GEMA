@@ -503,7 +503,10 @@ class Tensor {
              !std::is_same<A, B>::value);*/
 
     
-
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * 
+     * 
+     */
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
     static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<T(const T&, const T&)> &operation)
     noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
@@ -521,7 +524,7 @@ class Tensor {
     noexcept requires(std::is_same<T, bool>::value);
 
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
-    static void apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)> &operation)
+    static void apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)>& operation)
     noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -534,6 +537,8 @@ class Tensor {
      */
     Tensor<T>* forEachAndReturn(const std::function<T(const T&)>& operation) const noexcept;
 
+    static Tensor<T>* forEachAndReturn(const Tensor<T>& tensor, const std::function<T(const T&)>& operation) noexcept;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Applies function on all items thru passed function.
      * 
@@ -541,6 +546,12 @@ class Tensor {
      */
     void forEach(const std::function<void(T&)>& apply) noexcept requires(!std::is_same<T, bool>::value);
     void forEach(const std::function<void(T&)>& apply) noexcept requires(std::is_same<T, bool>::value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * 
+     * 
+     */
+    static void forEach(const Tensor<T>& tensor, const std::function<void(T&)>& apply) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.
