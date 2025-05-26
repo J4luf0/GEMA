@@ -267,10 +267,24 @@ class Tensor {
     */
     Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
-    /**
-     * TODO: impement one value overloads
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Adds every tensor item to value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor addend tensor.
+     * @param value addend value.
+     * 
+     * @return Pointer to new resulting tensor.
      */
     friend Tensor<T>* operator+(const Tensor<T>& tensor, const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Adds value to every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param value addend value.
+     * @param tensor addend tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
     friend Tensor<T>* operator+(const T& value, const Tensor<T>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -281,6 +295,13 @@ class Tensor {
     void operator+=(const Tensor<T>& tensor2);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Adds value to tensor item by item in place. Does no size checking.
+     * 
+     * @param value addend value.
+    */
+    void operator+=(const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts tensor with tensor item by item and returns result as new tensor. Does no size checking.
      * 
      * @param tensor2 substrahend tensor.
@@ -288,6 +309,26 @@ class Tensor {
      * @return Pointer to new resulting tensor.
      */
     Tensor<T>* operator-(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Substracts value from every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor minuend tensor.
+     * @param value substrahend value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator-(const Tensor<T>& tensor, const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Substracts every tensor item from value and returns result as new tensor. Does no size checking.
+     * 
+     * @param value minuend value.
+     * @param tensor substrahend tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator-(const T& value, const Tensor<T>& tensor);
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts tensor from a tensor item by item in place. Does no size checking.
@@ -295,6 +336,13 @@ class Tensor {
      * @param tensor2 substrahend tensor.
      */
     void operator-=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Substracts value from tensor item by item in place. Does no size checking.
+     * 
+     * @param value substrahend value.
+    */
+    void operator-=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies tensor with tensor item by item and returns result as new tensor. Does not size checking.

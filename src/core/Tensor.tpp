@@ -391,8 +391,7 @@ namespace gema{
     }
 
     template<class T>
-    Tensor<T>* operator+(const Tensor<T>& tensor, const T& value)
-    {
+    Tensor<T>* operator+(const Tensor<T>& tensor, const T& value){
         /*return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
             return tensorItem + singularValue;
         });*/
@@ -403,11 +402,7 @@ namespace gema{
     }
 
     template<class T>
-    Tensor<T>* operator+(const T& value, const Tensor<T>& tensor)
-    {
-        /*return applyAndReturn(value, tensor, [](const T& singularValue, const T& tensorItem){
-            return singularValue + tensorItem;
-        });*/
+    Tensor<T>* operator+(const T& value, const Tensor<T>& tensor){
 
         return forEachAndReturn(tensor, [&value](const T& item){
             return value + item;
@@ -419,6 +414,14 @@ namespace gema{
 
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
             tensorItem += tensor2Item;
+        });
+    }
+
+    template<class T>
+    void Tensor<T>::operator+=(const T &value){
+
+        forEach([&value](T& tensorItem){
+            tensorItem += value;
         });
     }
 
