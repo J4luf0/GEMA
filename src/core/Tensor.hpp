@@ -354,11 +354,38 @@ class Tensor {
     Tensor<T>* operator*(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor multiplicand tensor.
+     * @param value multiplier value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator*(const Tensor<T>& tensor, const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param value multiplicand value.
+     * @param tensor multiplier tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator*(const T& value, const Tensor<T>& tensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies tensor from a tensor item by item in place. Does no size checking.
      * 
      * @param tensor2 product tensor.
      */
     void operator*=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies tensor item by item by value in place. Does no size checking.
+     * 
+     * @param value multiplier value.
+    */
+    void operator*=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Divides tensor with tensor item by item and returns result as new tensor. Does not size checking.
@@ -370,11 +397,38 @@ class Tensor {
     Tensor<T>* operator/(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Divides every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor dividend tensor.
+     * @param value divisor value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator/(const Tensor<T>& tensor, const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Multiplies value by every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param value dividend value.
+     * @param tensor divisor tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator/(const T& value, const Tensor<T>& tensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Divides tensor from a tensor item by item in place. Does no size checking.
      * 
      * @param tensor2 divisor tensor.
      */
     void operator/=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Divides tensor item by item by value in place. Does no size checking.
+     * 
+     * @param value divisor value.
+    */
+    void operator/=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs modulo item by item and returns result as new tensor. Does not size checking.
@@ -386,11 +440,38 @@ class Tensor {
     Tensor<T>* operator%(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs modulo every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor dividend tensor.
+     * @param value divisor value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator%(const Tensor<T>& tensor, const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs modulo value by every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param value dividend value.
+     * @param tensor divisor tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    friend Tensor<T>* operator%(const T& value, const Tensor<T>& tensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs modulo item by item in place. Does no size checking.
      * 
      * @param tensor2 divisor tensor.
      */
     void operator%=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs modulo every tensor item by value in place. Does no size checking.
+     * 
+     * @param value divisor value.
+    */
+    void operator/=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor. Is specialized for floating 
