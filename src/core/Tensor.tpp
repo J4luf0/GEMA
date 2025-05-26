@@ -382,6 +382,10 @@ namespace gema{
         }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
 
+    // OPERATOR OVERLOADS
+
+    // (+) --------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
@@ -418,18 +422,36 @@ namespace gema{
     }
 
     template<class T>
-    void Tensor<T>::operator+=(const T &value){
+    void Tensor<T>::operator+=(const T& value){
 
-        forEach([&value](T& tensorItem){
-            tensorItem += value;
+        forEach([&value](T& item){
+            item += value;
         });
     }
+
+    // (-) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
     Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const{
 
-        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+        return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem - tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator-(const Tensor<T>& tensor, const T& value){
+
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return item - value;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator-(const T& value, const Tensor<T>& tensor){
+        
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return value - item;
         });
     }
 
@@ -441,11 +463,37 @@ namespace gema{
         });
     }
 
+    template<class T>
+    void Tensor<T>::operator-=(const T& value){
+
+        forEach([&value](T& item){
+            item -= value;
+        });
+    }
+
+    // (*) --------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     Tensor<T> *Tensor<T>::operator*(const Tensor<T> &tensor2) const{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem * tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator*(const Tensor<T>& tensor, const T& value){
+
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return item * value;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator*(const T& value, const Tensor<T>& tensor){
+        
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return value * item;
         });
     }
 
@@ -457,11 +505,37 @@ namespace gema{
         });
     }
 
+    template<class T>
+    void Tensor<T>::operator*=(const T& value){
+
+        forEach([&value](T& item){
+            item *= value;
+        });
+    }
+
+    // (/) --------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     Tensor<T> *Tensor<T>::operator/(const Tensor<T> &tensor2) const{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem / tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator/(const Tensor<T>& tensor, const T& value){
+
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return item / value;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator/(const T& value, const Tensor<T>& tensor){
+        
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return value / item;
         });
     }
 
@@ -473,11 +547,37 @@ namespace gema{
         });
     }
 
+    template<class T>
+    void Tensor<T>::operator/=(const T& value){
+
+        forEach([&value](T& item){
+            item /= value;
+        });
+    }
+
+    // (%) --------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     Tensor<T> *Tensor<T>::operator%(const Tensor<T> &tensor2) const{
         
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem % tensor2Item;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator%(const Tensor<T>& tensor, const T& value){
+
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return item % value;
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator%(const T& value, const Tensor<T>& tensor){
+        
+        return forEachAndReturn(tensor, [&value](const T& item){
+            return value % item;
         });
     }
 
@@ -489,6 +589,16 @@ namespace gema{
         });
     }
 
+    template<class T>
+    void Tensor<T>::operator%=(const T& value){
+
+        forEach([&value](T& item){
+            item %= value;
+        });
+    }
+
+    // (|) --------------------------------------------------------------------------------------------------------------------
+    
     template<typename T> //template<typename F, typename std::enable_if<!std::is_floating_point<F>::value, double>::type>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value){
 
