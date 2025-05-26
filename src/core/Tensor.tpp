@@ -25,51 +25,6 @@ namespace gema{
                      void>>;
     };
 
-    /*template<auto F, typename T>
-    constexpr T* extractData(){
-
-        using type = decltype(F);
-
-        if constexpr (std::is_same_v<type, T>){
-            return &F;
-        }
-
-        if constexpr (std::is_same_v<type, Tensor<T>>){
-            return F.tensor_.data();
-        }
-
-        return nullptr;
-    }*/
-
-    // Helper that gives item pointer no matter if Tensor<T> or T itself is provided
-    /*template<typename F, typename T>
-    consteval T* extractData(F& object){
-
-        if constexpr (std::is_same_v<F, T>){
-            return &object;
-        }
-
-        if constexpr (std::is_same_v<F, Tensor<T>>){
-            return object.tensor_.data();
-        }
-
-        return nullptr;
-    }*/
-
-    // Helper to apply operation in specified item in one or both of the operands
-    /*template<typename T, typename A, typename B>
-    consteval void genericOperation(T* resultTensor, const A& operand1, const B& operand2, 
-    const std::function<T(const T&, const T&)>& operation, const uint64_t i){
-
-        if constexpr (std::is_same_v<A, B>){
-            resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
-        }else if constexpr (std::is_same_v<A, T>){
-            resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
-        }else if constexpr (std::is_same_v<B, T>){
-            resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
-        }
-    }*/
-
     // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
     template<typename T, typename A, typename B>
     consteval uint64_t tensor_size(const A& operand1, const B& operand2){
@@ -96,16 +51,23 @@ namespace gema{
     }
 
     template<typename X, typename F, typename... R>
-    consteval X* type_pick(F&& first, R&&... rest) {
+    const X* type_pick(const F& first, const R&... rest) { 
 
         if constexpr (std::is_same_v<std::decay_t<F>, X>) {
-            return &first;
+            return (&first);
         } else if constexpr (sizeof...(rest) > 0) {
-            return type_pick<X>(std::forward<R>(rest)...);
+            return type_pick<X>(rest...);
         } else {
             return nullptr; // No match found
         }
     }
+    
+    template<typename X, typename A, typename B, typename T>
+    struct first_of_specified{
+        using type =    std::conditional<std::is_same_v<A, X>, A,
+                        std::conditional<std::is_same_v<B, X>, B, 
+                        void>>;
+    };
     
 
     /*template<typename F>
@@ -424,7 +386,7 @@ namespace gema{
     template <class T>
     Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const noexcept{
 
-        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
+        return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem + tensor2Item;
         });
     }
@@ -732,12 +694,11 @@ namespace gema{
 
     template <class T>
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B>
-    Tensor<T> *gema::Tensor<T>::applyAndReturn(const A &operand1, const B &operand2,
-    const std::function<T(const T&, const T&)> &operation) noexcept 
+    Tensor<T>* gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2,
+    const std::function<T(const T&, const T&)>& operation) noexcept 
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
         
-
-        constexpr Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
+        const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
         Tensor<T>* resultTensor = new Tensor<T>(tensorOperand);
 
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
@@ -779,7 +740,7 @@ namespace gema{
     void Tensor<T>::apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)> &operation)
     noexcept requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
 
-        constexpr Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
+        const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
 
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
