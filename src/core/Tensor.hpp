@@ -481,8 +481,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
-    Tensor<T>* operator|(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);
+    Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
