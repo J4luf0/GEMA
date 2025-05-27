@@ -604,7 +604,7 @@ namespace gema{
 
         return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){
 
-            if constexpr(std::is_floating_point_v<T>){
+            if constexpr(std::is_floating_point<T>::value){
                 auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
                 auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
                 return std::bit_cast<T>(itemBits | item2Bits);
@@ -615,22 +615,21 @@ namespace gema{
     }
 
     template <class T>
-    void Tensor<T>::operator|=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value){
+    void Tensor<T>::operator|=(const Tensor<T>& tensor2){
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem |= tensor2Item;
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
+                auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
+                tensorItem = std::bit_cast<T>(itemBits | item2Bits);
+            }else{
+                tensorItem |= tensor2Item;
+            }
         });
     }
 
-    template <class T>
-    void Tensor<T>::operator|=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value){
-
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            auto itemBits = std::bit_cast<typename float_to_integral<T>::type>(tensorItem);
-            auto item2Bits = std::bit_cast<typename float_to_integral<T>::type>(tensor2Item);
-            tensorItem = std::bit_cast<T>(itemBits | item2Bits);
-        });
-    }
+    // (&) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
     Tensor<T>* Tensor<T>::operator&(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value){

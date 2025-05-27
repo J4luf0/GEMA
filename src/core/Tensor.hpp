@@ -483,19 +483,46 @@ class Tensor {
      */
     Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "or" between every tensor item and value and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param tensor operand tensor.
+     * @param value operand value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator|(const Tensor<U>& tensor, const U& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "or" between value and every tensor item and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param value operand value.
+     * @param tensor operand tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator|(const U& value, const Tensor<U>& tensor);
+
     //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
     //template<typename F = T, typename std::enable_if<std::is_floating_point<F>::value, double>::type = 0.>
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor in place. Is specialized for floating values
-     * so it can do bitwise operation on them too.
+     * @brief Performs bitwise "or" on each item in a tensor in place. Is specialized for floating values too.
      * 
      * @param tensor2 second tensor to perform operation against.
      */
-    void operator|=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
-    void operator|=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value);
+    void operator|=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "or" between each item in a tensor and value in place. Does no size checking.
+     * 
+     * @param value operand value.
+    */
+    void operator|=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor. Is specialized for floating 
