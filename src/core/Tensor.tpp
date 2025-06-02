@@ -27,6 +27,12 @@ namespace gema{
                      void>>>>;
     };
 
+    // If F is floating point, it will get converted to integral and if not, then just returned
+    template<typename F>
+    struct non_float_or_integral{
+        using type = std::conditional_t<std::is_floating_point_v<F>, to_integral<F>, F>;
+    };
+
     // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
     template<typename T, typename A, typename B>
     consteval uint64_t tensor_size(const A& operand1, const B& operand2){
@@ -634,15 +640,22 @@ namespace gema{
     template <class T>
     void Tensor<T>::operator|=(const T &value)
     {
+        /*non_float_or_integral<T> valueBits;
+        if constexpr(std::is_floating_point<T>::value){
+            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
+        }else{
+            valueBits = value;
+        }*/
+        non_float_or_integral<T> valueBits = std::bit_cast<typename non_float_or_integral<T>::type>(value);
 
-        forEach([&value](T& item){
+        forEach([&valueBits](T& item){
 
             if constexpr(std::is_floating_point<T>::value){
                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
-                auto valueBits = std::bit_cast<typename to_integral<T>::type>(value); // TODO: make it compute only once!!!
+                 // TODO: make it compute only once!!!
                 item = std::bit_cast<T>(itemBits | valueBits);
             }else{
-                item |= value;
+                item |= valueBits;//
             }
         });
     }
