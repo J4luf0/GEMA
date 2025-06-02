@@ -532,8 +532,31 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
-    Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const;
+    /*Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);*/
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "and" between every tensor item and value and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param tensor operand tensor.
+     * @param value operand value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator&(const Tensor<U>& tensor, const U& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "and" between value and every tensor item and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param value operand value.
+     * @param tensor operand tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator&(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
@@ -541,8 +564,16 @@ class Tensor {
      * 
      * @param tensor2 second tensor to perform operation against.
      */
-    void operator&=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
-    void operator&=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value);
+    void operator&=(const Tensor<T>& tensor2);
+    /*void operator&=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
+    void operator&=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value);*/
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "and" between each item in a tensor and value in place. Does no size checking.
+     * 
+     * @param value operand value.
+    */
+    void operator&=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor. Is specialized for floating 
@@ -552,8 +583,29 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator^(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
-    Tensor<T>* operator^(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);
+    Tensor<T>* operator^(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "xor" between every tensor item and value and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param tensor operand tensor.
+     * @param value operand value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator^(const Tensor<U>& tensor, const U& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "xor" between value and every tensor item and returns result as new tensor. 
+     * Does no size checking.
+     * 
+     * @param value operand value.
+     * @param tensor operand tensor.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator^(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "xor" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
@@ -561,8 +613,14 @@ class Tensor {
      * 
      * @param tensor2 second tensor to perform operation against.
      */
-    void operator^=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
-    void operator^=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value);
+    void operator^=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise "xor" between each item in a tensor and value in place. Does no size checking.
+     * 
+     * @param value operand value.
+    */
+    void operator^=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item and returns result 
@@ -572,7 +630,18 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator<<(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator<<(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs left bit shift between every tensor item by given value and returns result as new tensor. Does no size 
+     * checking.
+     * 
+     * @param tensor operand tensor.
+     * @param value operand value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator<<(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -580,7 +649,14 @@ class Tensor {
      * 
      * @param tensor2 tensor specifying bit shift amount.
      */
-    void operator<<=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
+    void operator<<=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs left bit shift on each item in a tensor by given value in place. Does no size checking.
+     * 
+     * @param value operand value.
+    */
+    void operator<<=(const T& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item and returns result 
@@ -590,7 +666,18 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T>* operator>>(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
+    Tensor<T>* operator>>(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs right bit shift between every tensor item by given value and returns result as new tensor. Does no size 
+     * checking.
+     * 
+     * @param tensor operand tensor.
+     * @param value operand value.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator>>(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -598,15 +685,24 @@ class Tensor {
      * 
      * @param tensor2 tensor specifying bit shift amount.
      */
-    void operator>>=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
+    void operator>>=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs right bit shift on each item in a tensor by given value in place. Does no size checking.
+     * 
+     * @param value operand value.
+    */
+    void operator>>=(const T& value);
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise negation on each item in a tensor. Is specialized for floating values so it can do bitwise
-     * operation on them too. Has specialization on bool type that uses ! (not) instead of ~ on the inside, user always uses ~.
+     * @brief Performs bitwise negation on each item in a tensor. Can do bitwise operation on floating types too.
      */
-    Tensor<T>* operator~() requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
+    Tensor<T>* operator~();
+    /*Tensor<T>* operator~() requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
     Tensor<T>* operator~() requires(std::is_same<T, bool>::value);
-    Tensor<T>* operator~() requires(std::is_floating_point<T>::value);
+    Tensor<T>* operator~() requires(std::is_floating_point<T>::value);*/
+
+    Tensor<T>* operator!();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise negation on each item in a tensor.
