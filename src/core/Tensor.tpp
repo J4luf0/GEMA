@@ -640,6 +640,7 @@ namespace gema{
     template <class T>
     void Tensor<T>::operator|=(const T &value)
     {
+        // use this if the bitcast wont get optimized away to nonfloating types
         /*non_float_or_integral<T> valueBits;
         if constexpr(std::is_floating_point<T>::value){
             valueBits = std::bit_cast<typename to_integral<T>::type>(value);
