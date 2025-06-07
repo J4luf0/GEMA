@@ -29,7 +29,7 @@ namespace gema{
 
     // If F is floating point, it will get converted to integral and if not, then just returned
     template<typename F>
-    struct non_float_or_integral{
+    struct integral_if_float{
         using type = std::conditional_t<std::is_floating_point_v<F>, to_integral<F>, F>;
     };
 
@@ -76,6 +76,20 @@ namespace gema{
                         std::conditional<std::is_same_v<B, X>, B, 
                         void>>;
     };
+
+    template<typename T>
+    inline constexpr integral_if_float<T> bitcast_if_float(const T& value){
+
+        // use this if the bitcast wont get optimized away to nonfloating types
+        integral_if_float<T> valueBits;
+        if constexpr(std::is_floating_point<T>::value){
+            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
+        }else{
+            valueBits = value;
+        }
+
+        return valueBits;
+    }
 
     /*template<typename F>
     struct is_iterable{
@@ -625,14 +639,8 @@ namespace gema{
     template <class T>
     Tensor<T>* operator|(const Tensor<T>& tensor, const T& value){
 
-        // use this if the bitcast wont get optimized away to nonfloating types
-        /*non_float_or_integral<T> valueBits;
-        if constexpr(std::is_floating_point<T>::value){
-            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
-        }else{
-            valueBits = value;
-        }*/
-        non_float_or_integral<T> valueBits = std::bit_cast<typename non_float_or_integral<T>::type>(value);
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+        //integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);
 
         return forEachAndReturn(tensor, [&valueBits](const T& item){
 
@@ -648,7 +656,17 @@ namespace gema{
     template <class T>
     inline Tensor<T>* operator|(const T& value, const Tensor<T>& tensor){
 
-        return tensor | value;
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+
+        return forEachAndReturn(tensor, [&valueBits](const T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                return std::bit_cast<T>(valueBits | item);
+            }else{
+                return valueBits | item;
+            }
+        });
     }
 
     template <class T>
@@ -669,23 +687,15 @@ namespace gema{
     template <class T>
     void Tensor<T>::operator|=(const T &value)
     {
-        // use this if the bitcast wont get optimized away to nonfloating types
-        /*non_float_or_integral<T> valueBits;
-        if constexpr(std::is_floating_point<T>::value){
-            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
-        }else{
-            valueBits = value;
-        }*/
-        non_float_or_integral<T> valueBits = std::bit_cast<typename non_float_or_integral<T>::type>(value);
+        integral_if_float<T> valueBits = bitcast_if_float(value);
 
         forEach([&valueBits](T& item){
 
             if constexpr(std::is_floating_point<T>::value){
                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
-                 // TODO: make it compute only once!!!
                 item = std::bit_cast<T>(itemBits | valueBits);
             }else{
-                item |= valueBits;//
+                item |= valueBits;
             }
         });
     }
@@ -708,6 +718,39 @@ namespace gema{
     }
 
     template <class T>
+    Tensor<T>* operator&(const Tensor<T>& tensor, const T& value){
+
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+        //integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);
+
+        return forEachAndReturn(tensor, [&valueBits](const T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                return std::bit_cast<T>(itemBits & valueBits);
+            }else{
+                return item & valueBits;
+            }
+        });
+    }
+
+    template <class T>
+    inline Tensor<T>* operator&(const T& value, const Tensor<T>& tensor){
+
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+
+        return forEachAndReturn(tensor, [&valueBits](const T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                return std::bit_cast<T>(valueBits & item);
+            }else{
+                return valueBits & item;
+            }
+        });
+    }
+
+    template <class T>
     void Tensor<T>::operator&=(const Tensor<T>& tensor2){
         
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
@@ -718,6 +761,22 @@ namespace gema{
                 tensorItem = std::bit_cast<T>(itemBits & item2Bits);
             }else{
                 tensorItem &= tensor2Item;
+            }
+        });
+    }
+
+    template <class T>
+    void Tensor<T>::operator&=(const T &value)
+    {
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+
+        forEach([&valueBits](T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                item = std::bit_cast<T>(itemBits & valueBits);
+            }else{
+                item &= valueBits;
             }
         });
     }
