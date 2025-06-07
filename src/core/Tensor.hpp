@@ -78,8 +78,8 @@ concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
  * 
  * @tparam Type of data that is stored in the tensor.
  * 
- * @warning Even though the bool is supported, it is advised to use char instead, unless user is looking to take advantage
- * of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
+ * @warning Even though the bool is supported, it is advised to use char or 8 bit int instead, unless user is looking to take 
+ * advantage of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
  * forEach(), etc...) and thus slower.
  */
 template<class T> 
@@ -762,7 +762,8 @@ class Tensor {
      * 
      * @return A pointer to resulting tensor.
      */
-    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const;
+    template <apply_and_return_callable<T> C>
+    inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
     // requires(!std::is_floating_point<T>::value);
     /*inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
     const requires(std::is_floating_point<T>::value);*/
@@ -778,8 +779,8 @@ class Tensor {
      * 
      * 
      */
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
-    static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, const std::function<T(const T&, const T&)> &operation)
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C> 
+    static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, C&& operation)
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -793,8 +794,8 @@ class Tensor {
     inline void apply(const Tensor<T>& tensor2, C&& operation) /*requires(std::is_invocable_r_v<void, C, T&, const T&>)*/;
     //requires(!std::is_same<T, bool>::value);/*const std::function<void(T&, const T&)>&*/
 
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
-    static void apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)>& operation)
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_callable<T> C> 
+    static void apply(A& operand1, const B& operand2, C&& operation)
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -826,7 +827,7 @@ class Tensor {
      * @param apply function that will be applied on all items.
      */
     template <foreach_callable<T> C> 
-    void forEach(C&& operation);
+    inline void forEach(C&& operation);
     //void forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------

@@ -884,37 +884,47 @@ namespace gema{
     }
 
     template <class T>
-    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation) const{
-        // requires(!std::is_floating_point<T>::value){
+    template <apply_and_return_callable<T> C>
+    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
 
-        Tensor<T>* resultTensor = new Tensor<T>(this);
-
-        std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
-
-        /*for(uint64_t i = 0; i < tensor_.size(); i++){
-            tensorOut->tensor_[i] = operation(tensor_[i], tensor2.tensor_[i]);
-        }*/
-
-        return resultTensor;
+        //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
+        return applyAndReturn(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B>
-    Tensor<T>* gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2,
-    const std::function<T(const T&, const T&)>& operation) 
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C>
+    Tensor<T>* gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
         
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
         Tensor<T>* resultTensor = new Tensor<T>(tensorOperand);
 
+        // TODO: find a way to deal with bool or maybe get rid of it
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            if constexpr (std::is_same_v<A, B>){
-                resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<A, T>){
-                resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<B, T>){
-                resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
+            if constexpr(std::is_same_v<T, bool>){
+
+                if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
+                    bool op1Item = operand1.tensor_.at(i);
+                    bool op2Item = operand2.tensor_.at(i);
+                    resultTensor->tensor_.at(i) = operation(op1Item, op2Item);
+
+                }else if constexpr (std::is_same_v<A, T>){
+                    bool op2Item = operand2.tensor_.at(i);
+                    resultTensor->tensor_.at(i) = operation(operand1, op2Item);
+
+                }else if constexpr (std::is_same_v<B, T>){
+                    bool op1Item = operand1.tensor_.at(i);
+                    resultTensor->tensor_.at(i) = operation(op1Item, operand2);
+                }
+            }else{
+                if constexpr (std::is_same_v<A, B>){
+                    resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+                }else if constexpr (std::is_same_v<A, T>){
+                    resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
+                }else if constexpr (std::is_same_v<B, T>){
+                    resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
+                }
             }
         }
 
@@ -923,9 +933,9 @@ namespace gema{
 
     template <class T>
     template <apply_callable<T> C>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation)/* requires(std::is_invocable_r_v<void, C, T&, const T&>)*/{
+    inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation){
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        /*for(uint64_t i = 0; i < tensor_.size(); i++){
 
             if constexpr(std::is_same<T, bool>::value){
                 bool tensorItemValue = tensor_.at(i);
@@ -934,33 +944,55 @@ namespace gema{
             }else{
                 operation(tensor_[i], tensor2.tensor_[i]);
             }
-        }
+        }*/
+       apply(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
-    void Tensor<T>::apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)> &operation)
+    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_callable<T> C> 
+    void Tensor<T>::apply(A& operand1, const B& operand2, C&& operation) // static
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
 
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
 
+
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            if constexpr (std::is_same_v<A, B>){
-                operation(operand1.tensor_[i], operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<A, T>){
-                operation(operand1, operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<B, T>){
-                operation(operand1.tensor_[i], operand2);
+            if constexpr(std::is_same_v<T, bool>){
+                if constexpr (std::is_same_v<A, B>){
+                    bool op1Item = operand1.tensor_.at(i);
+                    bool op2Item = operand2.tensor_.at(i);
+                    operation(op1Item, op2Item);
+                    operand1.tensor_.at(i) = op1Item;
+
+                }else if constexpr (std::is_same_v<A, T>){
+                    bool op2Item = operand2.tensor_.at(i);
+                    operation(operand1, op2Item);
+                    operand2.tensor_.at(i) = op2Item;
+
+                }else if constexpr (std::is_same_v<B, T>){
+                    bool op1Item = operand1.tensor_.at(i);
+                    operation(op1Item, operand2);
+                    operand1.tensor_.at(i) = op1Item;
+                }
+            }else{
+                if constexpr (std::is_same_v<A, B>){
+                    operation(operand1.tensor_[i], operand2.tensor_[i]);
+                }else if constexpr (std::is_same_v<A, T>){
+                    operation(operand1, operand2.tensor_[i]);
+                }else if constexpr (std::is_same_v<B, T>){
+                    operation(operand1.tensor_[i], operand2);
+                }
             }
         }
+        
     }
 
     template <class T>
     template <foreach_and_return_callable<T> C>
     inline Tensor<T>* Tensor<T>::forEachAndReturn(C&& operation) const{
 
-        return forEachAndReturn(*this, std::forward(operation));
+        return forEachAndReturn(*this, std::forward<C>(operation));
     }
 
     template <class T>
@@ -978,16 +1010,15 @@ namespace gema{
 
     template <class T>
     template <foreach_callable<T> C>
-    void Tensor<T>::forEach(C&& operation){
+    inline void Tensor<T>::forEach(C&& operation){
 
-        forEach(*this, std::forward(operation));
+        forEach(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_callable<T> C>
     void Tensor<T>::forEach(const Tensor<T>& tensor, C&& operation){ // static
 
-        //tensor.forEach(std::forward(operation));
         #pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
 
