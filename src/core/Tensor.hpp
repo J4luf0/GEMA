@@ -798,33 +798,35 @@ class Tensor {
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Creates new instance with same dimensions as this tensor and applies passed function on all items, then writes 
+     * items into new instance, then returns the new instance. Looping order is unspecified.
+     * 
+     * @param apply function that will be applied on all items.
+     * 
+     * @return Pointer to new instance upon its items was the function used.
+     */
+    template <foreach_and_return_callable<T> C>
+    inline Tensor<T>* forEachAndReturn(C&& operation) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as given tensor and applies passed function on all items, then writes 
-     * items into new instance, then returns the new instance.
+     * items into new instance, then returns the new instance. Looping order is unspecified.
      * 
      * @param tensor tensor to perform the operation on.
      * @param operation function defining operation on item.
      * 
      * @return Pointer to new instance upon its items was the function used.
      */
-    static Tensor<T>* forEachAndReturn(const Tensor<T>& tensor, const std::function<T(const T&)>& operation);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Creates new instance with same dimensions as this tensor and applies passed function on all items, then writes 
-     * items into new instance, then returns the new instance.
-     * 
-     * @param apply function that will be applied on all items.
-     * 
-     * @return Pointer to new instance upon its items was the function used.
-     */
-    inline Tensor<T>* forEachAndReturn(const std::function<T(const T&)>& operation) const;
-
+    template <foreach_and_return_callable<T> C>
+    static Tensor<T>* forEachAndReturn(const Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Applies function on all items with passed function. Looping order is unspecified.
      * 
      * @param apply function that will be applied on all items.
      */
-    template <foreach_callable<T> C> void forEach(C&& operation);
+    template <foreach_callable<T> C> 
+    void forEach(C&& operation);
     //void forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -833,7 +835,8 @@ class Tensor {
      * @param tensor to perform the operation on.
      * @param operation function that will be applied on all items.
      */
-    template <foreach_callable<T> C> static void forEach(const Tensor<T>& tensor, C&& operation);
+    template <foreach_callable<T> C>
+    static void forEach(const Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

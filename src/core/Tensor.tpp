@@ -957,7 +957,15 @@ namespace gema{
     }
 
     template <class T>
-    Tensor<T> *Tensor<T>::forEachAndReturn(const Tensor<T> &tensor, const std::function<T(const T &)> &operation)
+    template <foreach_and_return_callable<T> C>
+    inline Tensor<T>* Tensor<T>::forEachAndReturn(C&& operation) const{
+
+        return forEachAndReturn(*this, std::forward(operation));
+    }
+
+    template <class T>
+    template <foreach_and_return_callable<T> C>
+    Tensor<T>* Tensor<T>::forEachAndReturn(const Tensor<T> &tensor, C&& operation) // static
     {
         Tensor<T>* resultTensor = new Tensor<T>(&tensor);
 
@@ -969,41 +977,32 @@ namespace gema{
     }
 
     template <class T>
-    inline Tensor<T>* Tensor<T>::forEachAndReturn(const std::function<T(const T&)>& operation) const{
-
-        return forEachAndReturn(*this, operation);
-    }
-
-
-    template <class T>
     template <foreach_callable<T> C>
     void Tensor<T>::forEach(C&& operation){
 
-        // TODO: what approach is better?
-        // 1.
-        uint64_t i = 0;
-        #pragma GCC ivdep
-        for(T& item : tensor_){
-
-            if constexpr(std::is_same<T, bool>::value){
-                bool value = tensor_.at(i);
-                operation(value);
-                tensor_.at(i) = value;
-                ++i;
-            }else{
-                operation(item);
-            }
-            
-        }
-        // 2.
-        //std::transform(tensor_.begin(), tensor_.end(), tensor_.begin(), apply);
+        forEach(*this, std::forward(operation));
     }
 
     template <class T>
     template <foreach_callable<T> C>
-    void Tensor<T>::forEach(const Tensor<T>& tensor, C&& operation){// TODO: is && needed?
+    void Tensor<T>::forEach(const Tensor<T>& tensor, C&& operation){ // static
 
-        tensor.forEach(std::forward(operation));
+        //tensor.forEach(std::forward(operation));
+        #pragma GCC ivdep
+        for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
+
+            if constexpr(std::is_same<T, bool>::value){
+                bool value = tensor.tensor_.at(i);
+                operation(value);
+                tensor.tensor_.at(i) = value;
+                ++i;
+            }else{
+                operation(tensor.tensor_[i]);
+            }
+        }
+        
+        // 2.
+        //std::transform(tensor.tensor_.begin(), tensor.tensor_.end(), tensor.tensor_.begin(), apply);
     }
 
     template <class T>
