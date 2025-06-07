@@ -76,7 +76,6 @@ namespace gema{
                         std::conditional<std::is_same_v<B, X>, B, 
                         void>>;
     };
-    
 
     /*template<typename F>
     struct is_iterable{
@@ -395,7 +394,7 @@ namespace gema{
     // (+) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
+    inline Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
         return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
             return tensorItem + tensor2Item;
@@ -403,7 +402,7 @@ namespace gema{
     }
 
     template<class T>
-    Tensor<T>* operator+(const Tensor<T>& tensor, const T& value){
+    inline Tensor<T>* operator+(const Tensor<T>& tensor, const T& value){
         /*return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
             return tensorItem + singularValue;
         });*/
@@ -414,8 +413,9 @@ namespace gema{
     }
 
     template<class T>
-    Tensor<T>* operator+(const T& value, const Tensor<T>& tensor){
+    inline Tensor<T>* operator+(const T& value, const Tensor<T>& tensor){
 
+        // do not delegate switched argument operator
         return forEachAndReturn(tensor, [&value](const T& item){
             return value + item;
         });
@@ -620,6 +620,35 @@ namespace gema{
                 return tensorItem | tensor2Item;
             }
         });
+    }
+
+    template <class T>
+    Tensor<T>* operator|(const Tensor<T>& tensor, const T& value){
+
+        // use this if the bitcast wont get optimized away to nonfloating types
+        /*non_float_or_integral<T> valueBits;
+        if constexpr(std::is_floating_point<T>::value){
+            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
+        }else{
+            valueBits = value;
+        }*/
+        non_float_or_integral<T> valueBits = std::bit_cast<typename non_float_or_integral<T>::type>(value);
+
+        return forEachAndReturn(tensor, [&valueBits](const T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                return std::bit_cast<T>(itemBits | valueBits);
+            }else{
+                return item | valueBits;
+            }
+        });
+    }
+
+    template <class T>
+    inline Tensor<T>* operator|(const T& value, const Tensor<T>& tensor){
+
+        return tensor | value;
     }
 
     template <class T>
@@ -893,22 +922,18 @@ namespace gema{
     }
 
     template <class T>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
-    requires(!std::is_same<T, bool>::value){
+    template <apply_callable<T> C>
+    inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation)/* requires(std::is_invocable_r_v<void, C, T&, const T&>)*/{
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
-            operation(tensor_[i], tensor2.tensor_[i]);
-        }
-    }
 
-    template <class T>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
-    requires(std::is_same<T, bool>::value){
-
-        for(uint64_t i = 0; i < tensor_.size(); i++){
-            bool tensorItemValue = tensor_.at(i);
-            bool tensor2ItemValue = tensor2.tensor_.at(i);
-            operation(tensorItemValue, tensor2ItemValue);
+            if constexpr(std::is_same<T, bool>::value){
+                bool tensorItemValue = tensor_.at(i);
+                bool tensor2ItemValue = tensor2.tensor_.at(i);
+                operation(tensorItemValue, tensor2ItemValue);
+            }else{
+                operation(tensor_[i], tensor2.tensor_[i]);
+            }
         }
     }
 
@@ -951,31 +976,34 @@ namespace gema{
 
 
     template <class T>
-    void Tensor<T>::forEach(const std::function<void(T&)>& operation) requires(!std::is_same<T, bool>::value){
+    template <foreach_callable<T> C>
+    void Tensor<T>::forEach(C&& operation){
 
         // TODO: what approach is better?
         // 1.
+        uint64_t i = 0;
+        #pragma GCC ivdep
         for(T& item : tensor_){
-            operation(item);
+
+            if constexpr(std::is_same<T, bool>::value){
+                bool value = tensor_.at(i);
+                operation(value);
+                tensor_.at(i) = value;
+                ++i;
+            }else{
+                operation(item);
+            }
+            
         }
         // 2.
         //std::transform(tensor_.begin(), tensor_.end(), tensor_.begin(), apply);
     }
 
     template <class T>
-    void Tensor<T>::forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value){
-        
-        for(uint64_t i = 0; i < tensor_.size(); i++){
-            bool value = tensor_.at(i);
-            operation(value);
-            tensor_.at(i) = value;
-        }
-    }
+    template <foreach_callable<T> C>
+    void Tensor<T>::forEach(const Tensor<T>& tensor, C&& operation){// TODO: is && needed?
 
-    template <class T>
-    void Tensor<T>::forEach(const Tensor<T>& tensor, const std::function<void(T&)>& operation){
-
-        tensor.forEach(operation);
+        tensor.forEach(std::forward(operation));
     }
 
     template <class T>

@@ -8,8 +8,28 @@ template<class T>
 class Tensor;
     
 // Concept that checks if type X is of type T or Tensor<T>. Useful for operator overloads.
-template <typename X, typename T>
+template <typename X, class T>
 concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
+
+/// Checks for void(T&, const T&) signature.
+template <typename C, class T>
+concept apply_callable = std::is_invocable_r_v<void, C, T&, const T&>;
+// const std::function<void(T&, const T&)>&
+
+/// Checks for T(const T&, const T&) signature.
+template <typename C, class T>
+concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
+// const std::function<T(const T&, const T&)>&
+
+/// Checks for void(T&) signature.
+template <typename C, class T>
+concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
+// const std::function<void(T&)>&
+
+// Checks for T(const T&) signature.
+template <typename C, class T>
+concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
+// const std::function<T(const T&)>&
 
 // ============================================================================================================================
 /**
@@ -265,7 +285,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
     */
-    Tensor<T>* operator+(const Tensor<T>& tensor2) const;
+    inline Tensor<T>* operator+(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds every tensor item to value and returns result as new tensor. Does no size checking.
@@ -275,7 +295,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U>* operator+(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend inline Tensor<U>* operator+(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds value to every tensor item and returns result as new tensor. Does no size checking.
@@ -285,7 +305,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U>* operator+(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend inline Tensor<U>* operator+(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds tensor to tensor item by item in place. Does no size checking.
@@ -503,7 +523,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<T>* operator|(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend inline Tensor<T>* operator|(const U& value, const Tensor<U>& tensor);
 
     //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
@@ -769,14 +789,13 @@ class Tensor {
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
      */
-    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
-    requires(!std::is_same<T, bool>::value);
-    inline void apply(const Tensor<T>& tensor2, const std::function<void(T&, const T&)>& operation)
-    requires(std::is_same<T, bool>::value);
+    template <apply_callable<T> C>
+    inline void apply(const Tensor<T>& tensor2, C&& operation) /*requires(std::is_invocable_r_v<void, C, T&, const T&>)*/;
+    //requires(!std::is_same<T, bool>::value);/*const std::function<void(T&, const T&)>&*/
 
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B> 
     static void apply(A& operand1, const B& operand2, const std::function<void(T&, const T&)>& operation)
- requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
+    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as given tensor and applies passed function on all items, then writes 
@@ -801,20 +820,20 @@ class Tensor {
 
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Applies function on all items with passed function.
+     * @brief Applies function on all items with passed function. Looping order is unspecified.
      * 
      * @param apply function that will be applied on all items.
      */
-    void forEach(const std::function<void(T&)>& operation) requires(!std::is_same<T, bool>::value);
-    void forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value);
+    template <foreach_callable<T> C> void forEach(C&& operation);
+    //void forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Applies function on all items in given tensor with passed function.
+     * @brief Applies function on all items in given tensor with passed function. Looping order is unspecified.
      * 
      * @param tensor to perform the operation on.
      * @param operation function that will be applied on all items.
      */
-    static void forEach(const Tensor<T>& tensor, const std::function<void(T&)>& operation);
+    template <foreach_callable<T> C> static void forEach(const Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.
