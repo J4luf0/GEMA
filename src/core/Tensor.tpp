@@ -405,8 +405,59 @@ namespace gema{
 
     // OPERATOR OVERLOADS
 
-    // (+) --------------------------------------------------------------------------------------------------------------------
+    // ARITHMETIC BINARY GENERIC MACRO
+    #define ARITHMETIC_BINARY(OP_SYMBOL)\
+    /**/\
+        template <class T>\
+        inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+    /**/\
+            return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
+                return tensorItem OP_SYMBOL tensor2Item;\
+            });\
+        }\
+    /**/\
+        template<class T>\
+        inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+    /**/\
+            return forEachAndReturn(tensor, [&value](const T& item){\
+                return item OP_SYMBOL value;\
+            });\
+        }\
+    /**/\
+        template<class T>\
+        inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+    /**/\
+            /* do not delegate switched argument operator */\
+            return forEachAndReturn(tensor, [&value](const T& item){\
+                return value OP_SYMBOL item;\
+            });\
+        }\
+    /**/\
+        template <class T>\
+        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
+    /**/\
+            apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
+                tensorItem OP_SYMBOL##= tensor2Item;\
+            });\
+        }\
+    /**/\
+        template<class T>\
+        void Tensor<T>::operator OP_SYMBOL##=(const T& value){\
+    /**/\
+            forEach([&value](T& item){\
+                item OP_SYMBOL##= value;\
+            });\
+        }\
+    /**/
 
+    ARITHMETIC_BINARY(+)
+    ARITHMETIC_BINARY(-)
+    ARITHMETIC_BINARY(*)
+    ARITHMETIC_BINARY(/)
+    ARITHMETIC_BINARY(%)
+
+    // (+) --------------------------------------------------------------------------------------------------------------------
+/*
     template <class T>
     inline Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
@@ -417,9 +468,9 @@ namespace gema{
 
     template<class T>
     inline Tensor<T>* operator+(const Tensor<T>& tensor, const T& value){
-        /*return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
-            return tensorItem + singularValue;
-        });*/
+        //return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
+        //    return tensorItem + singularValue;
+        //});
 
         return forEachAndReturn(tensor, [&value](const T& item){
             return item + value;
@@ -617,7 +668,7 @@ namespace gema{
         forEach([&value](T& item){
             item %= value;
         });
-    }
+    }*/
 
     // (|) --------------------------------------------------------------------------------------------------------------------
     
@@ -640,7 +691,7 @@ namespace gema{
     Tensor<T>* operator|(const Tensor<T>& tensor, const T& value){
 
         integral_if_float<T> valueBits = bitcast_if_float(value);
-        //integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);
+        /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/
 
         return forEachAndReturn(tensor, [&valueBits](const T& item){
 
