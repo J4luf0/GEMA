@@ -13,11 +13,11 @@
 
 namespace gema{
 
-    const int maxLoopCount = 65536; // Will be probably unused.
+    constexpr int maxLoopCount = 65536; // Will be probably unused.
 
     // Meta helpers:
     
-    // Helper converter from floating types to integral
+    // Converts from floating types to integral of same size
     template<typename F>
     struct to_integral {
         using type = std::conditional_t<sizeof(F) == 1, uint8_t,
@@ -33,50 +33,7 @@ namespace gema{
         using type = std::conditional_t<std::is_floating_point_v<F>, to_integral<F>, F>;
     };
 
-    // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
-    template<typename T, typename A, typename B>
-    consteval uint64_t tensor_size(const A& operand1, const B& operand2){
-
-        if constexpr (std::is_same_v<A, Tensor<T>>){
-            return operand1.tensor_.size();
-        } else if constexpr (std::is_same_v<B, Tensor<T>>){
-            return operand2.tensor_.size();
-        }else{
-            return 1;
-        }
-    }
-
-    template<typename X, typename T, typename A, typename B>
-    consteval Tensor<T>* type_pick_b(const A& operand1, const B& operand2){
-        
-        if constexpr (std::is_same_v<A, X>){
-            return &operand1;
-        } else if constexpr (std::is_same_v<B, X>){
-            return &operand2;
-        } else {
-            return nullptr;
-        }
-    }
-
-    template<typename X, typename F, typename... R>
-    inline const X* type_pick(const F& first, const R&... rest) { 
-
-        if constexpr (std::is_same_v<std::decay_t<F>, X>) {
-            return (&first);
-        } else if constexpr (sizeof...(rest) > 0) {
-            return type_pick<X>(rest...);
-        } else {
-            return nullptr; // No match found
-        }
-    }
-    
-    template<typename X, typename A, typename B, typename T>
-    struct first_of_specified{
-        using type =    std::conditional<std::is_same_v<A, X>, A,
-                        std::conditional<std::is_same_v<B, X>, B, 
-                        void>>;
-    };
-
+    // If argument is floating type, it will get bitcasted to integral of same size, otherwise just returned
     template<typename T>
     inline constexpr integral_if_float<T> bitcast_if_float(const T& value){
 
@@ -91,33 +48,58 @@ namespace gema{
         return valueBits;
     }
 
-    /*template<typename F>
-    struct is_iterable{
-        using type = std::conditional_t<sizeof(F) == 4, uint32_t, 
-                     std::conditional_t<sizeof(F) == 8, uint64_t,
-                     void>>;
-    };*/
+    // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
+    template<typename T, typename A, typename B>
+    consteval uint64_t tensor_size(const A& operand1, const B& operand2){
 
-    // probably delete this
-    // Primitives and simple types
-    //template <typename T> class Tensor<T>;
-    //template class Tensor<T>;
-    /*template class Tensor<bool>;
-    template class Tensor<char>;
-    template class Tensor<short>;
-    template class Tensor<int>;
-    template class Tensor<long long int>;
-    template class Tensor<float>;
-    template class Tensor<double>;*/
+        if constexpr (std::is_same_v<A, Tensor<T>>){
+            return operand1.tensor_.size();
+        } else if constexpr (std::is_same_v<B, Tensor<T>>){
+            return operand2.tensor_.size();
+        }else{
+            return 1;
+        }
+    }
+
+    // Returns first argument of two arguments that matches given type
+    template<typename X, typename T, typename A, typename B>
+    consteval Tensor<T>* type_pick_b(const A& operand1, const B& operand2){
+        
+        if constexpr (std::is_same_v<A, X>){
+            return &operand1;
+        } else if constexpr (std::is_same_v<B, X>){
+            return &operand2;
+        } else {
+            return nullptr;
+        }
+    }
+
+    // Returns first argument that matches given type
+    template<typename X, typename F, typename... R>
+    inline const X* type_pick(const F& first, const R&... rest) { 
+
+        if constexpr (std::is_same_v<std::decay_t<F>, X>) {
+            return (&first);
+        } else if constexpr (sizeof...(rest) > 0) {
+            return type_pick<X>(rest...);
+        } else {
+            return nullptr; // No match found
+        }
+    }
     
-    //template <typename T> class Tensor<Tensor<T>*>;
-    //template <typename O> class Tensor<O&>;
-    //template <typename O> class Tensor<O*>;
-    // Others
-    //template <typename O> class Tensor<std::vector<O>>;
-    //template <typename O> class Tensor<std::unique_ptr<O>>;
+    // Returns first type of two type arguments that matches given type
+    template<typename X, typename A, typename B, typename T>
+    struct first_of_specified{
+        using type =    std::conditional<std::is_same_v<A, X>, A,
+                        std::conditional<std::is_same_v<B, X>, B, 
+                        void>>;
+    };
 
-    // static private default values
+    
+
+
+
+    // static private default values:
 
     template <class T>
     inline std::function<bool(const T&, const T&)> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
@@ -149,7 +131,7 @@ namespace gema{
         }
     };
 
-    // public methods
+    // public methods:
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
@@ -1153,7 +1135,7 @@ namespace gema{
 
 
 
-    // private methods
+    // private methods:
 
     template <class T>
     std::vector<uint64_t> Tensor<T>::getCoords(int itemIndex) const{
