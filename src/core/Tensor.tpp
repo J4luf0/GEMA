@@ -113,8 +113,8 @@ namespace gema{
 
     template <class T>
     inline std::function<int(const T&, const T&)> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
-        if constexpr (std::is_floating_point<T>::value) {
 
+        if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
             if (std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)))){
                 return 0;
@@ -124,7 +124,7 @@ namespace gema{
                 return -1;
             }
 
-        } else if constexpr (std::is_arithmetic<T>::value){
+        } else if constexpr (std::is_integral<T>::value){
             return (a != b) * ((a > b) + -(a < b));
         }else{
             return 0;
@@ -340,6 +340,8 @@ namespace gema{
         return tensorTransposed;
     }
 
+    // SPECIAL OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
+    // Does not need macros.
     template <class T>
     Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor2){
         
@@ -387,9 +389,26 @@ namespace gema{
         }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
 
-    // OPERATOR OVERLOADS
+    // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------
+    // Operator overload implemetations are often repetetive. To reduce code duplicates, macros are created for the overloads
+    // and their variants. A naming convention has been created to include in macro name information about its abstract
+    // signature.
+    //
+    // Notation explanation:
+    // The last letters in macro name (after the last _) mean type of operation (similar to function signature).
+    // T - Tensor<T>
+    // V - value of type T from Tensor<T>
+    // o - operation
+    // oe - operation in place
+    // r - results in
+    //
+    // Examples: 
+    // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
+    // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
 
     // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
+    // Artihmetic binary is an binary operation on two arithmetic types (or ones with overloaded operators acting like 
+    // arithmetic).
     #define ARITHMETIC_BINARY(OP_SYMBOL)\
     /**/\
         template <class T>\
@@ -411,7 +430,8 @@ namespace gema{
         template<class T>\
         inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
-            /* do not delegate switched argument operator */\
+            /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
+            /* it is not guaranteed to be so on every type and operation!*/\
             return forEachAndReturn(tensor, [&value](const T& item){\
                 return value OP_SYMBOL item;\
             });\
@@ -442,8 +462,9 @@ namespace gema{
 
     #undef ARITHMETIC_BINARY // Macro no longer needed
 
-    // (+) --------------------------------------------------------------------------------------------------------------------
 /*
+    // (+) --------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     inline Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
 
@@ -654,24 +675,13 @@ namespace gema{
         forEach([&value](T& item){
             item %= value;
         });
-    }*/
+    }
+*/
 
     // BITWISE BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
     // Bitwise operations (including bitshift) will support floating types using bitcast inside the functions.
-    //
-    // Notation explanation:
-    // The last letters in macro name (after the last _) mean type of operation (similar to function signature).
-    // T - Tensor<T>
-    // V - value of type T from Tensor<T>
-    // o - operation
-    // oe - operation in place
-    // r - results in
-    //
-    // Examples: 
-    // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
-    // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
-
     #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+    /**/\
         template<typename T>\
         inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
@@ -689,6 +699,7 @@ namespace gema{
     /**/
 
     #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+    /**/\
         template <class T>\
         inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
@@ -708,6 +719,7 @@ namespace gema{
     /**/
 
     #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
+    /**/\
         template <class T>\
         inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
@@ -726,6 +738,7 @@ namespace gema{
     /**/
 
     #define BITWISE_BINARY_ToeT(OP_SYMBOL)\
+    /**/\
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
     /**/\
@@ -743,6 +756,7 @@ namespace gema{
     /**/
 
     #define BITWISE_BINARY_ToeV(OP_SYMBOL)\
+    /**/\
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
     /**/\
@@ -790,8 +804,9 @@ namespace gema{
     #undef BITSHIFTLIKE
     #undef BITWISE_BINARY 
 
+/*
     // (|) --------------------------------------------------------------------------------------------------------------------
-   /*
+   
     template<typename T>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
 
@@ -982,10 +997,12 @@ namespace gema{
                 tensorItem ^= tensor2Item;
             }
         });
-    }*/
+    }
+*/
 
-    // (<<) -------------------------------------------------------------------------------------------------------------------
 /*
+    // (<<) -------------------------------------------------------------------------------------------------------------------
+
     template <class T>
     Tensor<T>* Tensor<T>::operator<<(const Tensor<T> &tensor2) const{
 
@@ -1080,6 +1097,7 @@ namespace gema{
         });
     }
 */
+
     // (~) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
@@ -1288,7 +1306,6 @@ namespace gema{
                 bool value = tensor.tensor_.at(i);
                 operation(value);
                 tensor.tensor_.at(i) = value;
-                ++i;
             }else{
                 operation(tensor.tensor_[i]);
             }
