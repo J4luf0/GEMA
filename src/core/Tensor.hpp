@@ -260,6 +260,10 @@ class Tensor {
     */
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
+
+    
+    // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copies one tensor to another by value.
      * 
@@ -287,6 +291,10 @@ class Tensor {
      * @return Boolean @b false if the tensors are the same and @b true in not.
      */
     bool operator!=(const Tensor<T>& tensor2) const;
+
+
+
+    // ARITHMETIC OPERATOR OVERLOADS ------------------------------------------------------------------------------------------
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds tensor with tensor item by item and returns result as new tensor. Does no size checking.
@@ -502,6 +510,39 @@ class Tensor {
      * @param value divisor value.
     */
     void operator%=(const T& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "and" item by item and returns result as new tensor. Does not size checking.
+     * 
+     * @param tensor2 right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    Tensor<T>* operator&&(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "and" with every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor left-hand side operand.
+     * @param value right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator&&(const Tensor<U>& tensor, const U& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "and" with value by every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param value left-hand side operand.
+     * @param tensor right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator&&(const U& value, const Tensor<U>& tensor);
+
+
+
+    // BITWISE OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor. Is specialized for floating 
@@ -723,6 +764,10 @@ class Tensor {
      * @param value operand value.
     */
     void operator>>=(const T& value);
+
+
+
+    // UNARY OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise negation on each item in a tensor. Can do bitwise operation on floating types too.
@@ -766,6 +811,10 @@ class Tensor {
     Tensor<T>& operator++();
 
     Tensor<T>* operator++(int) const;
+
+    // OPERATOR OVERLOADS END -------------------------------------------------------------------------------------------------
+
+
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 
