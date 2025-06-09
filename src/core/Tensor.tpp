@@ -131,6 +131,8 @@ namespace gema{
         }
     };
 
+
+
     // public methods:
 
     template <class T>
@@ -387,7 +389,7 @@ namespace gema{
 
     // OPERATOR OVERLOADS
 
-    // ARITHMETIC BINARY GENERIC MACRO
+    // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
     #define ARITHMETIC_BINARY(OP_SYMBOL)\
     /**/\
         template <class T>\
@@ -652,8 +654,95 @@ namespace gema{
         });
     }*/
 
+    // BITWISE_BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
+    #define BITWISE_BINARY(OP_SYMBOL)\
+    /**/\
+        template<typename T>\
+        Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+    /**/\
+            return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
+    /**/\
+                if constexpr(std::is_floating_point<T>::value){\
+                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
+                    auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
+                    return std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
+                }else{\
+                    return tensorItem OP_SYMBOL tensor2Item;\
+                }\
+            });\
+        }\
+    /**/\
+        template <class T>\
+        Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+    /**/\
+            integral_if_float<T> valueBits = bitcast_if_float(value);\
+            /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
+    /**/\
+            return forEachAndReturn(tensor, [&valueBits](const T& item){\
+    /**/\
+                if constexpr(std::is_floating_point<T>::value){\
+                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+                    return std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
+                }else{\
+                    return item OP_SYMBOL valueBits;\
+                }\
+            });\
+        }\
+    /**/\
+        template <class T>\
+        inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+    /**/\
+            integral_if_float<T> valueBits = bitcast_if_float(value);\
+    /**/\
+            return forEachAndReturn(tensor, [&valueBits](const T& item){\
+    /**/\
+                if constexpr(std::is_floating_point<T>::value){\
+                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+                    return std::bit_cast<T>(valueBits OP_SYMBOL item);\
+                }else{\
+                    return valueBits OP_SYMBOL item;\
+                }\
+            });\
+        }\
+    /**/\
+        template <class T>\
+        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
+    /**/\
+            apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
+    /**/\
+                if constexpr(std::is_floating_point<T>::value){\
+                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
+                    auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
+                    tensorItem = std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
+                }else{\
+                    tensorItem OP_SYMBOL##= tensor2Item;\
+                }\
+            });\
+        }\
+    /**/\
+        template <class T>\
+        void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
+    /**/\
+            integral_if_float<T> valueBits = bitcast_if_float(value);\
+    /**/\
+            forEach([&valueBits](T& item){\
+    /**/\
+                if constexpr(std::is_floating_point<T>::value){\
+                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+                    item = std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
+                }else{\
+                    item OP_SYMBOL##= valueBits;\
+                }\
+            });\
+        }\
+    /**/
+
+    BITWISE_BINARY(|)
+    BITWISE_BINARY(&)
+    BITWISE_BINARY(^)
+
     // (|) --------------------------------------------------------------------------------------------------------------------
-    
+   /*
     template<typename T>
     Tensor<T>* Tensor<T>::operator|(const Tensor<T>& tensor2) const{
 
@@ -673,7 +762,7 @@ namespace gema{
     Tensor<T>* operator|(const Tensor<T>& tensor, const T& value){
 
         integral_if_float<T> valueBits = bitcast_if_float(value);
-        /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/
+        //integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);
 
         return forEachAndReturn(tensor, [&valueBits](const T& item){
 
@@ -844,7 +933,7 @@ namespace gema{
                 tensorItem ^= tensor2Item;
             }
         });
-    }
+    }*/
 
     // (<<) -------------------------------------------------------------------------------------------------------------------
 
