@@ -440,6 +440,8 @@ namespace gema{
     ARITHMETIC_BINARY(/)
     ARITHMETIC_BINARY(%)
 
+    #undef ARITHMETIC_BINARY // Macro no longer needed
+
     // (+) --------------------------------------------------------------------------------------------------------------------
 /*
     template <class T>
@@ -654,11 +656,24 @@ namespace gema{
         });
     }*/
 
-    // BITWISE_BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
-    #define BITWISE_BINARY(OP_SYMBOL)\
-    /**/\
+    // BITWISE BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
+    // Bitwise operations (including bitshift) will support floating types using bitcast inside the functions.
+    //
+    // Notation explanation:
+    // The last letters in macro name (after the last _) mean type of operation (similar to function signature).
+    // T - Tensor<T>
+    // V - value of type T from Tensor<T>
+    // o - operation
+    // oe - operation in place
+    // r - results in
+    //
+    // Examples: 
+    // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
+    // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
+
+    #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
         template<typename T>\
-        Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
             return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
     /**/\
@@ -671,9 +686,11 @@ namespace gema{
                 }\
             });\
         }\
-    /**/\
+    /**/
+
+    #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
         template <class T>\
-        Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
             integral_if_float<T> valueBits = bitcast_if_float(value);\
             /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
@@ -688,7 +705,9 @@ namespace gema{
                 }\
             });\
         }\
-    /**/\
+    /**/
+
+    #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
         template <class T>\
         inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
@@ -698,13 +717,15 @@ namespace gema{
     /**/\
                 if constexpr(std::is_floating_point<T>::value){\
                     auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
-                    return std::bit_cast<T>(valueBits OP_SYMBOL item);\
+                    return std::bit_cast<T>(valueBits OP_SYMBOL itemBits);\
                 }else{\
                     return valueBits OP_SYMBOL item;\
                 }\
             });\
         }\
-    /**/\
+    /**/
+
+    #define BITWISE_BINARY_ToeT(OP_SYMBOL)\
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
     /**/\
@@ -719,7 +740,9 @@ namespace gema{
                 }\
             });\
         }\
-    /**/\
+    /**/
+
+    #define BITWISE_BINARY_ToeV(OP_SYMBOL)\
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
     /**/\
@@ -737,9 +760,35 @@ namespace gema{
         }\
     /**/
 
+    // To expand all possible operator overloads for binary bitwise operations
+    #define BITWISE_BINARY(OP_SYMBOL)\
+        BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+        BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+        BITWISE_BINARY_VoTrT(OP_SYMBOL)\
+        BITWISE_BINARY_ToeT(OP_SYMBOL)\
+        BITWISE_BINARY_ToeV(OP_SYMBOL)
+
     BITWISE_BINARY(|)
     BITWISE_BINARY(&)
     BITWISE_BINARY(^)
+
+    // Some bitwise overloads for binary operations are not making sense for bitshift
+    #define BITSHIFTLIKE(OP_SYMBOL)\
+        BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+        BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+        BITWISE_BINARY_ToeT(OP_SYMBOL)\
+        BITWISE_BINARY_ToeV(OP_SYMBOL)
+
+    BITSHIFTLIKE(<<)
+    BITSHIFTLIKE(>>)
+
+    #undef BITWISE_BINARY_ToTgT // Macros no longer needed 
+    #undef BITWISE_BINARY_ToVgT
+    #undef BITWISE_BINARY_VoTgT
+    #undef BITWISE_BINARY_ToeT
+    #undef BITWISE_BINARY_ToeV
+    #undef BITSHIFTLIKE
+    #undef BITWISE_BINARY 
 
     // (|) --------------------------------------------------------------------------------------------------------------------
    /*
@@ -784,7 +833,7 @@ namespace gema{
 
             if constexpr(std::is_floating_point<T>::value){
                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
-                return std::bit_cast<T>(valueBits | item);
+                return std::bit_cast<T>(valueBits | itemBits);
             }else{
                 return valueBits | item;
             }
@@ -865,7 +914,7 @@ namespace gema{
 
             if constexpr(std::is_floating_point<T>::value){
                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
-                return std::bit_cast<T>(valueBits & item);
+                return std::bit_cast<T>(valueBits & itemBits);
             }else{
                 return valueBits & item;
             }
@@ -936,9 +985,9 @@ namespace gema{
     }*/
 
     // (<<) -------------------------------------------------------------------------------------------------------------------
-
+/*
     template <class T>
-    Tensor<T> *Tensor<T>::operator<<(const Tensor<T> &tensor2) const{
+    Tensor<T>* Tensor<T>::operator<<(const Tensor<T> &tensor2) const{
 
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
 
@@ -948,6 +997,22 @@ namespace gema{
                 tensorItem = std::bit_cast<T>(itemBits << item2Bits);
             }else{
                 tensorItem << tensor2Item;
+            }
+        });
+    }
+
+    template <class T>
+    Tensor<T>* operator<<(const Tensor<T>& tensor, const T& value){
+
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+    
+        return forEachAndReturn(tensor, [&valueBits](const T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                return std::bit_cast<T>(itemBits << valueBits);
+            }else{
+                return item << valueBits;
             }
         });
     }
@@ -967,10 +1032,26 @@ namespace gema{
         });
     }
 
+    template <class T>
+    void Tensor<T>::operator<<=(const T& value){
+
+        integral_if_float<T> valueBits = bitcast_if_float(value);
+    
+        forEach([&valueBits](T& item){
+
+            if constexpr(std::is_floating_point<T>::value){
+                auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);
+                item = std::bit_cast<T>(itemBits << valueBits);
+            }else{
+                item <<= valueBits;
+            }
+        });
+    }
+
     // (>>) -------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T> *Tensor<T>::operator>>(const Tensor<T> &tensor2) const{
+    Tensor<T>* Tensor<T>::operator>>(const Tensor<T> &tensor2) const{
         
         return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
             
@@ -998,11 +1079,11 @@ namespace gema{
             }
         });
     }
-
+*/
     // (~) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T> *Tensor<T>::operator~(){
+    Tensor<T>* Tensor<T>::operator~(){
 
         return forEachAndReturn([](const T& item){
 
@@ -1017,7 +1098,7 @@ namespace gema{
     // (!) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T> *Tensor<T>::operator!()
+    Tensor<T>* Tensor<T>::operator!()
     {
         
         return forEachAndReturn([](const T& item){
