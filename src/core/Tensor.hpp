@@ -251,15 +251,6 @@ class Tensor {
     void fillWith(const T& fill) requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Copies one tensor to another by value.
-     * 
-     * @param tensor2 tensor which values are copied into this tensor.
-     * 
-     * @return Reference to this tensor after the copying.
-     */
-    Tensor<T>& operator=(const Tensor<T>& tensor2);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
      * 
      * @param dim1 first dimension to swap, default value is 0.
@@ -270,6 +261,15 @@ class Tensor {
     Tensor<T>* transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Copies one tensor to another by value.
+     * 
+     * @param tensor2 tensor which values are copied into this tensor.
+     * 
+     * @return Reference to this tensor after the copying.
+     */
+    Tensor<T>& operator=(const Tensor<T>& tensor2);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal.
      * 
      * @param tensor2 a second tensor to be compared by value.
@@ -277,6 +277,16 @@ class Tensor {
      * @return Boolean @b true if the tensors are the same and @b false in not.
      */
     bool operator==(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal. Then returns bool
+     * negation of the result.
+     * 
+     * @param tensor2 a second tensor to be compared by value.
+     * 
+     * @return Boolean @b false if the tensors are the same and @b true in not.
+     */
+    bool operator!=(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds tensor with tensor item by item and returns result as new tensor. Does no size checking.
@@ -752,6 +762,10 @@ class Tensor {
      * @brief Performs unary minus on all items of the tensor.
      */
     inline void negateInPlace();
+
+    Tensor<T>& operator++();
+
+    Tensor<T>* operator++(int) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors, items from this tensor as first operand 

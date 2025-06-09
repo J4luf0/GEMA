@@ -389,6 +389,12 @@ namespace gema{
         }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
 
+    template <class T>
+    bool Tensor<T>::operator!=(const Tensor<T> &tensor2) const
+    {
+        return !(*this == tensor2);
+    }
+
     // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------
     // Operator overload implemetations are often repetetive. To reduce code duplicates, macros are created for the overloads
     // and their variants. A naming convention has been created to include in macro name information about its abstract
@@ -1133,7 +1139,7 @@ namespace gema{
     void Tensor<T>::complementInPlace(){
 
         forEach([](T& item){
-            item = ~item;
+            item = ~item; // TODO: isnt there needed a float specialization?
         });
     }
 
