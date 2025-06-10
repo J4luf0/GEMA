@@ -431,7 +431,7 @@ namespace gema{
         template<class T>\
         inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
-            return forEachAndReturn(tensor, [&value](const T& item){\
+            return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
                 return item OP_SYMBOL value;\
             });\
         }\
@@ -443,7 +443,7 @@ namespace gema{
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
-            return forEachAndReturn(tensor, [&value](const T& item){\
+            return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
                 return value OP_SYMBOL item;\
             });\
         }\
@@ -746,7 +746,7 @@ namespace gema{
             integral_if_float<T> valueBits = bitcast_if_float(value);\
             /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
     /**/\
-            return forEachAndReturn(tensor, [&valueBits](const T& item){\
+            return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
     /**/\
                 if constexpr(std::is_floating_point<T>::value){\
                     auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
@@ -765,7 +765,7 @@ namespace gema{
     /**/\
             integral_if_float<T> valueBits = bitcast_if_float(value);\
     /**/\
-            return forEachAndReturn(tensor, [&valueBits](const T& item){\
+            return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
     /**/\
                 if constexpr(std::is_floating_point<T>::value){\
                     auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
@@ -1317,7 +1317,7 @@ namespace gema{
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const Tensor<T> &tensor, C&& operation) // static
+    Tensor<T>* Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
     {
         Tensor<T>* resultTensor = new Tensor<T>(&tensor);
 
