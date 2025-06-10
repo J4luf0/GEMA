@@ -852,81 +852,87 @@ class Tensor {
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
      * 
-     * @return A pointer to resulting tensor.
+     * @return A pointer to new resulting tensor.
      */
     template <apply_and_return_callable<T> C>
     inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
-    // requires(!std::is_floating_point<T>::value);
-    /*inline Tensor<T>* applyAndReturn(const Tensor<T>& tensor2, const std::function<T(const T&, const T&)>& operation)
-    const requires(std::is_floating_point<T>::value);*/
-
-    /*template <class A, class B> static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2l,  
-    const std::function<void(T&, const T&)>& operation)
-    requires((std::is_same<A, T>::value || std::is_same<A, Tensor<T>>::value) && 
-             (std::is_same<B, T>::value || std::is_same<B, Tensor<T>>::value) && 
-             !std::is_same<A, B>::value);*/
-
     
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
+     * of type T, or both arguments are tensor. In case of value, the operation is performed on every tensor item with value in
+     * given order, in case of both arguments being tensor, the operation is performed item on item. In this case, both tensors
+     * should have same sizes. Results of operation are stored in new tensor.
      * 
+     * @param operand1 first operand either tensor or value of type T.
+     * @param operand2 second operand either tensor or value of type T.
+     * @param operation binary operation returning T and having correct signature defined in concept.
      * 
+     * @return A pointer to new resulting tensor.
      */
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C> 
     static Tensor<T>* applyAndReturn(const A& operand1, const B& operand2, C&& operation)
-    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);//is_tensor_or_t<A, T> && is_tensor_or_t<B, T> && !std::is_same_v<A, B>
+    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Allows to apply custom operation between each item of two tensors and then store the result
-     * into the caller tensor.
+     * @brief Allows to apply custom operation between each item of two tensors and then store the result into caller tensor.
      * 
      * @param tensor2 a second tensor to use the operation against as second operand.
      * @param operation a binary function that defines operation between two items.
      */
     template <apply_callable<T> C>
-    inline void apply(const Tensor<T>& tensor2, C&& operation) /*requires(std::is_invocable_r_v<void, C, T&, const T&>)*/;
-    //requires(!std::is_same<T, bool>::value);/*const std::function<void(T&, const T&)>&*/
+    inline void apply(const Tensor<T>& tensor2, C&& operation); /*requires(std::is_invocable_r_v<void, C, T&, const T&>)*/
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
+     * of type T, or both arguments are tensor. In case of value, the operation is performed on every tensor item with value in
+     * given order, in case of both arguments being tensor, the operation is performed item on item. In this case, both tensors
+     * should have same sizes. Operation is done in place, where the storing operand is the first one, with exception of case,
+     * where the first operand is value of type T.
+     * 
+     * @param operand1 first operand either tensor or value of type T.
+     * @param operand2 second operand either tensor or value of type T.
+     * @param operation binary operation returning T and having correct signature defined in concept.
+     */
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_callable<T> C> 
     static void apply(A& operand1, const B& operand2, C&& operation)
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Creates new instance with same dimensions as this tensor and applies passed function on all items, then writes 
+     * @brief Creates new instance with same dimensions as this tensor and applies passed callable on all items, then writes 
      * items into new instance, then returns the new instance. Looping order is unspecified.
      * 
-     * @param apply function that will be applied on all items.
+     * @param operation unary operation returning T and having correct signature defined in concept.
      * 
-     * @return Pointer to new instance upon its items was the function used.
+     * @return A pointer to new resulting tensor.
      */
     template <foreach_and_return_callable<T> C>
     inline Tensor<T>* forEachAndReturn(C&& operation) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Creates new instance with same dimensions as given tensor and applies passed function on all items, then writes 
+     * @brief Creates new instance with same dimensions as given tensor and applies passed callable on all items, then writes 
      * items into new instance, then returns the new instance. Looping order is unspecified.
      * 
      * @param tensor tensor to perform the operation on.
-     * @param operation function defining operation on item.
+     * @param operation unary operation returning T and having correct signature defined in concept.
      * 
-     * @return Pointer to new instance upon its items was the function used.
+     * @return A pointer to new resulting tensor.
      */
     template <foreach_and_return_callable<T> C>
     static Tensor<T>* forEachAndReturn(const Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Applies function on all items with passed function. Looping order is unspecified.
+     * @brief Applies operation on all items with passed callable. Looping order is unspecified.
      * 
-     * @param apply function that will be applied on all items.
+     * @param operation unary operation, having correct signature defined in concept.
      */
     template <foreach_callable<T> C> 
     inline void forEach(C&& operation);
-    //void forEach(const std::function<void(T&)>& operation) requires(std::is_same<T, bool>::value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Applies function on all items in given tensor with passed function. Looping order is unspecified.
+     * @brief Applies operation on all items in given tensor with passed callable. Looping order is unspecified.
      * 
      * @param tensor to perform the operation on.
-     * @param operation function that will be applied on all items.
+     * @param operation unary operation, having correct signature defined in concept.
      */
     template <foreach_callable<T> C>
     static void forEach(const Tensor<T>& tensor, C&& operation);
