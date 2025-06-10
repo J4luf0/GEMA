@@ -673,6 +673,23 @@ TEST(tensor_test, operatorAdd_005){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorAdd_006){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    int value = -4;
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({-4, 1, -5, 96, -6, -20});
+
+    std::unique_ptr<Tensor<int>> result(value + *tensor);
+
+    EXPECT_EQ(*result, *expected);
+}
+
 TEST(tensor_test, operatorAddAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
