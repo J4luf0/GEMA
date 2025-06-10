@@ -540,6 +540,35 @@ class Tensor {
      */
     template<typename U> friend Tensor<T>* operator&&(const U& value, const Tensor<U>& tensor);
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "or" item by item and returns result as new tensor. Does not size checking.
+     * 
+     * @param tensor2 right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    Tensor<T>* operator||(const Tensor<T>& tensor2) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "or" with every tensor item by value and returns result as new tensor. Does no size checking.
+     * 
+     * @param tensor left-hand side operand.
+     * @param value right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator||(const Tensor<U>& tensor, const U& value);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs logical "or" with value by every tensor item and returns result as new tensor. Does no size checking.
+     * 
+     * @param value left-hand side operand.
+     * @param tensor right-hand size operand.
+     * 
+     * @return Pointer to new resulting tensor.
+     */
+    template<typename U> friend Tensor<T>* operator||(const U& value, const Tensor<U>& tensor);
+
 
 
     // BITWISE OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------

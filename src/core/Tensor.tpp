@@ -415,7 +415,7 @@ namespace gema{
     // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
     // Artihmetic binary is an binary operation on two arithmetic types (or ones with overloaded operators acting like 
     // arithmetic).
-    #define ARITHMETIC_BINARY(OP_SYMBOL)\
+    #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
         inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
@@ -424,6 +424,9 @@ namespace gema{
                 return tensorItem OP_SYMBOL tensor2Item;\
             });\
         }\
+    /**/
+
+    #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template<class T>\
         inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
@@ -432,7 +435,9 @@ namespace gema{
                 return item OP_SYMBOL value;\
             });\
         }\
-    /**/\
+    /**/
+
+    #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
         template<class T>\
         inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
@@ -442,6 +447,9 @@ namespace gema{
                 return value OP_SYMBOL item;\
             });\
         }\
+    /**/
+
+    #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
     /**/\
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
@@ -450,6 +458,9 @@ namespace gema{
                 tensorItem OP_SYMBOL##= tensor2Item;\
             });\
         }\
+    /**/
+
+    #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
     /**/\
         template<class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const T& value){\
@@ -460,13 +471,36 @@ namespace gema{
         }\
     /**/
 
+    #define ARITHMETIC_BINARY(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
+
     ARITHMETIC_BINARY(+)
     ARITHMETIC_BINARY(-)
     ARITHMETIC_BINARY(*)
     ARITHMETIC_BINARY(/)
     ARITHMETIC_BINARY(%)
 
-    #undef ARITHMETIC_BINARY // Macro no longer needed
+    #define LOGICAL_BINARY(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)
+
+    LOGICAL_BINARY(&&)
+    LOGICAL_BINARY(||)
+
+    #undef ARITHMETIC_BINARY_ToTrT // Macros no longer needed
+    #undef ARITHMETIC_BINARY_ToVrT
+    #undef ARITHMETIC_BINARY_VoTrT
+    #undef ARITHMETIC_BINARY_ToeT
+    #undef ARITHMETIC_BINARY_ToeV
+
+    #undef LOGICAL_BINARY
+
+    #undef ARITHMETIC_BINARY
 
 /*
     // (+) --------------------------------------------------------------------------------------------------------------------
