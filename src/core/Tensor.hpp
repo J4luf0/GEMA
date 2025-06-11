@@ -935,7 +935,7 @@ class Tensor {
      * @param operation unary operation, having correct signature defined in concept.
      */
     template <foreach_callable<T> C>
-    static void forEach(const Tensor<T>& tensor, C&& operation);
+    static void forEach(Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

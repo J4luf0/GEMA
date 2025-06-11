@@ -1208,7 +1208,7 @@ namespace gema{
     inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
 
         //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
-        return applyAndReturn(*this, tensor2, std::forward<C>(operation));
+        return Tensor<T>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
@@ -1220,6 +1220,7 @@ namespace gema{
         Tensor<T>* resultTensor = new Tensor<T>(tensorOperand);
 
         // TODO: find a way to deal with bool or maybe get rid of it
+        //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
             if constexpr(std::is_same_v<T, bool>){
@@ -1265,7 +1266,7 @@ namespace gema{
                 operation(tensor_[i], tensor2.tensor_[i]);
             }
         }*/
-       apply(*this, tensor2, std::forward<C>(operation));
+        Tensor<T>::apply(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
@@ -1275,7 +1276,7 @@ namespace gema{
 
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
 
-
+        //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
             if constexpr(std::is_same_v<T, bool>){
@@ -1312,7 +1313,7 @@ namespace gema{
     template <foreach_and_return_callable<T> C>
     inline Tensor<T>* Tensor<T>::forEachAndReturn(C&& operation) const{
 
-        return forEachAndReturn(*this, std::forward<C>(operation));
+        return Tensor<T>::forEachAndReturn(*this, std::forward<C>(operation));
     }
 
     template <class T>
@@ -1321,6 +1322,7 @@ namespace gema{
     {
         Tensor<T>* resultTensor = new Tensor<T>(&tensor);
 
+        //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
             resultTensor->tensor_[i] = operation(tensor.tensor_[i]);
         }
@@ -1332,14 +1334,14 @@ namespace gema{
     template <foreach_callable<T> C>
     inline void Tensor<T>::forEach(C&& operation){
 
-        forEach(*this, std::forward<C>(operation));
+        Tensor<T>::forEach(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_callable<T> C>
-    void Tensor<T>::forEach(const Tensor<T>& tensor, C&& operation){ // static
+    void Tensor<T>::forEach(Tensor<T>& tensor, C&& operation){ // static
 
-        #pragma GCC ivdep
+        //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
 
             if constexpr(std::is_same<T, bool>::value){

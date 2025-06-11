@@ -744,6 +744,23 @@ TEST(tensor_test, operatorAddAssign_003){
     EXPECT_EQ(*tensor, *expected);
 }
 
+TEST(tensor_test, operatorAddAssign_004){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5., -1.});
+
+    double value = 3.;
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({8., 2.});
+    
+    *tensor += value;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
 TEST(tensor_test, operatorSubstract_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
