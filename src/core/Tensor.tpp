@@ -13,6 +13,71 @@
 
 namespace gema{
 
+    template<class T>
+    concept has_to_string = requires(const T& t) {
+        { t.to_string() } -> std::convertible_to<std::string>;
+    };
+
+    template<typename T>
+    concept is_formattable = requires(T t, std::format_context& ctx) {
+        std::formatter<T, char>{};                         // constructible
+        std::formatter<T, char>{}.format(t, ctx);          // callable
+        //std::format("{}", t);
+    };
+}
+
+namespace std{
+
+    template <class T>
+    struct formatter<gema::Tensor<T>, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();  // No custom format specs supported
+        }
+
+        auto format(const gema::Tensor<T>& tensor, format_context& ctx) const {
+            // Use tensor.toString() to get the string representation
+            return format_to(ctx.out(), "{}", tensor.toString());
+        }
+    };
+
+    template <class T>
+    struct formatter<gema::Tensor<T>*, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();  // No custom format specs supported
+        }
+
+        auto format(const gema::Tensor<T>* tensor, format_context& ctx) const {
+            // Use tensor.toString() to get the string representation
+            return format_to(ctx.out(), "{}", tensor->toString());
+        }
+    };
+/*
+    template <size_t N>
+    struct formatter<bitset<N>, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const bitset<N>& bs, format_context& ctx) const {
+            return format_to(ctx.out(), "{}", bs.to_string());
+        }
+    };*/
+
+    template <class T>
+    requires (!gema::is_formattable<T> && gema::has_to_string<T>)
+    struct formatter<T, char>{
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const T& t, format_context& ctx) const {
+            return format_to(ctx.out(), "{}", t.to_string());
+        }
+    };
+}
+
+namespace gema{
+
     constexpr int maxLoopCount = 65536; // Will be probably unused.
 
     // Meta helpers:
@@ -94,6 +159,8 @@ namespace gema{
                         std::conditional<std::is_same_v<B, X>, B, 
                         void>>;
     };
+
+    
 
     
 
@@ -258,6 +325,11 @@ namespace gema{
         }
 
         return output; 
+    }
+
+    template <class T>
+    std::ostream& operator<<(std::ostream& os, const Tensor<T>& tensor){
+        return os << tensor.toString();
     }
 
     template <class T>

@@ -225,6 +225,16 @@ class Tensor {
     std::string toString() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Puts user readable tensor output (from Tensor<T>::toString) into stream.
+     * 
+     * @param os output stream.
+     * @param tansor tensor to output.
+     * 
+     * @return Output stream.
+     */
+    template<typename U> friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Parses std::string specifying the tensor dimension sizes and values. Inverse to "toString".
      * 
      * @param tensorString string in correct format to be parsed.

@@ -34,3 +34,6 @@
 # Folders
 delete/
 build/
+
+# Specific files
+error.log
