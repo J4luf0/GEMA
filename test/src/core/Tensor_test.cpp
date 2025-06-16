@@ -9,6 +9,9 @@
 
 using gema::Tensor;
 
+#define DEBUG(text)\
+    std::cout << text << std::endl;
+
 TEST(tensor_test, constructor_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -149,7 +152,11 @@ TEST(tensor_test, constructor_008){
 
     result->setItem(tenVal3, {0});
 
+    DEBUG("hmm");
+
     EXPECT_NE(*tensor, *result);
+
+    DEBUG("wat");
 }
 
 TEST(tensor_test, constructor_009){
@@ -1088,6 +1095,8 @@ TEST(tensor_test, operatorBitwiseXor_002){
     expected->setItems({0b0110, 0b1001});
 
     std::unique_ptr<Tensor<std::bitset<4>>> result(*tensor ^ *tensor2);
+
+    std::cout << "is formattable bitset: " << std::boolalpha << gema::is_formattable<std::bitset<4>> <<std::endl;
 
     EXPECT_EQ(*result, *expected);
 }

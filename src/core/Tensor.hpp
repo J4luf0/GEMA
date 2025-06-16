@@ -14,22 +14,32 @@ concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
 /// Checks for void(T&, const T&) signature.
 template <typename C, class T>
 concept apply_callable = std::is_invocable_r_v<void, C, T&, const T&>;
-// const std::function<void(T&, const T&)>&
 
 /// Checks for T(const T&, const T&) signature.
 template <typename C, class T>
 concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
-// const std::function<T(const T&, const T&)>&
 
 /// Checks for void(T&) signature.
 template <typename C, class T>
 concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
-// const std::function<void(T&)>&
 
 // Checks for T(const T&) signature.
 template <typename C, class T>
 concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
-// const std::function<T(const T&)>&
+
+// Checks for bool(const T&, const T&) signature.
+template <typename C, class T>
+concept equals_callable = std::is_invocable_r_v<bool, C, const T&, const T&>;
+
+// Checks for int(const T&, const T&) signature.
+template <typename C, class T>
+concept order_callable = std::is_invocable_r_v<int, C, const T&, const T&>;
+
+// Signature of equals function, returning equalness of arguments represented by bool.
+template <class T> using EqualsCallable = bool(const T&, const T&);
+
+// Signature of order fuction, returning order of arguments represented as int.
+template <class T> using OrderCallable = int(const T&, const T&);
 
 // ============================================================================================================================
 /**
@@ -91,16 +101,15 @@ class Tensor {
     std::vector<uint64_t> dimensionSizes_;      /// Size od every tensor dimension.
 
     /// Function compares items in tensor and represents equality by bool.
-    static std::function<bool(const T&, const T&)> defaultEquals_;
-    std::function<bool(const T&, const T&)>* equals_ = &defaultEquals_;
-    std::function<bool(const T&, const T&)> userEquals_;
+    static std::function<EqualsCallable<T>> defaultEquals_;
+    std::function<EqualsCallable<T>>* equals_ = &defaultEquals_;
+    std::function<EqualsCallable<T>> userEquals_;
 
     /// Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
-    static std::function<int(const T&, const T&)> defaultOrder_;
-    std::function<int(const T&, const T&)>* order_ = &defaultOrder_;
-    std::function<int(const T&, const T&)> userOrder_;
+    static std::function<OrderCallable<T>> defaultOrder_;
+    std::function<OrderCallable<T>>* order_ = &defaultOrder_;
+    std::function<OrderCallable<T>> userOrder_;
 
-    
     std::function<void(const T&)> tensorOutput_;
     std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
 
@@ -192,9 +201,9 @@ class Tensor {
     /** -----------------------------------------------------------------------------------------------------------------------
      * 
      */
-    void setEquals(const std::function<bool(const T&, const T&)>& equals);
+    void setEquals(const std::function<EqualsCallable<T>>& equals);
 
-    void setOrder(const std::function<int(const T&, const T&)>& order);
+    void setOrder(const std::function<OrderCallable<T>>& order);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the tensor through this->showTensor() method.

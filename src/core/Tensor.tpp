@@ -14,22 +14,48 @@
 namespace gema{
 
     template<class T>
-    concept has_to_string = requires(const T& t) {
+    concept has_to_string = requires(T& t) {
         { t.to_string() } -> std::convertible_to<std::string>;
     };
 
     template<typename T>
-    concept is_formattable = requires(T t, std::format_context& ctx) {
+    concept has_free_to_string = requires(T& t) {
+        { to_string(t) } -> std::convertible_to<std::string>;
+    };
+
+    template<typename T>
+    concept has_ostream = requires(T& t, std::ostream& os) {
+        { os << t } -> std::same_as<std::ostream&>;
+    };
+
+    /*template <typename T, typename = void>
+    struct is_formattable : std::false_type {};
+
+    template <typename T>
+    struct is_formattable<T, std::void_t<
+        decltype(std::formatter<T, char>{}), // can be constructed
+        decltype(std::declval<std::formatter<T, char>>().format(std::declval<T>(), std::declval<std::format_context&>()))
+    >> : std::true_type {};*/
+/*
+    template<typename T>
+    concept is_formattable = requires(const T& t, std::format_context& ctx) {
         std::formatter<T, char>{};                         // constructible
         std::formatter<T, char>{}.format(t, ctx);          // callable
         //std::format("{}", t);
+    };*/
+
+    template<typename T>
+    concept is_formattable = requires (T& v, std::format_context ctx) {
+        std::formatter<std::remove_cvref_t<T>>().format(v, ctx);
     };
 }
 
+// STD specializations of formatter
 namespace std{
 
     template <class T>
     struct formatter<gema::Tensor<T>, char> {
+
         constexpr auto parse(format_parse_context& ctx) {
             return ctx.begin();  // No custom format specs supported
         }
@@ -42,6 +68,7 @@ namespace std{
 
     template <class T>
     struct formatter<gema::Tensor<T>*, char> {
+
         constexpr auto parse(format_parse_context& ctx) {
             return ctx.begin();  // No custom format specs supported
         }
@@ -51,29 +78,69 @@ namespace std{
             return format_to(ctx.out(), "{}", tensor->toString());
         }
     };
-/*
+
     template <size_t N>
     struct formatter<bitset<N>, char> {
+
         constexpr auto parse(format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const bitset<N>& bs, format_context& ctx) const {
-            return format_to(ctx.out(), "{}", bs.to_string());
+        auto format(const bitset<N> bitset, format_context& ctx) const {
+            return format_to(ctx.out(), "{}", bitset.to_string());
         }
-    };*/
+    };
 
-    template <class T>
-    requires (!gema::is_formattable<T> && gema::has_to_string<T>)
+    /*template <class T>
+    requires (!gema::is_formattable<T> && (gema::has_to_string<T> || gema::has_free_to_string<T>))
     struct formatter<T, char>{
+
         constexpr auto parse(format_parse_context& ctx) {
             return ctx.begin();
         }
 
         auto format(const T& t, format_context& ctx) const {
-            return format_to(ctx.out(), "{}", t.to_string());
+
+            if constexpr (gema::has_to_string<T>){
+                return format_to(ctx.out(), "{}", t.to_string());
+
+            } else if constexpr (gema::has_free_to_string<T>){
+                return format_to(ctx.out(), "{}", to_string(t));
+
+            } else{
+
+            }
         }
-    };
+    };*/
+/*
+    template <class T>
+    requires (!gema::is_formattable<T> && gema::has_free_to_string<T>)
+    struct formatter<T, char>{
+
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const T& t, format_context& ctx) const {
+            return format_to(ctx.out(), "{}", to_string(t));
+        }
+    };*/
+
+    /*template <class T>
+    requires (!gema::is_formattable<T> && gema::has_ostream<T>)
+    struct formatter<T, char>{
+
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const T& t, format_context& ctx) const {
+
+            std::ostringstream oss;
+            oss << t;
+            return format_to(ctx.out(), "{}", oss.str());
+        }
+    };*/
 }
 
 namespace gema{
@@ -169,7 +236,7 @@ namespace gema{
     // static private default values:
 
     template <class T>
-    inline std::function<bool(const T&, const T&)> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
+    inline std::function<EqualsCallable<T>> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
             return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
@@ -179,7 +246,7 @@ namespace gema{
     };
 
     template <class T>
-    inline std::function<int(const T&, const T&)> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
+    inline std::function<OrderCallable<T>> Tensor<T>::defaultOrder_ = [] (const T& a, const T& b) {
 
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
@@ -261,14 +328,14 @@ namespace gema{
     }
 
     template <class T>
-    void Tensor<T>::setEquals(const std::function<bool(const T&, const T&)>& equals){
+    void Tensor<T>::setEquals(const std::function<EqualsCallable<T>>& equals){
         
         userEquals_ = equals;
         equals_ = &userEquals_;
     }
 
     template <class T>
-    void Tensor<T>::setOrder(const std::function<int(const T&, const T&)>& order){
+    void Tensor<T>::setOrder(const std::function<OrderCallable<T>>& order){
 
         userOrder_ = order;
         order_ = &userOrder_;
