@@ -44,10 +44,30 @@ namespace gema{
         //std::format("{}", t);
     };*/
 
-    template<typename T>
+    /*template<typename T>
     concept is_formattable = requires (T& v, std::format_context ctx) {
-        std::formatter<std::remove_cvref_t<T>>().format(v, ctx);
+        std::formatter<std::remove_cvref_t<T>>().format(v, ctx); 
+    };*/
+
+    /*template<typename T>
+    concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
+        typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
+        { std::formatter<std::remove_cvref_t<T>, char>().parse(pctx) } -> std::same_as<decltype(pctx.begin())>;
+        { std::formatter<std::remove_cvref_t<T>, char>().format(v, ctx) } -> std::same_as<decltype(ctx.out())>;
+    };*/
+
+    template<typename T>
+    concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
+        //typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
+        std::is_default_constructible_v<std::formatter<T, char>>;
+        std::is_copy_constructible_v<std::formatter<T, char>>;
+        std::is_move_constructible_v<std::formatter<T, char>>;
+        std::is_copy_assignable_v<std::formatter<T, char>>;
+        std::is_move_assignable_v<std::formatter<T, char>>;
     };
+
+    template<typename T>
+    concept is_not_formattable = !is_formattable<T>;
 }
 
 // STD specializations of formatter
@@ -79,6 +99,23 @@ namespace std{
         }
     };
 
+    /*template <gema::is_not_formattable T>
+    struct formatter<T, char> {
+
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const T& formatee, format_context& ctx) const {
+
+            if constexpr (gema::has_to_string<T>){
+                return format_to(ctx.out(), "{}", formatee.to_string());
+            }else{
+                return format_to(ctx.out(), "{}", "[no format]");
+            }
+        }
+    };*/
+
     template <size_t N>
     struct formatter<bitset<N>, char> {
 
@@ -86,61 +123,10 @@ namespace std{
             return ctx.begin();
         }
 
-        auto format(const bitset<N> bitset, format_context& ctx) const {
+        auto format(const bitset<N>& bitset, format_context& ctx) const {
             return format_to(ctx.out(), "{}", bitset.to_string());
         }
     };
-
-    /*template <class T>
-    requires (!gema::is_formattable<T> && (gema::has_to_string<T> || gema::has_free_to_string<T>))
-    struct formatter<T, char>{
-
-        constexpr auto parse(format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const T& t, format_context& ctx) const {
-
-            if constexpr (gema::has_to_string<T>){
-                return format_to(ctx.out(), "{}", t.to_string());
-
-            } else if constexpr (gema::has_free_to_string<T>){
-                return format_to(ctx.out(), "{}", to_string(t));
-
-            } else{
-
-            }
-        }
-    };*/
-/*
-    template <class T>
-    requires (!gema::is_formattable<T> && gema::has_free_to_string<T>)
-    struct formatter<T, char>{
-
-        constexpr auto parse(format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const T& t, format_context& ctx) const {
-            return format_to(ctx.out(), "{}", to_string(t));
-        }
-    };*/
-
-    /*template <class T>
-    requires (!gema::is_formattable<T> && gema::has_ostream<T>)
-    struct formatter<T, char>{
-
-        constexpr auto parse(format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const T& t, format_context& ctx) const {
-
-            std::ostringstream oss;
-            oss << t;
-            return format_to(ctx.out(), "{}", oss.str());
-        }
-    };*/
 }
 
 namespace gema{
@@ -233,7 +219,7 @@ namespace gema{
 
 
 
-    // static private default values:
+    // STATIC PRIVATE DEFAULT VALUES: -----------------------------------------------------------------------------------------
 
     template <class T>
     inline std::function<EqualsCallable<T>> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
@@ -267,7 +253,7 @@ namespace gema{
 
 
 
-    // public methods:
+    // PUBLIC METHODS: --------------------------------------------------------------------------------------------------------
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
@@ -1503,7 +1489,7 @@ namespace gema{
 
 
 
-    // private methods:
+    // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 
     template <class T>
     std::vector<uint64_t> Tensor<T>::getCoords(int itemIndex) const{

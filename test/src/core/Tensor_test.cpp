@@ -152,11 +152,7 @@ TEST(tensor_test, constructor_008){
 
     result->setItem(tenVal3, {0});
 
-    DEBUG("hmm");
-
     EXPECT_NE(*tensor, *result);
-
-    DEBUG("wat");
 }
 
 TEST(tensor_test, constructor_009){
@@ -1096,8 +1092,6 @@ TEST(tensor_test, operatorBitwiseXor_002){
 
     std::unique_ptr<Tensor<std::bitset<4>>> result(*tensor ^ *tensor2);
 
-    std::cout << "is formattable bitset: " << std::boolalpha << gema::is_formattable<std::bitset<4>> <<std::endl;
-
     EXPECT_EQ(*result, *expected);
 }
 
@@ -1178,8 +1172,10 @@ TEST(tensor_test, showDebug){
     const std::vector<uint64_t> dimensionSizes{2, 3};
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
 
-    //std::cout << "alive still" << std::endl;
+    auto expected = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
+    expected->setItems({0b0110, 0b1001, 0b0101, 0b1010, 0b1110, 0b0111});
 
+    std::cout << "is formattable bitset: " << std::boolalpha << gema::is_formattable<std::bitset<4>> <<std::endl;
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
