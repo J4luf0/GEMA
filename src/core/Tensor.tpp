@@ -70,7 +70,7 @@ namespace gema{
 }
 
 // STD specializations of formatter
-namespace std{
+namespace std {
 
     template <class T>
     struct formatter<gema::Tensor<T>, char> {
@@ -99,14 +99,14 @@ namespace std{
     };
 }
 
-namespace gema{
+namespace gema {
 
     constexpr int maxLoopCount = 65536; // Will be probably unused.
 
     // Meta helpers:
     
     // Converts from floating types to integral of same size
-    template<typename F>
+    template <typename F>
     struct to_integral {
         using type = std::conditional_t<sizeof(F) == 1, uint8_t,
                      std::conditional_t<sizeof(F) == 2, uint16_t,
@@ -116,13 +116,13 @@ namespace gema{
     };
 
     // If F is floating point, it will get converted to integral and if not, then just returned
-    template<typename F>
+    template <typename F>
     struct integral_if_float{
         using type = std::conditional_t<std::is_floating_point_v<F>, to_integral<F>, F>;
     };
 
     // If argument is floating type, it will get bitcasted to integral of same size, otherwise just returned
-    template<typename T>
+    template <typename T>
     inline constexpr integral_if_float<T> bitcast_if_float(const T& value){
 
         // use this if the bitcast wont get optimized away to nonfloating types
@@ -137,7 +137,7 @@ namespace gema{
     }
 
     // Takes two parameters and returns length of tensor_ of the first one to be type Tensor<T>
-    template<typename T, typename A, typename B>
+    template <typename T, typename A, typename B>
     consteval uint64_t tensor_size(const A& operand1, const B& operand2){
 
         if constexpr (std::is_same_v<A, Tensor<T>>){
@@ -150,7 +150,7 @@ namespace gema{
     }
 
     // Returns first argument of two arguments that matches given type
-    template<typename X, typename T, typename A, typename B>
+    template <typename X, typename T, typename A, typename B>
     consteval Tensor<T>* type_pick_b(const A& operand1, const B& operand2){
         
         if constexpr (std::is_same_v<A, X>){
@@ -163,7 +163,7 @@ namespace gema{
     }
 
     // Returns first argument that matches given type
-    template<typename X, typename F, typename... R>
+    template <typename X, typename F, typename... R>
     inline const X* type_pick(const F& first, const R&... rest) { 
 
         if constexpr (std::is_same_v<std::decay_t<F>, X>) {
@@ -176,7 +176,7 @@ namespace gema{
     }
     
     // Returns first type of two type arguments that matches given type
-    template<typename X, typename A, typename B, typename T>
+    template <typename X, typename A, typename B, typename T>
     struct first_of_specified{
         using type =    std::conditional<std::is_same_v<A, X>, A,
                         std::conditional<std::is_same_v<B, X>, B, 

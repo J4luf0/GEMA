@@ -676,7 +676,7 @@ TEST(tensor_test, operatorAdd_004){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorAdd_005){
+TEST(tensor_test, operatorAddValue_005){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -693,7 +693,7 @@ TEST(tensor_test, operatorAdd_005){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorAdd_006){
+TEST(tensor_test, operatorAddValue_006){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -764,7 +764,7 @@ TEST(tensor_test, operatorAddAssign_003){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorAddAssign_004){
+TEST(tensor_test, operatorAddAssignValue_004){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -781,7 +781,7 @@ TEST(tensor_test, operatorAddAssign_004){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorAddAssign_005){
+TEST(tensor_test, operatorAddAssignValue_005){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -836,7 +836,7 @@ TEST(tensor_test, operatorSubstract_002){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorSubstract_003){
+TEST(tensor_test, operatorSubstractValue_003){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -853,7 +853,7 @@ TEST(tensor_test, operatorSubstract_003){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorSubstract_004){
+TEST(tensor_test, operatorSubstractValue_004){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
