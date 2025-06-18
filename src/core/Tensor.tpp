@@ -193,6 +193,7 @@ namespace gema {
 
     template <class T>
     inline std::function<EqualsCallable<T>> Tensor<T>::defaultEquals_ = [] (const T& a, const T& b) {
+        
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
             return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));

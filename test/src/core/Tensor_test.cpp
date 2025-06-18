@@ -906,6 +906,23 @@ TEST(tensor_test, operatorSubstractAssign_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
+TEST(tensor_test, operatorSubstractAssignValue_003){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5., -1.});
+
+    double value = 3.;
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({2., -4.});
+    
+    *tensor -= value;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
 // (|) --------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){
