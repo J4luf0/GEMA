@@ -13,14 +13,10 @@
 
 namespace gema{
 
+    // TODO: choose what to delete
     template<class T>
     concept has_to_string = requires(T& t) {
         { t.to_string() } -> std::convertible_to<std::string>;
-    };
-
-    template<typename T>
-    concept has_free_to_string = requires(T& t) {
-        { to_string(t) } -> std::convertible_to<std::string>;
     };
 
     template<typename T>
@@ -29,34 +25,37 @@ namespace gema{
     };
 
     /*template <typename T, typename = void>
-    struct is_formattable : std::false_type {};
+    struct has_formatter : std::false_type {};
 
     template <typename T>
-    struct is_formattable<T, std::void_t<
-        decltype(std::formatter<T, char>{}), // can be constructed
-        decltype(std::declval<std::formatter<T, char>>().format(std::declval<T>(), std::declval<std::format_context&>()))
-    >> : std::true_type {};*/
-/*
-    template<typename T>
+    struct has_formatter<T, std::void_t<typename std::formatter<T, char>>> : std::true_type {};
+
+    template <typename T>
+    concept is_formattable = has_formatter<T>::value;*/
+
+    // works except last line
+    /*template<typename T>
     concept is_formattable = requires(const T& t, std::format_context& ctx) {
         std::formatter<T, char>{};                         // constructible
         std::formatter<T, char>{}.format(t, ctx);          // callable
-        //std::format("{}", t);
+        //std::format("{}", t);   // does not work?
     };*/
 
+    // This one maybe works
     /*template<typename T>
     concept is_formattable = requires (T& v, std::format_context ctx) {
         std::formatter<std::remove_cvref_t<T>>().format(v, ctx); 
     };*/
 
+    // This one maybe works
     /*template<typename T>
     concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
-        typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
+        //typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
         { std::formatter<std::remove_cvref_t<T>, char>().parse(pctx) } -> std::same_as<decltype(pctx.begin())>;
         { std::formatter<std::remove_cvref_t<T>, char>().format(v, ctx) } -> std::same_as<decltype(ctx.out())>;
     };*/
 
-    template<typename T>
+    /*template<typename T>
     concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
         //typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
         std::is_default_constructible_v<std::formatter<T, char>>;
@@ -64,10 +63,10 @@ namespace gema{
         std::is_move_constructible_v<std::formatter<T, char>>;
         std::is_copy_assignable_v<std::formatter<T, char>>;
         std::is_move_assignable_v<std::formatter<T, char>>;
-    };
+    };*/
 
-    template<typename T>
-    concept is_not_formattable = !is_formattable<T>;
+    //template <typename T>
+    //concept is_not_formattable = !is_formattable<T>;
 }
 
 // STD specializations of formatter
@@ -96,35 +95,6 @@ namespace std{
         auto format(const gema::Tensor<T>* tensor, format_context& ctx) const {
             // Use tensor.toString() to get the string representation
             return format_to(ctx.out(), "{}", tensor->toString());
-        }
-    };
-
-    /*template <gema::is_not_formattable T>
-    struct formatter<T, char> {
-
-        constexpr auto parse(format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const T& formatee, format_context& ctx) const {
-
-            if constexpr (gema::has_to_string<T>){
-                return format_to(ctx.out(), "{}", formatee.to_string());
-            }else{
-                return format_to(ctx.out(), "{}", "[no format]");
-            }
-        }
-    };*/
-
-    template <size_t N>
-    struct formatter<bitset<N>, char> {
-
-        constexpr auto parse(format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const bitset<N>& bitset, format_context& ctx) const {
-            return format_to(ctx.out(), "{}", bitset.to_string());
         }
     };
 }

@@ -9,6 +9,21 @@
 
 using gema::Tensor;
 
+// Formatter specializations for certain used types
+namespace std{
+    template <size_t N>
+    struct formatter<bitset<N>, char> {
+
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const bitset<N>& bitset, format_context& ctx) const {
+            return format_to(ctx.out(), "{}", bitset.to_string());
+        }
+    };
+}
+
 #define DEBUG(text)\
     std::cout << text << std::endl;
 
@@ -1175,7 +1190,7 @@ TEST(tensor_test, showDebug){
     auto expected = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
     expected->setItems({0b0110, 0b1001, 0b0101, 0b1010, 0b1110, 0b0111});
 
-    std::cout << "is formattable bitset: " << std::boolalpha << gema::is_formattable<std::bitset<4>> <<std::endl;
+    //std::cout << "is formattable bitset: " << std::boolalpha << gema::is_formattable<std::bitset<4>> << std::endl;
 }
 
 /*//Our main <3 -----------------------------------------------------------------------------------------------------------------
