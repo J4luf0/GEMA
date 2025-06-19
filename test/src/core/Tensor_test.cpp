@@ -676,7 +676,7 @@ TEST(tensor_test, operatorAdd_004){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorAddValue_005){
+TEST(tensor_test, operatorAddValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -693,7 +693,7 @@ TEST(tensor_test, operatorAddValue_005){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorAddValue_006){
+TEST(tensor_test, operatorAddValue_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -764,7 +764,7 @@ TEST(tensor_test, operatorAddAssign_003){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorAddAssignValue_004){
+TEST(tensor_test, operatorAddAssignValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -781,7 +781,7 @@ TEST(tensor_test, operatorAddAssignValue_004){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorAddAssignValue_005){
+TEST(tensor_test, operatorAddAssignValue_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -836,7 +836,7 @@ TEST(tensor_test, operatorSubstract_002){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorSubstractValue_003){
+TEST(tensor_test, operatorSubstractValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -853,19 +853,17 @@ TEST(tensor_test, operatorSubstractValue_003){
     EXPECT_EQ(*result, *expected);
 }
 
-TEST(tensor_test, operatorSubstractValue_004){
+TEST(tensor_test, operatorSubstractValue_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
     tensor->setItems({0, 5, -1, 100, -2, -16});
 
-    int value = -4;
-
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({-4, -9, -3, -104, -2, 12});
 
-    std::unique_ptr<Tensor<int>> result(value - *tensor);
+    std::unique_ptr<Tensor<int>> result(-4 - *tensor);
 
     EXPECT_EQ(*result, *expected);
 }
@@ -906,7 +904,7 @@ TEST(tensor_test, operatorSubstractAssign_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, operatorSubstractAssignValue_003){
+TEST(tensor_test, operatorSubstractAssignValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -921,6 +919,59 @@ TEST(tensor_test, operatorSubstractAssignValue_003){
     *tensor -= value;
 
     EXPECT_EQ(*tensor, *expected);
+}
+
+// (*) --------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorMultiply_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, -40, 2, -10000, 10, 0});
+
+    std::unique_ptr<Tensor<int>> result(*tensor * *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorMultiply_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({0., 5., -1., 100., -2., -16.});
+
+    auto tensor2 = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor2->setItems({3., -8., -2., -100., -5., 0.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({0., -40., 2., -10000., 10., 0.});
+
+    std::unique_ptr<Tensor<double>> result(*tensor * *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorMultiplyValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({0., 5., -1., 100., -2., -16.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({0., -2.5, 0.5, -50., 1., 8.});
+
+    std::unique_ptr<Tensor<double>> result(*tensor * -0.5);
+
+    EXPECT_EQ(*result, *expected);
 }
 
 // (|) --------------------------------------------------------------------------------------------------------------------
