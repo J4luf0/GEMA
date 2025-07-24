@@ -183,6 +183,15 @@ namespace gema {
                         void>>;
     };
 
+    template<typename T>
+    inline decltype(auto) total_dereference(T&& x) {
+        if constexpr (std::is_pointer_v<std::remove_reference_t<T>>) {
+            return deref_all(*x);  // dereference one level and recurse
+        } else {
+            return std::forward<T>(x);  // base case: not a pointer
+        }
+    }
+
     
 
     
@@ -280,8 +289,9 @@ namespace gema {
 
     // Secure version will need to check for correct tensorItems size
     template <class T>
-    void Tensor<T>::setItems(const std::vector<T>& tensorItems){
+    Tensor<T>& Tensor<T>::setItems(const std::vector<T>& tensorItems){
         tensor_ = tensorItems;
+        return *this;
     }
 
     template <class T>
@@ -507,6 +517,21 @@ namespace gema {
     // Examples: 
     // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
     // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
+
+    template <class T>
+    constexpr inline auto& force_dereference(T& pointer){//bad
+
+        if constexpr (std::is_pointer_v<T>){
+            return *pointer;
+        } else if constexpr (
+            std::is_same_v<T, std::unique_ptr<typename T::element_type>> || 
+            std::is_same_v<T, std::shared_ptr<typename T::element_type>>)
+        {
+            return *pointer;
+        } else{
+            return pointer;
+        }
+    }
 
     // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
     // Artihmetic binary is an binary operation on two arithmetic types (or ones with overloaded operators acting like 

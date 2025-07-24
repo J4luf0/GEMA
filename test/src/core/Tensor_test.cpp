@@ -974,6 +974,124 @@ TEST(tensor_test, operatorMultiplyValue_001){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorMultiplyAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100, -2, -16});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -8, -2, -100, -5, 0});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, -40, 2, -10000, 10, 0});
+
+    *tensor *= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorMultiplyAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({5., -1.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({15., -3.});
+    
+    *tensor *= 3.;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorMultiplyAssignValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+    const std::vector<uint64_t> dimensionSizesInner{1};
+
+    auto tensor = std::make_unique<Tensor<Tensor<int>>>(dimensionSizes);
+    auto tensorInner = Tensor<int>(dimensionSizesInner);
+    tensorInner.setItems({-2});
+    auto tensorInner2 = Tensor<int>(dimensionSizesInner);
+    tensorInner2.setItems({1});
+    tensor->setItems({tensorInner, tensorInner2});
+
+    auto expected = std::make_unique<Tensor<Tensor<int>>>(dimensionSizes);
+    auto expectedInner = Tensor<int>(dimensionSizesInner);
+    expectedInner.setItems({-6});
+    auto expectedInner2 = Tensor<int>(dimensionSizesInner);
+    expectedInner2.setItems({3});
+    expected->setItems({expectedInner, expectedInner2});
+
+    auto valueTensor = std::make_unique<Tensor<int>>(dimensionSizesInner);
+    valueTensor->setItems({3});
+    
+    *tensor *= *valueTensor;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+// (/) --------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorDivide_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -1, -2, 100});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, -5, 0, 1});
+
+    std::unique_ptr<Tensor<int>> result(*tensor / *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorDivide_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({1., 5., -1., 100.});
+
+    auto tensor2 = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor2->setItems({3., -2., -2., 100.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({1./3., 5./(-2.), 0.5, 1.});
+
+    std::unique_ptr<Tensor<double>> result(*tensor / *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorDivideAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = std::make_unique<Tensor<Tensor<char>>>(dimensionSizes);
+    tensor->setItems({Tensor<char>({2}).setItems({0x00, 0x01}), Tensor<char>({2}).setItems({-0x10, 0x78})});
+
+    auto tensor2 = std::make_unique<Tensor<Tensor<char>>>(dimensionSizes);
+    tensor2->setItems({Tensor<char>({2}).setItems({-0x10, 0x01}), Tensor<char>({2}).setItems({0x08, 0x08})});
+
+    auto expected = std::make_unique<Tensor<Tensor<char>>>(dimensionSizes);
+    expected->setItems({Tensor<char>({2}).setItems({0x00, 0x01}), Tensor<char>({2}).setItems({-0x02, 0x0f})});
+
+    *tensor /= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+// TODO: test division by zero
+
 // (|) --------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){

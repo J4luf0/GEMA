@@ -196,7 +196,7 @@ class Tensor {
      * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
-    void setItems(const std::vector<T>& tensorItems);
+    Tensor<T>& setItems(const std::vector<T>& tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * 
