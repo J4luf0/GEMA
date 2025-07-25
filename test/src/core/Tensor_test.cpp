@@ -1072,6 +1072,36 @@ TEST(tensor_test, operatorDivide_002){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorDivideValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({0., 5., -1., 100., -2., -16.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({0., 5./-0.5, 2., -200., 4., 32.});
+
+    std::unique_ptr<Tensor<double>> result(*tensor / -0.5);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorDivideValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1, 1};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, (-2)/5});
+
+    std::unique_ptr<Tensor<int>> result((-2) / *tensor);
+
+    EXPECT_EQ(*result, *expected);
+}
+
 TEST(tensor_test, operatorDivideAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
@@ -1089,6 +1119,22 @@ TEST(tensor_test, operatorDivideAssign_001){
 
     EXPECT_EQ(*tensor, *expected);
 }
+
+TEST(tensor_test, operatorDivideAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setItems({4, -1});
+
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setItems({4/3, -(1)/(-3)});
+    
+    *tensor /= 3;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
 
 // TODO: test division by zero
 
