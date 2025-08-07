@@ -103,7 +103,7 @@ namespace gema {
 
     constexpr int maxLoopCount = 65536; // Will be probably unused.
 
-    // Meta helpers:
+    // Template helpers:
     
     // Converts from floating types to integral of same size
     template <typename F>
@@ -118,17 +118,18 @@ namespace gema {
     // If F is floating point, it will get converted to integral and if not, then just returned
     template <typename F>
     struct integral_if_float{
-        using type = std::conditional_t<std::is_floating_point_v<F>, to_integral<F>, F>;
+        using type = std::conditional_t<std::is_floating_point_v<F>, typename to_integral<F>::type, F>;
     };
 
     // If argument is floating type, it will get bitcasted to integral of same size, otherwise just returned
     template <typename T>
-    inline constexpr integral_if_float<T> bitcast_if_float(const T& value){
+    inline constexpr typename integral_if_float<T>::type bitcast_if_float(const T& value){
 
         // use this if the bitcast wont get optimized away to nonfloating types
-        integral_if_float<T> valueBits;
+        typename integral_if_float<T>::type valueBits;
+
         if constexpr(std::is_floating_point<T>::value){
-            valueBits = std::bit_cast<typename to_integral<T>::type>(value);
+            valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);
         }else{
             valueBits = value;
         }
@@ -864,7 +865,7 @@ namespace gema {
         template <class T>\
         inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
-            integral_if_float<T> valueBits = bitcast_if_float(value);\
+            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
             /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
     /**/\
             return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
@@ -884,7 +885,7 @@ namespace gema {
         template <class T>\
         inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
-            integral_if_float<T> valueBits = bitcast_if_float(value);\
+            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
     /**/\
             return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
     /**/\
@@ -921,7 +922,7 @@ namespace gema {
         template <class T>\
         void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
     /**/\
-            integral_if_float<T> valueBits = bitcast_if_float(value);\
+            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
     /**/\
             forEach([&valueBits](T& item){\
     /**/\

@@ -1135,9 +1135,6 @@ TEST(tensor_test, operatorDivideAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-
-// TODO: test division by zero
-
 // (|) --------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){
@@ -1190,6 +1187,21 @@ TEST(tensor_test, operatorBitwiseOr_003){
     expected->setItems({3., std::bit_cast<double>(0xC034000000000000)});
 
     std::unique_ptr<Tensor<double>> result(*tensor | *tensor2);
+
+    EXPECT_EQ(*result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseOrValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{1, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setItems({0., 5., -1.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setItems({-0.5, std::bit_cast<double>(0xFFF4000000000000), std::bit_cast<double>(0xBFF0000000000000)});
+
+    std::unique_ptr<Tensor<double>> result(*tensor | -0.5);
 
     EXPECT_EQ(*result, *expected);
 }
