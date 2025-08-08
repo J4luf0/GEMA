@@ -1206,6 +1206,21 @@ TEST(tensor_test, operatorBitwiseOrValue_001){
     EXPECT_EQ(*result, *expected);
 }
 
+TEST(tensor_test, operatorBitwiseOrValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{3};
+
+    auto tensor = std::make_unique<Tensor<char>>(dimensionSizes);
+    tensor->setItems({(char)0b00000000, (char)0b00110101, (char)0b11010010});
+
+    auto expected = std::make_unique<Tensor<char>>(dimensionSizes);
+    expected->setItems({(char)0b00101110, (char)0b00111111, (char)0b11111110});
+
+    std::unique_ptr<Tensor<char>> result((char)0b00101110 | *tensor);
+
+    EXPECT_EQ(*result, *expected);
+}
+
 TEST(tensor_test, operatorBitwiseOrAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -1238,6 +1253,36 @@ TEST(tensor_test, operatorBitwiseOrAssign_002){
     expected->setItems({3., std::bit_cast<float>(0xC0340000)});
 
     *tensor |= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseOrAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
+    tensor->setItems({Tensor<uint8_t>({1}).setItems({0b10101100}), Tensor<uint8_t>({1}).setItems({0b00001001})});
+
+    auto expected = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
+    expected->setItems({Tensor<uint8_t>({1}).setItems({0b11111110}), Tensor<uint8_t>({1}).setItems({0b01011011})});
+    
+    *tensor /= Tensor<uint8_t>({1}).setItems({0b01010010});
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseOrAssignValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
+    tensor->setItems({std::bit_cast<float>(0x00000000), std::bit_cast<float>(0xf0454ac0)});
+
+    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
+    expected->setItems({std::bit_cast<float>(0xA1B80ED), std::bit_cast<float>(0xFA5FCAED)});
+    
+    *tensor /= std::bit_cast<float>(0x0a1b80ed);
 
     EXPECT_EQ(*tensor, *expected);
 }
