@@ -335,10 +335,10 @@ namespace gema {
 
         uint64_t dimensionProduct = tensor_.size();
 
-        //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); i--){ // Opposite endianness
+        //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); --i){ // Opposite endianness
         for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){ // Identity endianness
 
-            for(uint64_t j = 0; j < tensor_.size(); j++){
+            for(uint64_t j = 0; j < tensor_.size(); ++j){
 
                 if(j % dimensionProduct == 0){
                     openingBrackets[j] += "{";
@@ -354,7 +354,7 @@ namespace gema {
 
         std::string output = "";
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); ++i){
             output += 
                 std::format("{}{}{}{}", openingBrackets[i], tensor_[i], closingBrackets[i], (((i + 1) >= tensor_.size()) ? "" : ", "));
         }
@@ -382,7 +382,7 @@ namespace gema {
 
         Tensor<T>* newTensor = new Tensor<T>(dimensionSizes_);
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); ++i){
             newTensor->tensor_[i] = *(new T(tensor_[i]));
         }
 
@@ -406,7 +406,7 @@ namespace gema {
         std::fill(tensor_.begin(), tensor_.end(), fill); // probably better optimalized
 
         // 
-        /*for(uint64_t i = 0; i < tensor_.size(); i++){
+        /*for(uint64_t i = 0; i < tensor_.size(); ++i){
             tensor_.at(i) = fill;
         }*/
     }
@@ -430,7 +430,7 @@ namespace gema {
         switched.resize(dimensionSizes_.size());
 
         // Looping thru elements in tensor and swapping the desired coordinates
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+        for(uint64_t i = 0; i < tensor_.size(); ++i){
             
             // Switching the two coordinated corresponding to the two dimensions we want to switch
             original = getCoords(i);
@@ -1378,7 +1378,7 @@ namespace gema {
     template <apply_callable<T> C>
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation){
 
-        /*for(uint64_t i = 0; i < tensor_.size(); i++){
+        /*for(uint64_t i = 0; i < tensor_.size(); ++i){
 
             if constexpr(std::is_same<T, bool>::value){
                 bool tensorItemValue = tensor_.at(i);
