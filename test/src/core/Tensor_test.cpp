@@ -330,14 +330,14 @@ TEST(tensor_test, transposition_001){
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
     tensor->setItems({0, 5, -1, 100, -2, -16});
 
-    std::unique_ptr<Tensor<int>> result(tensor->transposition());
+    Tensor<int> result(tensor->transposition());
     
     const std::vector<uint64_t> expectedDimensionSizes{3, 2};
     auto expected = std::make_unique<Tensor<int>>(expectedDimensionSizes);
     //expected->setItems({0, -1, -2, 5, 100, -16}); //little endian
     expected->setItems({0, 100, 5, -2, -1, -16});
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, transposition_002){
@@ -347,13 +347,13 @@ TEST(tensor_test, transposition_002){
 
     tensor->setItems({0, 5});
 
-    std::unique_ptr<Tensor<int>> result(tensor->transposition());
+    Tensor<int> result(tensor->transposition());
     
     const std::vector<uint64_t> expectedDimensionSizes{2, 1};
     auto expected = std::make_unique<Tensor<int>>(expectedDimensionSizes);
     expected->setItems({0, 5});
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAssign_001){
@@ -617,9 +617,9 @@ TEST(tensor_test, operatorAdd_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({3, -3, -3, 0, -7, -16});
 
-    std::unique_ptr<Tensor<int>> result(*tensor + *tensor2);
+    Tensor<int> result(*tensor + *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAdd_002){
@@ -635,9 +635,9 @@ TEST(tensor_test, operatorAdd_002){
     auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
     expected->setItems({0.3, -2.5});
 
-    std::unique_ptr<Tensor<float>> result(*tensor + *tensor2);
+    Tensor<float> result(*tensor + *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAdd_003){
@@ -653,9 +653,9 @@ TEST(tensor_test, operatorAdd_003){
     auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
     expected->setItems({true});
     
-    std::unique_ptr<Tensor<bool>> result(*tensor + *tensor2);
+    Tensor<bool> result(*tensor + *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAdd_004){
@@ -671,9 +671,9 @@ TEST(tensor_test, operatorAdd_004){
     auto expected = std::make_unique<Tensor<std::string>>(dimensionSizes);
     expected->setItems({"yeehaw"});
     
-    std::unique_ptr<Tensor<std::string>> result(*tensor + *tensor2);
+    Tensor<std::string> result(*tensor + *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAddValue_001){
@@ -688,9 +688,9 @@ TEST(tensor_test, operatorAddValue_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({-4, 1, -5, 96, -6, -20});
 
-    std::unique_ptr<Tensor<int>> result(*tensor + value);
+    Tensor<int> result(*tensor + value);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAddValue_002){
@@ -705,9 +705,9 @@ TEST(tensor_test, operatorAddValue_002){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({-4, 1, -5, 96, -6, -20});
 
-    std::unique_ptr<Tensor<int>> result(value + *tensor);
+    Tensor<int> result(value + *tensor);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorAddAssign_001){
@@ -813,9 +813,9 @@ TEST(tensor_test, operatorSubstract_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({-3, 13, 1, 200, 3, -16});
 
-    std::unique_ptr<Tensor<int>> result(*tensor - *tensor2);
+    Tensor<int> result(*tensor - *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorSubstract_002){
@@ -831,9 +831,9 @@ TEST(tensor_test, operatorSubstract_002){
     auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
     expected->setItems({false, true, false});
 
-    std::unique_ptr<Tensor<bool>> result(*tensor - *tensor2);
+    Tensor<bool> result(*tensor - *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorSubstractValue_001){
@@ -848,9 +848,9 @@ TEST(tensor_test, operatorSubstractValue_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({4, 9, 3, 104, 2, -12});
 
-    std::unique_ptr<Tensor<int>> result(*tensor - value);
+    Tensor<int> result(*tensor - value);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorSubstractValue_002){
@@ -863,9 +863,9 @@ TEST(tensor_test, operatorSubstractValue_002){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({-4, -9, -3, -104, -2, 12});
 
-    std::unique_ptr<Tensor<int>> result(-4 - *tensor);
+    Tensor<int> result(-4 - *tensor);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorSubstractAssign_001){
@@ -936,9 +936,9 @@ TEST(tensor_test, operatorMultiply_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({0, -40, 2, -10000, 10, 0});
 
-    std::unique_ptr<Tensor<int>> result(*tensor * *tensor2);
+    Tensor<int> result(*tensor * *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorMultiply_002){
@@ -954,9 +954,9 @@ TEST(tensor_test, operatorMultiply_002){
     auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({0., -40., 2., -10000., 10., 0.});
 
-    std::unique_ptr<Tensor<double>> result(*tensor * *tensor2);
+    Tensor<double> result(*tensor * *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorMultiplyValue_001){
@@ -969,9 +969,9 @@ TEST(tensor_test, operatorMultiplyValue_001){
     auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({0., -2.5, 0.5, -50., 1., 8.});
 
-    std::unique_ptr<Tensor<double>> result(*tensor * -0.5);
+    Tensor<double> result(*tensor * -0.5);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorMultiplyAssign_001){
@@ -1049,27 +1049,27 @@ TEST(tensor_test, operatorDivide_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({0, -5, 0, 1});
 
-    std::unique_ptr<Tensor<int>> result(*tensor / *tensor2);
+    Tensor<int> result(*tensor / *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorDivide_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 2};
 
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setItems({1., 5., -1., 100.});
+    auto tensor = Tensor<double>(dimensionSizes);
+    tensor.setItems({1., 5., -1., 100.});
 
-    auto tensor2 = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor2->setItems({3., -2., -2., 100.});
+    auto tensor2 = Tensor<double>(dimensionSizes);
+    tensor2.setItems({3., -2., -2., 100.});
 
-    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
-    expected->setItems({1./3., 5./(-2.), 0.5, 1.});
+    auto expected = Tensor<double>(dimensionSizes);
+    expected.setItems({1./3., 5./(-2.), 0.5, 1.});
 
-    std::unique_ptr<Tensor<double>> result(*tensor / *tensor2);
+    Tensor<double> result = (tensor / tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(tensor_test, operatorDivideValue_001){
@@ -1082,9 +1082,9 @@ TEST(tensor_test, operatorDivideValue_001){
     auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({0., 5./-0.5, 2., -200., 4., 32.});
 
-    std::unique_ptr<Tensor<double>> result(*tensor / -0.5);
+    Tensor<double> result(*tensor / -0.5);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorDivideValue_002){
@@ -1097,9 +1097,9 @@ TEST(tensor_test, operatorDivideValue_002){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({(-2)/(-1), (-2)/5});
 
-    std::unique_ptr<Tensor<int>> result((-2) / *tensor);
+    Tensor<int> result((-2) / *tensor);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorDivideAssign_001){
@@ -1135,6 +1135,26 @@ TEST(tensor_test, operatorDivideAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
+// (%) --------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorModulo_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setItems({0, 5, -1, 100});
+
+    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor2->setItems({3, -1, -2, 3});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setItems({0, 0, -1, 1});
+
+    Tensor<int> result(*tensor % *tensor2);
+
+    EXPECT_EQ(result, *expected);
+}
+
 // (|) --------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){
@@ -1150,9 +1170,9 @@ TEST(tensor_test, operatorBitwiseOr_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({3, -3, -1, -4, -1, -16});
 
-    std::unique_ptr<Tensor<int>> result(*tensor | *tensor2);
+    Tensor<int> result(*tensor | *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseOr_002){
@@ -1168,9 +1188,9 @@ TEST(tensor_test, operatorBitwiseOr_002){
     auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
     expected->setItems({3., std::bit_cast<float>(0xC0340000)});
 
-    std::unique_ptr<Tensor<float>> result(*tensor | *tensor2);
+    Tensor<float> result(*tensor | *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseOr_003){
@@ -1186,9 +1206,9 @@ TEST(tensor_test, operatorBitwiseOr_003){
     auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({3., std::bit_cast<double>(0xC034000000000000)});
 
-    std::unique_ptr<Tensor<double>> result(*tensor | *tensor2);
+    Tensor<double> result(*tensor | *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseOrValue_001){
@@ -1201,9 +1221,9 @@ TEST(tensor_test, operatorBitwiseOrValue_001){
     auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
     expected->setItems({-0.5, std::bit_cast<double>(0xFFEE84801B020C4A), std::bit_cast<double>(0xBFF0000000000000)});
 
-    std::unique_ptr<Tensor<double>> result(*tensor | -0.5);
+    Tensor<double> result(*tensor | -0.5);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseOrValue_002){
@@ -1216,9 +1236,9 @@ TEST(tensor_test, operatorBitwiseOrValue_002){
     auto expected = std::make_unique<Tensor<char>>(dimensionSizes);
     expected->setItems({(char)0b00101110, (char)0b00111111, (char)0b11111110});
 
-    std::unique_ptr<Tensor<char>> result((char)0b00101110 | *tensor);
+    Tensor<char> result((char)0b00101110 | *tensor);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseOrAssign_001){
@@ -1302,9 +1322,9 @@ TEST(tensor_test, operatorBitwiseAnd_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({0, 0, -2, 4, -6, 0});
 
-    std::unique_ptr<Tensor<int>> result(*tensor & *tensor2);
+    Tensor<int> result(*tensor & *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseAnd_002){
@@ -1320,9 +1340,9 @@ TEST(tensor_test, operatorBitwiseAnd_002){
     auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
     expected->setItems({true, false, false});
 
-    std::unique_ptr<Tensor<bool>> result(*tensor & *tensor2);
+    Tensor<bool> result(*tensor & *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseAndAssign_001){
@@ -1376,9 +1396,9 @@ TEST(tensor_test, operatorBitwiseXor_001){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setItems({3, -3, 1, -8, 5, -16});
 
-    std::unique_ptr<Tensor<int>> result(*tensor ^ *tensor2);
+    Tensor<int> result(*tensor ^ *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseXor_002){
@@ -1394,9 +1414,9 @@ TEST(tensor_test, operatorBitwiseXor_002){
     auto expected = std::make_unique<Tensor<std::bitset<4>>>(dimensionSizes);
     expected->setItems({0b0110, 0b1001});
 
-    std::unique_ptr<Tensor<std::bitset<4>>> result(*tensor ^ *tensor2);
+    Tensor<std::bitset<4>> result(*tensor ^ *tensor2);
 
-    EXPECT_EQ(*result, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseXorAssign_001){
@@ -1444,12 +1464,12 @@ TEST(tensor_test, operatorNegation_001){
     auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
     tensor->setItems({0, 5, -1, 100, -2, -16});
 
-    std::unique_ptr<Tensor<int64_t>> tensor2(~*tensor);
+    Tensor<int64_t> tensor2(~*tensor);
 
     auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
     expected->setItems({-1, -6, 0, -101, 1, 15});
 
-    EXPECT_EQ(*tensor2, *expected);
+    EXPECT_EQ(tensor2, *expected);
 }
 
 TEST(tensor_test, operatorNegation_002){
@@ -1459,12 +1479,12 @@ TEST(tensor_test, operatorNegation_002){
     auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
     tensor->setItems({std::bit_cast<float>(0x40140000), std::numeric_limits<float>::infinity(), 2.520999908447265625, 2.51});
 
-    std::unique_ptr<Tensor<float>> tensor2(~*tensor);
+    Tensor<float> tensor2(~*tensor);
 
     auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
     expected->setItems({std::bit_cast<float>(0xBFEBFFFF), std::bit_cast<float>(0x807FFFFF), -1.73949992656707763671875, -1.7449999});
 
-    EXPECT_EQ(*tensor2, *expected);
+    EXPECT_EQ(tensor2, *expected);
 }
 
 // OPERATOR OVERLOAD TESTS END

@@ -250,6 +250,12 @@ namespace gema {
     }
 
     template <class T>
+    Tensor<T>::Tensor(Tensor<T>&& otherTensor) noexcept : 
+    tensor_(std::move(otherTensor.tensor_)), dimensionSizes_(std::move(otherTensor.dimensionSizes_)){
+
+    }
+
+    template <class T>
     Tensor<T>::Tensor(const Tensor<T>* otherTensor){
         tensor_.resize(otherTensor->tensor_.size());
         dimensionSizes_ = otherTensor->dimensionSizes_;
@@ -412,7 +418,7 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::transposition(const int dim1, const int dim2) const{
+    Tensor<T> Tensor<T>::transposition(const int dim1, const int dim2) const{
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
@@ -423,7 +429,7 @@ namespace gema {
         transposedDimensionSizes[dim2] = dimensionSizes_[dim1];
         
         // Initializing the new tensor
-        Tensor<T>* tensorTransposed = new Tensor<T>(transposedDimensionSizes);
+        Tensor<T> tensorTransposed = Tensor<T>(transposedDimensionSizes);
 
         std::vector<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
@@ -441,7 +447,7 @@ namespace gema {
             switched[dim2] = original[dim1];
 
             // Works until now, check the getIndex function if it actually works properly
-            tensorTransposed->tensor_[tensorTransposed->getIndex(switched)] = tensor_[getIndex(original)];
+            tensorTransposed.tensor_[tensorTransposed.getIndex(switched)] = tensor_[getIndex(original)];
         }
 
         return tensorTransposed;
@@ -540,7 +546,7 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline Tensor<T> Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
             return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
                 return tensorItem OP_SYMBOL tensor2Item;\
@@ -551,7 +557,7 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template<class T>\
-        inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline Tensor<T> operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
             return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
                 return item OP_SYMBOL value;\
@@ -561,7 +567,7 @@ namespace gema {
 
     #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
         template<class T>\
-        inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+        inline Tensor<T> operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
@@ -845,7 +851,7 @@ namespace gema {
     #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template<typename T>\
-        inline Tensor<T>* Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline Tensor<T> Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
             return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
     /**/\
@@ -863,7 +869,7 @@ namespace gema {
     #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T>* operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline Tensor<T> operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
             typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
             /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
@@ -883,7 +889,7 @@ namespace gema {
     #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T>* operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+        inline Tensor<T> operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
             typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
     /**/\
@@ -1263,7 +1269,7 @@ namespace gema {
     // (~) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator~(){
+    Tensor<T> Tensor<T>::operator~(){
 
         return forEachAndReturn([](const T& item){
 
@@ -1278,7 +1284,7 @@ namespace gema {
     // (!) --------------------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator!()
+    Tensor<T> Tensor<T>::operator!()
     {
         
         return forEachAndReturn([](const T& item){
@@ -1300,8 +1306,8 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator+() const{
-        return new Tensor<T>(*this);
+    Tensor<T> Tensor<T>::operator+() const{
+        return Tensor<T>(*this);
     }
 
     template <class T>
@@ -1310,9 +1316,9 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T>* Tensor<T>::operator-() const{
+    Tensor<T> Tensor<T>::operator-() const{
 
-        Tensor<T>* newTensor = new Tensor<T>(*this);
+        Tensor<T> newTensor = Tensor<T>(*this);
         newTensor->negateInPlace();
         return newTensor;
     }
@@ -1327,7 +1333,7 @@ namespace gema {
 
     template <class T>
     template <apply_and_return_callable<T> C>
-    inline Tensor<T>* Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
+    inline Tensor<T> Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
 
         //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
         return Tensor<T>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
@@ -1335,11 +1341,11 @@ namespace gema {
 
     template <class T>
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C>
-    Tensor<T>* gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
+    Tensor<T> gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
         
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
-        Tensor<T>* resultTensor = new Tensor<T>(tensorOperand);
+        Tensor<T> resultTensor = Tensor<T>(tensorOperand);
 
         // TODO: find a way to deal with bool or maybe get rid of it
         //#pragma GCC ivdep
@@ -1350,23 +1356,23 @@ namespace gema {
                 if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
                     bool op1Item = operand1.tensor_.at(i);
                     bool op2Item = operand2.tensor_.at(i);
-                    resultTensor->tensor_.at(i) = operation(op1Item, op2Item);
+                    resultTensor.tensor_.at(i) = operation(op1Item, op2Item);
 
                 }else if constexpr (std::is_same_v<A, T>){
                     bool op2Item = operand2.tensor_.at(i);
-                    resultTensor->tensor_.at(i) = operation(operand1, op2Item);
+                    resultTensor.tensor_.at(i) = operation(operand1, op2Item);
 
                 }else if constexpr (std::is_same_v<B, T>){
                     bool op1Item = operand1.tensor_.at(i);
-                    resultTensor->tensor_.at(i) = operation(op1Item, operand2);
+                    resultTensor.tensor_.at(i) = operation(op1Item, operand2);
                 }
             }else{
                 if constexpr (std::is_same_v<A, B>){
-                    resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+                    resultTensor.tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<A, T>){
-                    resultTensor->tensor_[i] = operation(operand1, operand2.tensor_[i]);
+                    resultTensor.tensor_[i] = operation(operand1, operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<B, T>){
-                    resultTensor->tensor_[i] = operation(operand1.tensor_[i], operand2);
+                    resultTensor.tensor_[i] = operation(operand1.tensor_[i], operand2);
                 }
             }
         }
@@ -1433,20 +1439,20 @@ namespace gema {
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    inline Tensor<T>* Tensor<T>::forEachAndReturn(C&& operation) const{
+    inline Tensor<T> Tensor<T>::forEachAndReturn(C&& operation) const{
 
         return Tensor<T>::forEachAndReturn(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    Tensor<T>* Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
+    Tensor<T> Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
     {
-        Tensor<T>* resultTensor = new Tensor<T>(&tensor);
+        Tensor<T> resultTensor = Tensor<T>(&tensor);
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
-            resultTensor->tensor_[i] = operation(tensor.tensor_[i]);
+            resultTensor.tensor_[i] = operation(tensor.tensor_[i]);
         }
 
         return resultTensor;
