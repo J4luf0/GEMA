@@ -1155,6 +1155,121 @@ TEST(tensor_test, operatorModulo_001){
     EXPECT_EQ(result, *expected);
 }
 
+TEST(tensor_test, operatorModuloValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<short>(dimensionSizes);
+    tensor.setItems({0, 5, -1, 100, -24, -16});
+
+    auto expected = Tensor<short>(dimensionSizes);
+    expected.setItems({0, 0, -1, 0, -4, -1});
+
+    Tensor<short> result(tensor % (short)-5);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorModuloValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<char>(dimensionSizes);
+    tensor.setItems({1, 5, -1, 100, -2, -16});
+
+    auto expected = Tensor<char>(dimensionSizes);
+    expected.setItems({0, 3, 0, 3, 1, 3});
+
+    Tensor<char> result((char)3 % tensor);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorModuloAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = Tensor<Tensor<char>>(dimensionSizes);
+    tensor.setItems({Tensor<char>({2}).setItems({0x00, 0x01}), Tensor<char>({2}).setItems({-0x10, 0x78})});
+
+    auto tensor2 = Tensor<Tensor<char>>(dimensionSizes);
+    tensor2.setItems({Tensor<char>({2}).setItems({-0x10, 0x01}), Tensor<char>({2}).setItems({0x09, 0x08})});
+
+    auto expected = Tensor<Tensor<char>>(dimensionSizes);
+    expected.setItems({Tensor<char>({2}).setItems({0x00, 0x00}), Tensor<char>({2}).setItems({-0x07, 0x00})});
+
+    tensor %= tensor2;
+
+    EXPECT_EQ(tensor, expected);
+}
+
+TEST(tensor_test, operatorModuloAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = Tensor<int64_t>(dimensionSizes);
+    tensor.setItems({4, -1});
+
+    auto expected = Tensor<int64_t>(dimensionSizes);
+    expected.setItems({1, -1});
+    
+    tensor %= 3;
+
+    EXPECT_EQ(tensor, expected);
+}
+
+// (&&) -------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorAnd_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<bool>(dimensionSizes);
+    tensor.setItems({false, false, true, true});
+
+    auto tensor2 = Tensor<bool>(dimensionSizes);
+    tensor2.setItems({false, true, false, true});
+
+    auto expected = Tensor<bool>(dimensionSizes);
+    expected.setItems({false, false, false, true});
+
+    Tensor<bool> result(tensor && tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorAndValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<short>(dimensionSizes);
+    tensor.setItems({0, 5, -1, 100, 0, -16});
+
+    auto expected = Tensor<short>(dimensionSizes);
+    expected.setItems({0, 1, 1, 1, 0, 1});
+
+    Tensor<short> result(tensor && (short)-5);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorAndValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<float>(dimensionSizes);
+    tensor.setItems({1., 0., -1., 100., -2., -0.});
+
+    auto expected = Tensor<float>(dimensionSizes);
+    expected.setItems({1., 0., 1., 1, 1., 0.});
+
+    Tensor<float> result((float)3 && tensor);
+
+    EXPECT_EQ(result, expected);
+}
+
+// (||) -------------------------------------------------------------------------------------------------------------------
+
 // (|) --------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){
