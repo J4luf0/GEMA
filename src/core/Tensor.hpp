@@ -328,7 +328,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
     */
-    inline Tensor<T> operator+(const Tensor<T>& tensor2) const;
+    inline auto operator+(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds every tensor item to value and returns result as new tensor. Does no size checking.
@@ -338,7 +338,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend inline Tensor<U> operator+(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend inline auto operator+(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds value to every tensor item and returns result as new tensor. Does no size checking.
@@ -348,7 +348,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend inline Tensor<U> operator+(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend inline auto operator+(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Adds tensor to tensor item by item in place. Does no size checking.
@@ -371,7 +371,9 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator-(const Tensor<T>& tensor2) const;
+    //template <class U> requires requires (U a, U b) { a - b; }
+    auto operator-(const Tensor<T>& tensor2) const;
+    //-> Tensor<decltype(std::declval<U>() - std::declval<U>())>;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts value from every tensor item and returns result as new tensor. Does no size checking.
@@ -381,7 +383,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator-(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator-(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts every tensor item from value and returns result as new tensor. Does no size checking.
@@ -391,7 +393,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator-(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator-(const U& value, const Tensor<U>& tensor);
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Substracts tensor from a tensor item by item in place. Does no size checking.
@@ -414,7 +416,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator*(const Tensor<T>& tensor2) const;
+    auto operator*(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
@@ -424,7 +426,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator*(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator*(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
@@ -434,7 +436,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator*(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator*(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies tensor from a tensor item by item in place. Does no size checking.
@@ -457,7 +459,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator/(const Tensor<T>& tensor2) const;
+    auto operator/(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Divides every tensor item by value and returns result as new tensor. Does no size checking.
@@ -467,7 +469,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator/(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator/(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Multiplies value by every tensor item and returns result as new tensor. Does no size checking.
@@ -477,7 +479,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator/(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator/(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Divides tensor from a tensor item by item in place. Does no size checking.
@@ -500,7 +502,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator%(const Tensor<T>& tensor2) const;
+    auto operator%(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs modulo every tensor item by value and returns result as new tensor. Does no size checking.
@@ -510,7 +512,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator%(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator%(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs modulo value by every tensor item and returns result as new tensor. Does no size checking.
@@ -520,7 +522,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator%(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator%(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs modulo item by item in place. Does no size checking.
@@ -543,7 +545,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator&&(const Tensor<T>& tensor2) const;
+    auto operator&&(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs logical "and" with every tensor item by value and returns result as new tensor. Does no size checking.
@@ -553,7 +555,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator&&(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator&&(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs logical "and" with value by every tensor item and returns result as new tensor. Does no size checking.
@@ -563,7 +565,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator&&(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator&&(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs logical "or" item by item and returns result as new tensor. Does not size checking.
@@ -572,7 +574,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator||(const Tensor<T>& tensor2) const;
+    auto operator||(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs logical "or" with every tensor item by value and returns result as new tensor. Does no size checking.
@@ -582,7 +584,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator||(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator||(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs logical "or" with value by every tensor item and returns result as new tensor. Does no size checking.
@@ -592,7 +594,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator||(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator||(const U& value, const Tensor<U>& tensor);
 
 
 

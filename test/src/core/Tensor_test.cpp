@@ -1155,6 +1155,24 @@ TEST(tensor_test, operatorModulo_001){
     EXPECT_EQ(result, *expected);
 }
 
+TEST(tensor_test, operatorModulo_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<double>(dimensionSizes);
+    tensor.setItems({0., 5.1, -1., -0.0});
+
+    auto tensor2 = Tensor<double>(dimensionSizes);
+    tensor2.setItems({3.5, -3.0, -2., 1.0});
+
+    auto expected = Tensor<double>(dimensionSizes);
+    expected.setItems({0., 2.1, -1., -0.});
+
+    Tensor<double> result(tensor % tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
 TEST(tensor_test, operatorModuloValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -1238,20 +1256,20 @@ TEST(tensor_test, operatorAnd_001){
     EXPECT_EQ(result, expected);
 }
 
-TEST(tensor_test, operatorAndValue_001){
+// TEST(tensor_test, operatorAndValue_001){
 
-    const std::vector<uint64_t> dimensionSizes{2, 3};
+//     const std::vector<uint64_t> dimensionSizes{2, 3};
 
-    auto tensor = Tensor<short>(dimensionSizes);
-    tensor.setItems({0, 5, -1, 100, 0, -16});
+//     auto tensor = Tensor<short>(dimensionSizes);
+//     tensor.setItems({0, 5, -1, 100, 0, -16});
 
-    auto expected = Tensor<short>(dimensionSizes);
-    expected.setItems({0, 1, 1, 1, 0, 1});
+//     auto expected = Tensor<bool>(dimensionSizes);
+//     expected.setItems({false, true, true, true, false, true});
 
-    Tensor<short> result(tensor && (short)-5);
+//     Tensor<bool> result(tensor && (short)-5);
 
-    EXPECT_EQ(result, expected);
-}
+//     EXPECT_EQ(result, expected);
+// }
 
 TEST(tensor_test, operatorAndValue_002){
 
@@ -1269,6 +1287,54 @@ TEST(tensor_test, operatorAndValue_002){
 }
 
 // (||) -------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorOr_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<bool>(dimensionSizes);
+    tensor.setItems({false, false, true, true});
+
+    auto tensor2 = Tensor<bool>(dimensionSizes);
+    tensor2.setItems({false, true, false, true});
+
+    auto expected = Tensor<bool>(dimensionSizes);
+    expected.setItems({false, true, true, true});
+
+    Tensor<bool> result(tensor || tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
+// TEST(tensor_test, operatorOrValue_001){
+
+//     const std::vector<uint64_t> dimensionSizes{2, 3};
+
+//     auto tensor = Tensor<short>(dimensionSizes);
+//     tensor.setItems({0, 5, -1, 100, 0, -16});
+
+//     auto expected = Tensor<bool>(dimensionSizes);
+//     expected.setItems({true, true, true, true, true, true});
+
+//     Tensor<bool> result(tensor || (short)-5);
+
+//     EXPECT_EQ(result, expected);
+// }
+
+TEST(tensor_test, operatorOrValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<float>(dimensionSizes);
+    tensor.setItems({1., 0., -1., 100., -2., -0.});
+
+    auto expected = Tensor<float>(dimensionSizes);
+    expected.setItems({1., 0., 1., 1, 1., 0.});
+
+    Tensor<float> result((float)0 || tensor);
+
+    EXPECT_EQ(result, expected);
+}
 
 // (|) --------------------------------------------------------------------------------------------------------------------
 

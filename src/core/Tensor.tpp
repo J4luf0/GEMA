@@ -546,10 +546,10 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T> Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
             return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
-                return tensorItem OP_SYMBOL tensor2Item;\
+                    return tensorItem OP_SYMBOL tensor2Item;\
             });\
         }\
     /**/
@@ -557,7 +557,7 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template<class T>\
-        inline Tensor<T> operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
             return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
                 return item OP_SYMBOL value;\
@@ -566,8 +566,9 @@ namespace gema {
     /**/
 
     #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
+    /**/\
         template<class T>\
-        inline Tensor<T> operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
@@ -610,7 +611,6 @@ namespace gema {
     ARITHMETIC_BINARY(-)
     ARITHMETIC_BINARY(*)
     ARITHMETIC_BINARY(/)
-    ARITHMETIC_BINARY(%)
 
     #define LOGICAL_BINARY(OP_SYMBOL)\
         ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
@@ -630,221 +630,69 @@ namespace gema {
 
     #undef ARITHMETIC_BINARY
 
-/*
-    // (+) --------------------------------------------------------------------------------------------------------------------
+    // Needed specialization for % because it is not normally supported for floating types
 
     template <class T>
-    inline Tensor<T>* Tensor<T>::operator+(const Tensor<T>& tensor2) const{
-
+    inline auto Tensor<T>::operator %(const Tensor<T>& tensor2) const{
         return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
-            return tensorItem + tensor2Item;
+            
+            if constexpr(std::is_floating_point_v<T>){
+                return std::fmod(tensorItem, tensor2Item);
+            }else{
+                return tensorItem % tensor2Item;
+            }
         });
     }
 
     template<class T>
-    inline Tensor<T>* operator+(const Tensor<T>& tensor, const T& value){
-        //return applyAndReturn(tensor, value, [](const T& tensorItem, const T& singularValue){
-        //    return tensorItem + singularValue;
-        //});
-
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return item + value;
+    inline auto operator %(const Tensor<T>& tensor, const T& value){
+        return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
+            //return item OP_SYMBOL value;
+            if constexpr(std::is_floating_point_v<T>){
+                return std::fmod(item, value);
+            }else{
+                return item % value;
+            }
         });
     }
 
     template<class T>
-    inline Tensor<T>* operator+(const T& value, const Tensor<T>& tensor){
-
-        // do not delegate switched argument operator
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return value + item;
+    inline auto operator %(const T& value, const Tensor<T>& tensor){
+        /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */
+        /* it is not guaranteed to be so on every type and operation!*/
+        return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
+            //return value OP_SYMBOL item;
+            if constexpr(std::is_floating_point_v<T>){
+                return std::fmod(value, item);
+            }else{
+                return value % item;
+            }
         });
     }
 
     template <class T>
-    void Tensor<T>::operator+=(const Tensor<T>& tensor2){
-
+    void Tensor<T>::operator %=(const Tensor<T>& tensor2){
         apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem += tensor2Item;
+            //tensorItem %= tensor2Item;
+            if constexpr(std::is_floating_point_v<T>){
+                tensorItem = std::fmod(tensorItem, tensor2Item);
+            }else{
+                tensorItem %= tensor2Item;
+            }
         });
     }
 
     template<class T>
-    void Tensor<T>::operator+=(const T& value){
-
+    void Tensor<T>::operator %=(const T& value){
         forEach([&value](T& item){
-            item += value;
+            //item %= value;
+            if constexpr(std::is_floating_point_v<T>){
+                item = std::fmod(item, value);
+            }else{
+                item %= value;
+            }
         });
     }
-
-    // (-) --------------------------------------------------------------------------------------------------------------------
-
-    template <class T>
-    Tensor<T>* Tensor<T>::operator-(const Tensor<T>& tensor2) const{
-
-        return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
-            return tensorItem - tensor2Item;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator-(const Tensor<T>& tensor, const T& value){
-
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return item - value;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator-(const T& value, const Tensor<T>& tensor){
-        
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return value - item;
-        });
-    }
-
-    template <class T>
-    void Tensor<T>::operator-=(const Tensor<T>& tensor2){
-        
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem -= tensor2Item;
-        });
-    }
-
-    template<class T>
-    void Tensor<T>::operator-=(const T& value){
-
-        forEach([&value](T& item){
-            item -= value;
-        });
-    }
-
-    // (*) --------------------------------------------------------------------------------------------------------------------
-
-    template <class T>
-    Tensor<T> *Tensor<T>::operator*(const Tensor<T> &tensor2) const{
-
-        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
-            return tensorItem * tensor2Item;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator*(const Tensor<T>& tensor, const T& value){
-
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return item * value;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator*(const T& value, const Tensor<T>& tensor){
-        
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return value * item;
-        });
-    }
-
-    template <class T>
-    void Tensor<T>::operator*=(const Tensor<T> &tensor2){
-
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem *= tensor2Item;
-        });
-    }
-
-    template<class T>
-    void Tensor<T>::operator*=(const T& value){
-
-        forEach([&value](T& item){
-            item *= value;
-        });
-    }
-
-    // (/) --------------------------------------------------------------------------------------------------------------------
-
-    template <class T>
-    Tensor<T> *Tensor<T>::operator/(const Tensor<T> &tensor2) const{
-
-        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
-            return tensorItem / tensor2Item;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator/(const Tensor<T>& tensor, const T& value){
-
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return item / value;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator/(const T& value, const Tensor<T>& tensor){
-        
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return value / item;
-        });
-    }
-
-    template <class T>
-    void Tensor<T>::operator/=(const Tensor<T> &tensor2){
-
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem /= tensor2Item;
-        });
-    }
-
-    template<class T>
-    void Tensor<T>::operator/=(const T& value){
-
-        forEach([&value](T& item){
-            item /= value;
-        });
-    }
-
-    // (%) --------------------------------------------------------------------------------------------------------------------
-
-    template <class T>
-    Tensor<T> *Tensor<T>::operator%(const Tensor<T> &tensor2) const{
-        
-        return applyAndReturn(tensor2, [](const T& tensorItem, const T& tensor2Item){
-            return tensorItem % tensor2Item;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator%(const Tensor<T>& tensor, const T& value){
-
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return item % value;
-        });
-    }
-
-    template <class T>
-    Tensor<T>* operator%(const T& value, const Tensor<T>& tensor){
-        
-        return forEachAndReturn(tensor, [&value](const T& item){
-            return value % item;
-        });
-    }
-
-    template <class T>
-    void Tensor<T>::operator%=(const Tensor<T> &tensor2){
-
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            tensorItem %= tensor2Item;
-        });
-    }
-
-    template<class T>
-    void Tensor<T>::operator%=(const T& value){
-
-        forEach([&value](T& item){
-            item %= value;
-        });
-    }
-*/
 
     // BITWISE BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
     // Bitwise operations (including bitshift) will support floating types using bitcast inside the functions.
