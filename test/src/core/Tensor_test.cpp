@@ -1256,6 +1256,24 @@ TEST(tensor_test, operatorAnd_001){
     EXPECT_EQ(result, expected);
 }
 
+TEST(tensor_test, operatorAnd_002){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = Tensor<Tensor<bool>>(dimensionSizes);
+    tensor.setData({Tensor<bool>({1}).setData({true}), Tensor<bool>({1}).setData({false})});
+
+    auto tensor2 = Tensor<Tensor<bool>>(dimensionSizes);
+    tensor2.setData({Tensor<bool>({1}).setData({true}), Tensor<bool>({1}).setData({true})});
+
+    auto expected = Tensor<Tensor<bool>>(dimensionSizes);
+    expected.setData({Tensor<bool>({1}).setData({true}), Tensor<bool>({1}).setData({false})});
+
+    Tensor<Tensor<bool>> result(tensor && tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
 TEST(tensor_test, operatorAndValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
