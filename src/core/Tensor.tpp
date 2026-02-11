@@ -1207,22 +1207,22 @@ namespace gema {
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            if constexpr(std::is_same_v<T, bool>){
+            // if constexpr(std::is_same_v<T, bool>){
 
-                if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
-                    bool op1Item = operand1.tensor_.at(i);
-                    bool op2Item = operand2.tensor_.at(i);
-                    resultTensorData.at(i) = operation(op1Item, op2Item);
+            //     if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
+            //         bool op1Item = operand1.tensor_.at(i);
+            //         bool op2Item = operand2.tensor_.at(i);
+            //         resultTensorData.at(i) = operation(op1Item, op2Item);
 
-                }else if constexpr (std::is_same_v<A, T>){
-                    bool op2Item = operand2.tensor_.at(i);
-                    resultTensorData.at(i) = operation(operand1, op2Item);
+            //     }else if constexpr (std::is_same_v<A, T>){
+            //         bool op2Item = operand2.tensor_.at(i);
+            //         resultTensorData.at(i) = operation(operand1, op2Item);
 
-                }else if constexpr (std::is_same_v<B, T>){
-                    bool op1Item = operand1.tensor_.at(i);
-                    resultTensorData.at(i) = operation(op1Item, operand2);
-                }
-            }else{
+            //     }else if constexpr (std::is_same_v<B, T>){
+            //         bool op1Item = operand1.tensor_.at(i);
+            //         resultTensorData.at(i) = operation(op1Item, operand2);
+            //     }
+            // }else{
                 if constexpr (std::is_same_v<A, B>){
                     resultTensorData[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<A, T>){
@@ -1230,7 +1230,7 @@ namespace gema {
                 }else if constexpr (std::is_same_v<B, T>){
                     resultTensorData[i] = operation(operand1.tensor_[i], operand2);
                 }
-            }
+            //}
         }
 
         return resultTensor;
@@ -1259,36 +1259,47 @@ namespace gema {
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
 
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
+        //auto& tensorOperandData = tensorOperand->getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            if constexpr(std::is_same_v<T, bool>){
-                if constexpr (std::is_same_v<A, B>){
-                    bool op1Item = operand1.tensor_.at(i);
-                    bool op2Item = operand2.tensor_.at(i);
-                    operation(op1Item, op2Item);
-                    operand1.tensor_.at(i) = op1Item;
+            // if constexpr(std::is_same_v<T, bool>){
+            //     if constexpr (std::is_same_v<A, B>){
+            //         bool op1Item = operand1.tensor_.at(i);
+            //         bool op2Item = operand2.tensor_.at(i);
+            //         operation(op1Item, op2Item);
+            //         operand1.tensor_.at(i) = op1Item;
 
-                }else if constexpr (std::is_same_v<A, T>){
-                    bool op2Item = operand2.tensor_.at(i);
-                    operation(operand1, op2Item);
-                    operand2.tensor_.at(i) = op2Item;
+            //     }else if constexpr (std::is_same_v<A, T>){
+            //         bool op2Item = operand2.tensor_.at(i);
+            //         operation(operand1, op2Item);
+            //         operand2.tensor_.at(i) = op2Item;
 
-                }else if constexpr (std::is_same_v<B, T>){
-                    bool op1Item = operand1.tensor_.at(i);
-                    operation(op1Item, operand2);
-                    operand1.tensor_.at(i) = op1Item;
-                }
-            }else{
+            //     }else if constexpr (std::is_same_v<B, T>){
+            //         bool op1Item = operand1.tensor_.at(i);
+            //         operation(op1Item, operand2);
+            //         operand1.tensor_.at(i) = op1Item;
+            //     }
+            // }else{
                 if constexpr (std::is_same_v<A, B>){
-                    operation(operand1.tensor_[i], operand2.tensor_[i]);
+                    T lhs = static_cast<T>(operand1.tensor_[i]);
+                    const T rhs = static_cast<T>(operand2.tensor_[i]);
+                    operation(lhs, rhs);
+                    operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                    //operation(operand1.tensor_[i], operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<A, T>){
-                    operation(operand1, operand2.tensor_[i]);
+                    const T rhs = static_cast<T>(operand2.tensor_[i]);
+                    operation(operand1, rhs);
+                    operand2.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(rhs);
+                    //operation(operand1, operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<B, T>){
-                    operation(operand1.tensor_[i], operand2);
+                    T lhs = static_cast<T>(operand1.tensor_[i]);
+                    operation(lhs, operand2);
+                    operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                    //operation(operand1.tensor_[i], operand2);
                 }
-            }
+            //}
         }
         
     }
@@ -1331,13 +1342,13 @@ namespace gema {
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
 
-            if constexpr(std::is_same<T, bool>::value){
-                bool value = tensor.tensor_.at(i);
-                operation(value);
-                tensor.tensor_.at(i) = value;
-            }else{
+            // if constexpr(std::is_same<T, bool>::value){
+            //     bool value = tensor.tensor_.at(i);
+            //     operation(value);
+            //     tensor.tensor_.at(i) = value;
+            // }else{
                 operation(tensor.tensor_[i]);
-            }
+            //}
         }
         
         // 2.
