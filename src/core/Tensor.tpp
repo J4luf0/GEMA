@@ -295,13 +295,13 @@ namespace gema {
     }
 
     template <class T>
-    std::vector<T>& Tensor<T>::getData(){
+    std::vector<typename tensor_storage_type<T>::type>& Tensor<T>::getData(){
         return tensor_;
     }
 
     // Secure version will need to check for correct tensorItems size
     template <class T>
-    Tensor<T>& Tensor<T>::setData(const std::vector<T>& tensorItems){
+    Tensor<T>& Tensor<T>::setData(const std::vector<typename tensor_storage_type<T>::type>& tensorItems){
         tensor_ = tensorItems;
         return *this;
     }
@@ -1201,7 +1201,7 @@ namespace gema {
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensorOperand->getDimensionSizes());
 
-        std::vector<opReturnType>& resultTensorData = resultTensor.getData();
+        std::vector<typename tensor_storage_type<opReturnType>::type>& resultTensorData = resultTensor.getData();
 
         // TODO: find a way to deal with bool or maybe get rid of it
         //#pragma GCC ivdep
@@ -1307,7 +1307,7 @@ namespace gema {
         using opReturnType = decltype(operation(std::declval<T>()));
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
 
-        std::vector<opReturnType>& resultTensorData = resultTensor.getData();
+        std::vector<typename tensor_storage_type<opReturnType>::type>& resultTensorData = resultTensor.getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){

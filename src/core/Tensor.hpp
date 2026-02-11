@@ -8,10 +8,10 @@ template<class T>
 class Tensor;
 
 // Avoids std::vector<bool> specialization, that would be otherwise problematic
-// template<class T>
-// struct tensor_storage_type{
-//     using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
-// };
+template<class T>
+struct tensor_storage_type{
+    using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+};
     
 // Concept that checks if type X is of type T or Tensor<T>. Useful for operator overloads.
 template <typename X, class T>
@@ -23,7 +23,8 @@ concept apply_callable = std::is_invocable_r_v<void, C, T&, const T&>;
 
 /// Checks for T(const T&, const T&) signature.
 template <typename C, class T>
-concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
+//concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
+concept apply_and_return_callable = std::is_invocable_v<C, const T&, const T&>;
 
 /// Checks for void(T&) signature.
 template <typename C, class T>
@@ -104,7 +105,7 @@ class Tensor {
 
     private:
 
-    std::vector<T> tensor_;                     /// The tensor data itself, represented by vector containing all the items.
+    std::vector<typename tensor_storage_type<T>::type> tensor_;                     /// The tensor data itself, represented by vector containing all the items.
     std::vector<uint64_t> dimensionSizes_;      /// Size od every tensor dimension.
 
     /// Function compares items in tensor and represents equality by bool.
@@ -207,7 +208,7 @@ class Tensor {
      * 
      * @note Exposes the inner implementation of tensor (the flattened data), use carefully.
      */
-    std::vector<T>& getData();
+    std::vector<typename tensor_storage_type<T>::type>& getData();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
@@ -218,7 +219,7 @@ class Tensor {
      * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
-    Tensor<T>& setData(const std::vector<T>& tensorItems);
+    Tensor<T>& setData(const std::vector<typename tensor_storage_type<T>::type>& tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * 
