@@ -1,7 +1,11 @@
 cmake -G "MinGW Makefiles" -B build
 # mingw32-make -C build clean
 
-#"" > error.log
+# "" > error.log
 mingw32-make -C build # 2> error.log
 
-./build/GEMA_tests.exe --gtest_color=yes # --gtest_list_tests
+$result = $LASTEXITCODE
+
+if ($result -eq 0) {
+    ./build/GEMA_tests.exe --gtest_color=yes # --gtest_list_tests
+}

@@ -6,6 +6,12 @@ namespace gema{
 // Forward declaration just for the concepts.
 template<class T>
 class Tensor;
+
+// Avoids std::vector<bool> specialization, that would be otherwise problematic
+// template<class T>
+// struct tensor_storage_type{
+//     using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+// };
     
 // Concept that checks if type X is of type T or Tensor<T>. Useful for operator overloads.
 template <typename X, class T>
@@ -25,7 +31,8 @@ concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
 
 // Checks for T(const T&) signature.
 template <typename C, class T>
-concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
+//concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
+concept foreach_and_return_callable = std::is_invocable_v<C, const T&>;
 
 // Checks for bool(const T&, const T&) signature.
 template <typename C, class T>
@@ -194,6 +201,15 @@ class Tensor {
     void setItem(const T& value, const std::vector<uint64_t>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Exposes tensor data as reference to std::vector. Modifying its elements will directly modify elements in tensor.
+     * 
+     * @return Reference to data of the tensor.
+     * 
+     * @note Exposes the inner implementation of tensor (the flattened data), use carefully.
+     */
+    std::vector<T>& getData();
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
      * in a tensor, only those that fit will be added.
      * 
@@ -202,7 +218,7 @@ class Tensor {
      * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
-    Tensor<T>& setItems(const std::vector<T>& tensorItems);
+    Tensor<T>& setData(const std::vector<T>& tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * 
@@ -619,7 +635,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator|(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator|(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "or" between value and every tensor item and returns result as new tensor. 
@@ -630,7 +646,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend inline Tensor<U> operator|(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend inline auto operator|(const U& value, const Tensor<U>& tensor);
 
     //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
     //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
@@ -672,7 +688,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator&(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator&(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" between value and every tensor item and returns result as new tensor. 
@@ -683,7 +699,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator&(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator&(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
@@ -721,7 +737,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator^(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator^(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "xor" between value and every tensor item and returns result as new tensor. 
@@ -732,7 +748,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator^(const U& value, const Tensor<U>& tensor);
+    template<typename U> friend auto operator^(const U& value, const Tensor<U>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "xor" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
@@ -768,7 +784,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator<<(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator<<(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -804,7 +820,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    template<typename U> friend Tensor<U> operator>>(const Tensor<U>& tensor, const U& value);
+    template<typename U> friend auto operator>>(const Tensor<U>& tensor, const U& value);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
@@ -933,7 +949,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <foreach_and_return_callable<T> C>
-    inline Tensor<T> forEachAndReturn(C&& operation) const;
+    inline auto forEachAndReturn(C&& operation) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as given tensor and applies passed callable on all items, then writes 
@@ -945,7 +961,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <foreach_and_return_callable<T> C>
-    static Tensor<T> forEachAndReturn(const Tensor<T>& tensor, C&& operation);
+    static auto forEachAndReturn(const Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Applies operation on all items with passed callable. Looping order is unspecified.

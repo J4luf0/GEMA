@@ -286,7 +286,7 @@ namespace gema {
 
         return tensor_[getIndex(coordinates)];
     }
-    
+
     template <class T>
     void Tensor<T>::setItem(const T& value, const std::vector<uint64_t>& coordinates){
 
@@ -294,9 +294,14 @@ namespace gema {
         tensor_[itemIndex] = value;
     }
 
+    template <class T>
+    std::vector<T>& Tensor<T>::getData(){
+        return tensor_;
+    }
+
     // Secure version will need to check for correct tensorItems size
     template <class T>
-    Tensor<T>& Tensor<T>::setItems(const std::vector<T>& tensorItems){
+    Tensor<T>& Tensor<T>::setData(const std::vector<T>& tensorItems){
         tensor_ = tensorItems;
         return *this;
     }
@@ -717,7 +722,7 @@ namespace gema {
     #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T> operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
     /**/\
             typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
             /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
@@ -737,7 +742,7 @@ namespace gema {
     #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline Tensor<T> operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
     /**/\
             typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
     /**/\
@@ -1287,20 +1292,23 @@ namespace gema {
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    inline Tensor<T> Tensor<T>::forEachAndReturn(C&& operation) const{
+    inline auto Tensor<T>::forEachAndReturn(C&& operation) const{
 
         return Tensor<T>::forEachAndReturn(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    Tensor<T> Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
+    auto Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
     {
-        Tensor<T> resultTensor = Tensor<T>(&tensor);
+        using opReturnType = decltype(operation(std::declval<T>()));
+        Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
+
+        std::vector<opReturnType>& tensorData = resultTensor.getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
-            resultTensor.tensor_[i] = operation(tensor.tensor_[i]);
+            tensorData[i] = operation(tensor.tensor_[i]);
         }
 
         return resultTensor;
