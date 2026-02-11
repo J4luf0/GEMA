@@ -704,7 +704,7 @@ namespace gema {
     #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template<typename T>\
-        inline Tensor<T> Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
     /**/\
             return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
     /**/\
@@ -1186,7 +1186,7 @@ namespace gema {
 
     template <class T>
     template <apply_and_return_callable<T> C>
-    inline Tensor<T> Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
+    inline auto Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
 
         //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
         return Tensor<T>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
@@ -1194,11 +1194,14 @@ namespace gema {
 
     template <class T>
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C>
-    Tensor<T> gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
+    auto gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
         
+        using opReturnType = decltype(operation(std::declval<T>(), std::declval<T>()));
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
-        Tensor<T> resultTensor = Tensor<T>(tensorOperand);
+        Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensorOperand->getDimensionSizes());
+
+        std::vector<opReturnType>& resultTensorData = resultTensor.getData();
 
         // TODO: find a way to deal with bool or maybe get rid of it
         //#pragma GCC ivdep
@@ -1209,23 +1212,23 @@ namespace gema {
                 if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
                     bool op1Item = operand1.tensor_.at(i);
                     bool op2Item = operand2.tensor_.at(i);
-                    resultTensor.tensor_.at(i) = operation(op1Item, op2Item);
+                    resultTensorData.at(i) = operation(op1Item, op2Item);
 
                 }else if constexpr (std::is_same_v<A, T>){
                     bool op2Item = operand2.tensor_.at(i);
-                    resultTensor.tensor_.at(i) = operation(operand1, op2Item);
+                    resultTensorData.at(i) = operation(operand1, op2Item);
 
                 }else if constexpr (std::is_same_v<B, T>){
                     bool op1Item = operand1.tensor_.at(i);
-                    resultTensor.tensor_.at(i) = operation(op1Item, operand2);
+                    resultTensorData.at(i) = operation(op1Item, operand2);
                 }
             }else{
                 if constexpr (std::is_same_v<A, B>){
-                    resultTensor.tensor_[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+                    resultTensorData[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<A, T>){
-                    resultTensor.tensor_[i] = operation(operand1, operand2.tensor_[i]);
+                    resultTensorData[i] = operation(operand1, operand2.tensor_[i]);
                 }else if constexpr (std::is_same_v<B, T>){
-                    resultTensor.tensor_[i] = operation(operand1.tensor_[i], operand2);
+                    resultTensorData[i] = operation(operand1.tensor_[i], operand2);
                 }
             }
         }
@@ -1304,11 +1307,11 @@ namespace gema {
         using opReturnType = decltype(operation(std::declval<T>()));
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
 
-        std::vector<opReturnType>& tensorData = resultTensor.getData();
+        std::vector<opReturnType>& resultTensorData = resultTensor.getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
-            tensorData[i] = operation(tensor.tensor_[i]);
+            resultTensorData[i] = operation(tensor.tensor_[i]);
         }
 
         return resultTensor;

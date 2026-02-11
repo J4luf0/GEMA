@@ -650,10 +650,10 @@ TEST(tensor_test, operatorAdd_003){
     auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
     tensor2->setData({false});
 
-    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
-    expected->setData({true});
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({1});
     
-    Tensor<bool> result(*tensor + *tensor2);
+    Tensor<int> result(*tensor + *tensor2);
 
     EXPECT_EQ(result, *expected);
 }
@@ -828,10 +828,10 @@ TEST(tensor_test, operatorSubstract_002){
     auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
     tensor2->setData({true, false, false});
 
-    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
-    expected->setData({false, true, false});
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({0, 1, 0});
 
-    Tensor<bool> result(*tensor - *tensor2);
+    Tensor<int> result(*tensor - *tensor2);
 
     EXPECT_EQ(result, *expected);
 }
@@ -1518,10 +1518,10 @@ TEST(tensor_test, operatorBitwiseAnd_002){
     auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
     tensor2->setData({true, true, false});
 
-    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
-    expected->setData({true, false, false});
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({1, 0, 0});
 
-    Tensor<bool> result(*tensor & *tensor2);
+    Tensor<int> result(*tensor & *tensor2);
 
     EXPECT_EQ(result, *expected);
 }

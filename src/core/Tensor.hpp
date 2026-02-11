@@ -624,7 +624,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator|(const Tensor<T>& tensor2) const;
+    auto operator|(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "or" between every tensor item and value and returns result as new tensor. 
@@ -675,7 +675,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator&(const Tensor<T>& tensor2) const;
+    auto operator&(const Tensor<T>& tensor2) const;
     /*Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
     Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);*/
 
@@ -726,7 +726,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator^(const Tensor<T>& tensor2) const;
+    auto operator^(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "xor" between every tensor item and value and returns result as new tensor. 
@@ -773,7 +773,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator<<(const Tensor<T>& tensor2) const;
+    auto operator<<(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs left bit shift between every tensor item by given value and returns result as new tensor. Does no size 
@@ -809,7 +809,7 @@ class Tensor {
      * 
      * @return Pointer to new resulting tensor.
      */
-    Tensor<T> operator>>(const Tensor<T>& tensor2) const;
+    auto operator>>(const Tensor<T>& tensor2) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs right bit shift between every tensor item by given value and returns result as new tensor. Does no size 
@@ -898,7 +898,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <apply_and_return_callable<T> C>
-    inline Tensor<T> applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
+    inline auto applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
@@ -913,7 +913,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C> 
-    static Tensor<T> applyAndReturn(const A& operand1, const B& operand2, C&& operation)
+    static auto applyAndReturn(const A& operand1, const B& operand2, C&& operation)
     requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
