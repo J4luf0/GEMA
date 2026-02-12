@@ -1663,6 +1663,36 @@ TEST(tensor_test, operatorBitwiseXor_002){
     EXPECT_EQ(result, *expected);
 }
 
+TEST(tensor_test, operatorBitwiseXorValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{1, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setData({0., 4000000.211, -1.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setData({-0.5, std::bit_cast<double>(0xFEAE84801B020C4A), std::bit_cast<double>(0x10000000000000)});
+
+    Tensor<double> result(*tensor ^ -0.5);
+
+    EXPECT_EQ(result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseXorValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{4};
+
+    auto tensor = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setData({true, false, true, false});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({false, true, false, true});
+
+    Tensor<int> result(true ^ *tensor);
+
+    EXPECT_EQ(result, *expected);
+}
+
 TEST(tensor_test, operatorBitwiseXorAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -1698,6 +1728,14 @@ TEST(tensor_test, operatorBitwiseXorAssign_002){
 
     EXPECT_EQ(*tensor, *expected);
 }
+
+// (<<) -------------------------------------------------------------------------------------------------------------------
+
+
+
+// (>>) -------------------------------------------------------------------------------------------------------------------
+
+
 
 // (~) --------------------------------------------------------------------------------------------------------------------
 
