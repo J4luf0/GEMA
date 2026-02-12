@@ -1544,6 +1544,36 @@ TEST(tensor_test, operatorBitwiseAnd_002){
     EXPECT_EQ(result, *expected);
 }
 
+TEST(tensor_test, operatorBitwiseAndValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{1, 3};
+
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setData({0., 4000000.211, -1.});
+
+    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
+    expected->setData({0., std::bit_cast<double>(0x140000000000000), std::bit_cast<double>(0xBFE0000000000000)});
+
+    Tensor<double> result(*tensor & -0.5);
+
+    EXPECT_EQ(result, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseAndValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{3};
+
+    auto tensor = std::make_unique<Tensor<char>>(dimensionSizes);
+    tensor->setData({(char)0b00010001, (char)0b00110101, (char)0b11010010});
+
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({(int)0b00000000, (int)0b00100100, (int)0b00000010});
+
+    Tensor<int> result((char)0b00101110 & *tensor);
+
+    EXPECT_EQ(result, *expected);
+}
+
 TEST(tensor_test, operatorBitwiseAndAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -1576,6 +1606,21 @@ TEST(tensor_test, operatorBitwiseAndAssign_002){
     expected->setData({0., std::bit_cast<float>(0x40000000)});
 
     *tensor &= *tensor2;
+
+    EXPECT_EQ(*tensor, *expected);
+}
+
+TEST(tensor_test, operatorBitwiseAndAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
+    tensor->setData({Tensor<uint8_t>({1}).setData({0b10101100}), Tensor<uint8_t>({1}).setData({0b00001011})});
+
+    auto expected = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
+    expected->setData({Tensor<uint8_t>({1}).setData({0b00000000}), Tensor<uint8_t>({1}).setData({0b00000010})});
+    
+    *tensor &= Tensor<uint8_t>({1}).setData({0b01010010});
 
     EXPECT_EQ(*tensor, *expected);
 }
