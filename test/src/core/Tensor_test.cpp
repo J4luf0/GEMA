@@ -1783,6 +1783,21 @@ TEST(tensor_test, operatorBitshiftValue_001){
     EXPECT_EQ(result, expected);
 }
 
+TEST(tensor_test, operatorBitshiftValue_002){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = Tensor<short>(dimensionSizes);
+    tensor.setData({1, 0});
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({0b10000, 0});
+
+    Tensor<int> result(tensor << (short)0x00000004);
+
+    EXPECT_EQ(result, expected);
+}
+
 TEST(tensor_test, operatorBitshiftAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
@@ -1799,6 +1814,21 @@ TEST(tensor_test, operatorBitshiftAssign_001){
     tensor <<= tensor2;
 
     EXPECT_EQ(tensor, expected);
+}
+
+TEST(tensor_test, operatorBitshiftAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<short>>(dimensionSizes);
+    tensor->setData({0x7000, 69});
+
+    auto expected = std::make_unique<Tensor<short>>(dimensionSizes);
+    expected->setData({(short)0xC000, 276});
+    
+    *tensor <<= 0x0002;
+
+    EXPECT_EQ(*tensor, *expected);
 }
 
 // (>>) -------------------------------------------------------------------------------------------------------------------
