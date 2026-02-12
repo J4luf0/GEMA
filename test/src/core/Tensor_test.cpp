@@ -1378,16 +1378,16 @@ TEST(tensor_test, operatorBitwiseOr_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({0., std::bit_cast<float>(0x40140000)});
+    auto tensor = std::make_unique<Tensor<unsigned int>>(dimensionSizes);
+    tensor->setData({0, std::bit_cast<unsigned int>(0x40140000)});
 
-    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor2->setData({3., std::bit_cast<float>(0xC0200000)});
+    auto tensor2 = std::make_unique<Tensor<unsigned int>>(dimensionSizes);
+    tensor2->setData({3, std::bit_cast<unsigned int>(0xC0200000)});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({3., std::bit_cast<float>(0xC0340000)});
+    auto expected = std::make_unique<Tensor<unsigned int>>(dimensionSizes);
+    expected->setData({3, std::bit_cast<unsigned int>(0xC0340000)});
 
-    Tensor<float> result(*tensor | *tensor2);
+    Tensor<unsigned int> result(*tensor | *tensor2);
 
     EXPECT_EQ(result, *expected);
 }
@@ -1396,16 +1396,16 @@ TEST(tensor_test, operatorBitwiseOr_003){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setData({0., std::bit_cast<double>(0x4014000000000000)});
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setData({0, std::bit_cast<int64_t>(0x4014000000000000)});
 
-    auto tensor2 = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor2->setData({3., std::bit_cast<double>(0xC020000000000000)});
+    auto tensor2 = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor2->setData({3, std::bit_cast<int64_t>(0xC020000000000000)});
 
-    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
-    expected->setData({3., std::bit_cast<double>(0xC034000000000000)});
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setData({3, std::bit_cast<int64_t>(0xC034000000000000)});
 
-    Tensor<double> result(*tensor | *tensor2);
+    Tensor<int64_t> result(*tensor | *tensor2);
 
     EXPECT_EQ(result, *expected);
 }
@@ -1414,13 +1414,17 @@ TEST(tensor_test, operatorBitwiseOrValue_001){
 
     const std::vector<uint64_t> dimensionSizes{1, 3};
 
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setData({0., 4000000.211, -1.});
+    auto tensor = std::make_unique<Tensor<uint64_t>>(dimensionSizes);
+    tensor->setData({std::bit_cast<uint64_t>(0.), 
+                        std::bit_cast<uint64_t>(4000000.211), 
+                        std::bit_cast<uint64_t>(-1.)});
 
-    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
-    expected->setData({-0.5, std::bit_cast<double>(0xFFEE84801B020C4A), std::bit_cast<double>(0xBFF0000000000000)});
+    auto expected = std::make_unique<Tensor<uint64_t>>(dimensionSizes);
+    expected->setData({std::bit_cast<uint64_t>(-0.5), 
+                        std::bit_cast<uint64_t>(0xFFEE84801B020C4A), 
+                        std::bit_cast<uint64_t>(0xBFF0000000000000)});
 
-    Tensor<double> result(*tensor | -0.5);
+    Tensor<uint64_t> result(*tensor | std::bit_cast<uint64_t>(-0.5));
 
     EXPECT_EQ(result, *expected);
 }
@@ -1462,18 +1466,18 @@ TEST(tensor_test, operatorBitwiseOrAssign_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({0., std::bit_cast<float>(0x40140000)});
+    auto tensor = Tensor<Tensor<int>>(dimensionSizes);
+    tensor.setData({Tensor<int>({1}, {0}), Tensor<int>({1}, {0x40140000})});
 
-    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor2->setData({3., std::bit_cast<float>(0xC0200000)});
+    auto tensor2 = Tensor<Tensor<int>>(dimensionSizes);
+    tensor2.setData({Tensor<int>({1}, {3}), Tensor<int>({1}, {(int)0xC0200000})});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({3., std::bit_cast<float>(0xC0340000)});
+    auto expected = Tensor<Tensor<int>>(dimensionSizes);
+    expected.setData({Tensor<int>({1}, {3}), Tensor<int>({1}, {(int)0xC0340000})});
 
-    *tensor |= *tensor2;
+    tensor |= tensor2;
 
-    EXPECT_EQ(*tensor, *expected);
+    EXPECT_EQ(tensor, expected);
 }
 
 TEST(tensor_test, operatorBitwiseOrAssignValue_001){
@@ -1481,10 +1485,10 @@ TEST(tensor_test, operatorBitwiseOrAssignValue_001){
     const std::vector<uint64_t> dimensionSizes{2};
 
     auto tensor = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
-    tensor->setData({Tensor<uint8_t>({1}).setData({0b10101100}), Tensor<uint8_t>({1}).setData({0b00001001})});
+    tensor->setData({Tensor<uint8_t>({1}, {0b10101100}), Tensor<uint8_t>({1}, {0b00001001})});
 
     auto expected = std::make_unique<Tensor<Tensor<uint8_t>>>(dimensionSizes);
-    expected->setData({Tensor<uint8_t>({1}).setData({0b11111110}), Tensor<uint8_t>({1}).setData({0b01011011})});
+    expected->setData({Tensor<uint8_t>({1}, {0b11111110}), Tensor<uint8_t>({1}, {0b01011011})});
     
     *tensor |= Tensor<uint8_t>({1}).setData({0b01010010});
 
@@ -1495,15 +1499,15 @@ TEST(tensor_test, operatorBitwiseOrAssignValue_002){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({std::bit_cast<float>(0x00000000), std::bit_cast<float>(0xf0454ac0)});
+    auto tensor = Tensor<std::bitset<32>>(dimensionSizes);
+    tensor.setData({0x00000000, 0xf0454ac0});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({std::bit_cast<float>(0x0A1B80ED), std::bit_cast<float>(0xFA5FCAED)});
+    auto expected = Tensor<std::bitset<32>>(dimensionSizes);
+    expected.setData({0x0A1B80ED, 0xFA5FCAED});
     
-    *tensor |= std::bit_cast<float>(0x0a1b80ed);
+    tensor |= 0x0a1b80ed;
 
-    EXPECT_EQ(*tensor, *expected);
+    EXPECT_EQ(tensor, expected);
 }
 
 // (&) --------------------------------------------------------------------------------------------------------------------
@@ -1548,13 +1552,13 @@ TEST(tensor_test, operatorBitwiseAndValue_001){
 
     const std::vector<uint64_t> dimensionSizes{1, 3};
 
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setData({0., 4000000.211, -1.});
+    auto tensor = std::make_unique<Tensor<uint64_t>>(dimensionSizes);
+    tensor->setData({0, std::bit_cast<uint64_t>(4000000.211), std::bit_cast<uint64_t>(-1.)});
 
-    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
-    expected->setData({0., std::bit_cast<double>(0x140000000000000), std::bit_cast<double>(0xBFE0000000000000)});
+    auto expected = std::make_unique<Tensor<uint64_t>>(dimensionSizes);
+    expected->setData({0, 0x140000000000000, 0xBFE0000000000000});
 
-    Tensor<double> result(*tensor & -0.5);
+    Tensor<uint64_t> result(*tensor & std::bit_cast<uint64_t>(-0.5));
 
     EXPECT_EQ(result, *expected);
 }
@@ -1594,16 +1598,16 @@ TEST(tensor_test, operatorBitwiseAndAssign_001){
 
 TEST(tensor_test, operatorBitwiseAndAssign_002){
 
-    const std::vector<uint64_t> dimensionSizes{2, 1};
+    const std::vector<uint64_t> dimensionSizes{3};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({0., std::bit_cast<float>(0x40140000)});
+    auto tensor = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setData({false, true, true});
 
-    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor2->setData({3., std::bit_cast<float>(0xC0200000)});
+    auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor2->setData({true, true, 2});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({0., std::bit_cast<float>(0x40000000)});
+    auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
+    expected->setData({false, true, true});
 
     *tensor &= *tensor2;
 
@@ -1667,13 +1671,13 @@ TEST(tensor_test, operatorBitwiseXorValue_001){
 
     const std::vector<uint64_t> dimensionSizes{1, 3};
 
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setData({0., 4000000.211, -1.});
+    auto tensor = std::make_unique<Tensor<bool>>(dimensionSizes);
+    tensor->setData({true, false, true});
 
-    auto expected = std::make_unique<Tensor<double>>(dimensionSizes);
-    expected->setData({-0.5, std::bit_cast<double>(0xFEAE84801B020C4A), std::bit_cast<double>(0x10000000000000)});
+    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
+    expected->setData({false, true, false});
 
-    Tensor<double> result(*tensor ^ -0.5);
+    Tensor<int> result(*tensor ^ true);
 
     EXPECT_EQ(result, *expected);
 }
@@ -1715,14 +1719,14 @@ TEST(tensor_test, operatorBitwiseXorAssign_002){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({0., std::bit_cast<float>(0x40140000)});
+    auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor->setData({0, 0x40140000});
 
-    auto tensor2 = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor2->setData({3., std::bit_cast<float>(0xC0200000)});
+    auto tensor2 = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    tensor2->setData({3, 0xC0200000});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({3., std::bit_cast<float>(0x80340000)});
+    auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
+    expected->setData({3, 0x80340000});
 
     *tensor ^= *tensor2;
 
@@ -1731,7 +1735,38 @@ TEST(tensor_test, operatorBitwiseXorAssign_002){
 
 // (<<) -------------------------------------------------------------------------------------------------------------------
 
+TEST(tensor_test, operatorBitshiftLeft_001){
 
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({0, 5, -1, (int)0x80000000, 3, -16});
+
+    auto tensor2 = Tensor<int>(dimensionSizes);
+    tensor2.setData({3, 1, 3, 1, 1, 3});
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({0, 10, -8, 0, 6, -128});
+
+    Tensor<int> result(tensor << tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorBitshiftValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = Tensor<uint64_t>(dimensionSizes);
+    tensor.setData({1, std::bit_cast<uint64_t>(4000000.211)});
+
+    auto expected = Tensor<uint64_t>(dimensionSizes);
+    expected.setData({0x00000010, 0x14E84801B020C4A0});
+
+    Tensor<uint64_t> result(tensor << (uint64_t)0x00000004);
+
+    EXPECT_EQ(result, expected);
+}
 
 // (>>) -------------------------------------------------------------------------------------------------------------------
 

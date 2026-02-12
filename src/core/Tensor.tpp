@@ -239,7 +239,19 @@ namespace gema {
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
     
-        int itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
+        uint64_t itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
+
+        tensor_.resize(itemCounting);
+    }
+
+    template <class T>
+    inline Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, 
+    const std::vector<typename tensor_storage_type<T>::type>& newTensorData)
+     : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
+
+        // Check actual capacity of dimensions to tensorData
+
+        uint64_t itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
 
         tensor_.resize(itemCounting);
     }
@@ -551,7 +563,8 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const\
+        requires requires (T a, T b) {a OP_SYMBOL b;}{\
     /**/\
             return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
                     return tensorItem OP_SYMBOL tensor2Item;\
@@ -562,7 +575,8 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
         template<class T>\
-        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value)\
+        requires requires (T a, T b) {a OP_SYMBOL b;}{\
     /**/\
             return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
                 return item OP_SYMBOL value;\
@@ -573,7 +587,8 @@ namespace gema {
     #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
     /**/\
         template<class T>\
-        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor)\
+        requires requires (T a, T b) {a OP_SYMBOL b;}{\
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
@@ -586,7 +601,8 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
     /**/\
         template <class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
+        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2)\
+        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
     /**/\
             apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
                 tensorItem OP_SYMBOL##= tensor2Item;\
@@ -597,7 +613,8 @@ namespace gema {
     #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
     /**/\
         template<class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const T& value){\
+        void Tensor<T>::operator OP_SYMBOL##=(const T& value)\
+        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
     /**/\
             forEach([&value](T& item){\
                 item OP_SYMBOL##= value;\
@@ -616,7 +633,11 @@ namespace gema {
     ARITHMETIC_BINARY(-)
     ARITHMETIC_BINARY(*)
     ARITHMETIC_BINARY(/)
+    ARITHMETIC_BINARY(|)
+    ARITHMETIC_BINARY(&)
+    ARITHMETIC_BINARY(^)
 
+    // Some logical overloads for binary operations are not making sense for logical operators
     #define LOGICAL_BINARY(OP_SYMBOL)\
         ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
         ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
@@ -625,12 +646,23 @@ namespace gema {
     LOGICAL_BINARY(&&)
     LOGICAL_BINARY(||)
 
+    // Some bitwise overloads for binary operations are not making sense for bitshift
+    #define BITSHIFTLIKE(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
+        ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
+
+    BITSHIFTLIKE(<<)
+    BITSHIFTLIKE(>>)
+
     #undef ARITHMETIC_BINARY_ToTrT // Macros no longer needed
     #undef ARITHMETIC_BINARY_ToVrT
     #undef ARITHMETIC_BINARY_VoTrT
     #undef ARITHMETIC_BINARY_ToeT
     #undef ARITHMETIC_BINARY_ToeV
 
+    #undef BITSHIFTLIKE
     #undef LOGICAL_BINARY
 
     #undef ARITHMETIC_BINARY
@@ -701,129 +733,129 @@ namespace gema {
 
     // BITWISE BINARY GENERIC MACRO -------------------------------------------------------------------------------------------
     // Bitwise operations (including bitshift) will support floating types using bitcast inside the functions.
-    #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
-    /**/\
-        template<typename T>\
-        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
-    /**/\
-            return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
-    /**/\
-                if constexpr(std::is_floating_point<T>::value){\
-                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
-                    auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
-                    return std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
-                }else{\
-                    return tensorItem OP_SYMBOL tensor2Item;\
-                }\
-            });\
-        }\
-    /**/
+    // #define BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+    // /**/\
+    //     template<typename T>\
+    //     inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const{\
+    // /**/\
+    //         return applyAndReturn(tensor2, [](const T tensorItem, const T tensor2Item){\
+    // /**/\
+    //             if constexpr(std::is_floating_point<T>::value){\
+    //                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
+    //                 auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
+    //                 return std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
+    //             }else{\
+    //                 return tensorItem OP_SYMBOL tensor2Item;\
+    //             }\
+    //         });\
+    //     }\
+    // /**/
 
-    #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
-    /**/\
-            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
-            /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
-    /**/\
-            return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
-    /**/\
-                if constexpr(std::is_floating_point<T>::value){\
-                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
-                    return std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
-                }else{\
-                    return item OP_SYMBOL valueBits;\
-                }\
-            });\
-        }\
-    /**/
+    // #define BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value){\
+    // /**/\
+    //         typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
+    //         /*integral_if_float<T> valueBits = std::bit_cast<typename integral_if_float<T>::type>(value);*/\
+    // /**/\
+    //         return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
+    // /**/\
+    //             if constexpr(std::is_floating_point<T>::value){\
+    //                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+    //                 return std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
+    //             }else{\
+    //                 return item OP_SYMBOL valueBits;\
+    //             }\
+    //         });\
+    //     }\
+    // /**/
 
-    #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
-    /**/\
-            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
-    /**/\
-            return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
-    /**/\
-                if constexpr(std::is_floating_point<T>::value){\
-                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
-                    return std::bit_cast<T>(valueBits OP_SYMBOL itemBits);\
-                }else{\
-                    return valueBits OP_SYMBOL item;\
-                }\
-            });\
-        }\
-    /**/
+    // #define BITWISE_BINARY_VoTrT(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor){\
+    // /**/\
+    //         typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
+    // /**/\
+    //         return Tensor<T>::forEachAndReturn(tensor, [&valueBits](const T& item){\
+    // /**/\
+    //             if constexpr(std::is_floating_point<T>::value){\
+    //                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+    //                 return std::bit_cast<T>(valueBits OP_SYMBOL itemBits);\
+    //             }else{\
+    //                 return valueBits OP_SYMBOL item;\
+    //             }\
+    //         });\
+    //     }\
+    // /**/
 
-    #define BITWISE_BINARY_ToeT(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
-    /**/\
-            apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
-    /**/\
-                if constexpr(std::is_floating_point<T>::value){\
-                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
-                    auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
-                    tensorItem = std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
-                }else{\
-                    tensorItem OP_SYMBOL##= tensor2Item;\
-                }\
-            });\
-        }\
-    /**/
+    // #define BITWISE_BINARY_ToeT(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2){\
+    // /**/\
+    //         apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
+    // /**/\
+    //             if constexpr(std::is_floating_point<T>::value){\
+    //                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(tensorItem);\
+    //                 auto item2Bits = std::bit_cast<typename to_integral<T>::type>(tensor2Item);\
+    //                 tensorItem = std::bit_cast<T>(itemBits OP_SYMBOL item2Bits);\
+    //             }else{\
+    //                 tensorItem OP_SYMBOL##= tensor2Item;\
+    //             }\
+    //         });\
+    //     }\
+    // /**/
 
-    #define BITWISE_BINARY_ToeV(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
-    /**/\
-            typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
-    /**/\
-            forEach([&valueBits](T& item){\
-    /**/\
-                if constexpr(std::is_floating_point<T>::value){\
-                    auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
-                    item = std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
-                }else{\
-                    item OP_SYMBOL##= valueBits;\
-                }\
-            });\
-        }\
-    /**/
+    // #define BITWISE_BINARY_ToeV(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     void Tensor<T>::operator OP_SYMBOL##=(const T &value){\
+    // /**/\
+    //         typename integral_if_float<T>::type valueBits = bitcast_if_float(value);\
+    // /**/\
+    //         forEach([&valueBits](T& item){\
+    // /**/\
+    //             if constexpr(std::is_floating_point<T>::value){\
+    //                 auto itemBits = std::bit_cast<typename to_integral<T>::type>(item);\
+    //                 item = std::bit_cast<T>(itemBits OP_SYMBOL valueBits);\
+    //             }else{\
+    //                 item OP_SYMBOL##= valueBits;\
+    //             }\
+    //         });\
+    //     }\
+    // /**/
 
-    // To expand all possible operator overloads for binary bitwise operations
-    #define BITWISE_BINARY(OP_SYMBOL)\
-        BITWISE_BINARY_ToTrT(OP_SYMBOL)\
-        BITWISE_BINARY_ToVrT(OP_SYMBOL)\
-        BITWISE_BINARY_VoTrT(OP_SYMBOL)\
-        BITWISE_BINARY_ToeT(OP_SYMBOL)\
-        BITWISE_BINARY_ToeV(OP_SYMBOL)
+    // // To expand all possible operator overloads for binary bitwise operations
+    // #define BITWISE_BINARY(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+    //     BITWISE_BINARY_VoTrT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToeT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToeV(OP_SYMBOL)
 
-    BITWISE_BINARY(|)
-    BITWISE_BINARY(&)
-    BITWISE_BINARY(^)
+    // BITWISE_BINARY(|)
+    // BITWISE_BINARY(&)
+    // BITWISE_BINARY(^)
 
-    // Some bitwise overloads for binary operations are not making sense for bitshift
-    #define BITSHIFTLIKE(OP_SYMBOL)\
-        BITWISE_BINARY_ToTrT(OP_SYMBOL)\
-        BITWISE_BINARY_ToVrT(OP_SYMBOL)\
-        BITWISE_BINARY_ToeT(OP_SYMBOL)\
-        BITWISE_BINARY_ToeV(OP_SYMBOL)
+    // // Some bitwise overloads for binary operations are not making sense for bitshift
+    // #define BITSHIFTLIKE(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToTrT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToVrT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToeT(OP_SYMBOL)\
+    //     BITWISE_BINARY_ToeV(OP_SYMBOL)
 
-    BITSHIFTLIKE(<<)
-    BITSHIFTLIKE(>>)
+    // BITSHIFTLIKE(<<)
+    // BITSHIFTLIKE(>>)
 
-    #undef BITWISE_BINARY_ToTgT // Macros no longer needed 
-    #undef BITWISE_BINARY_ToVgT
-    #undef BITWISE_BINARY_VoTgT
-    #undef BITWISE_BINARY_ToeT
-    #undef BITWISE_BINARY_ToeV
-    #undef BITSHIFTLIKE
-    #undef BITWISE_BINARY 
+    // #undef BITWISE_BINARY_ToTgT // Macros no longer needed 
+    // #undef BITWISE_BINARY_ToVgT
+    // #undef BITWISE_BINARY_VoTgT
+    // #undef BITWISE_BINARY_ToeT
+    // #undef BITWISE_BINARY_ToeV
+    // #undef BITSHIFTLIKE
+    // #undef BITWISE_BINARY 
 
 /*
     // (|) --------------------------------------------------------------------------------------------------------------------
