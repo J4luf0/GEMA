@@ -602,7 +602,7 @@ TEST(tensor_test, operatorEquals_007){
     EXPECT_EQ(expected, (*tensor == *tensor2));
 }
 
-// (+) --------------------------------------------------------------------------------------------------------------------
+// (+) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorAdd_001){
 
@@ -798,7 +798,7 @@ TEST(tensor_test, operatorAddAssignValue_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (-) --------------------------------------------------------------------------------------------------------------------
+// (-) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorSubstract_001){
 
@@ -921,7 +921,7 @@ TEST(tensor_test, operatorSubstractAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (*) --------------------------------------------------------------------------------------------------------------------
+// (*) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorMultiply_001){
 
@@ -1034,7 +1034,7 @@ TEST(tensor_test, operatorMultiplyAssignValue_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (/) --------------------------------------------------------------------------------------------------------------------
+// (/) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorDivide_001){
 
@@ -1135,7 +1135,7 @@ TEST(tensor_test, operatorDivideAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (%) --------------------------------------------------------------------------------------------------------------------
+// (%) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorModulo_001){
 
@@ -1236,7 +1236,7 @@ TEST(tensor_test, operatorModuloAssignValue_001){
     EXPECT_EQ(tensor, expected);
 }
 
-// (&&) -------------------------------------------------------------------------------------------------------------------
+// (&&) -----------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorAnd_001){
 
@@ -1304,7 +1304,7 @@ TEST(tensor_test, operatorAndValue_002){
     EXPECT_EQ(result, expected);
 }
 
-// (||) -------------------------------------------------------------------------------------------------------------------
+// (||) -----------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorOr_001){
 
@@ -1354,7 +1354,7 @@ TEST(tensor_test, operatorOrValue_002){
     EXPECT_EQ(result, expected);
 }
 
-// (|) --------------------------------------------------------------------------------------------------------------------
+// (|) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseOr_001){
 
@@ -1510,7 +1510,7 @@ TEST(tensor_test, operatorBitwiseOrAssignValue_002){
     EXPECT_EQ(tensor, expected);
 }
 
-// (&) --------------------------------------------------------------------------------------------------------------------
+// (&) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseAnd_001){
 
@@ -1629,7 +1629,7 @@ TEST(tensor_test, operatorBitwiseAndAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (^) --------------------------------------------------------------------------------------------------------------------
+// (^) ------------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitwiseXor_001){
 
@@ -1748,7 +1748,7 @@ TEST(tensor_test, operatorBitwiseXorAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (<<) -------------------------------------------------------------------------------------------------------------------
+// (<<) -----------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitshiftLeft_001){
 
@@ -1831,7 +1831,7 @@ TEST(tensor_test, operatorBitshiftLeftAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (>>) -------------------------------------------------------------------------------------------------------------------
+// (>>) -----------------------------------------------------------------------------------------------------------------------
 
 TEST(tensor_test, operatorBitshiftRight_001){
 
@@ -1899,9 +1899,9 @@ TEST(tensor_test, operatorBitshiftRightAssignValue_001){
     EXPECT_EQ(*tensor, *expected);
 }
 
-// (~) --------------------------------------------------------------------------------------------------------------------
+// (~) ------------------------------------------------------------------------------------------------------------------------
 
-TEST(tensor_test, operatorNegation_001){
+TEST(tensor_test, operatorBitwiseNegation_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
@@ -1916,7 +1916,7 @@ TEST(tensor_test, operatorNegation_001){
     EXPECT_EQ(tensor2, *expected);
 }
 
-TEST(tensor_test, operatorNegation_002){
+TEST(tensor_test, operatorBitwiseNegation_002){
 
     const std::vector<uint64_t> dimensionSizes{4};
 
@@ -1927,6 +1927,72 @@ TEST(tensor_test, operatorNegation_002){
     expected.setData({0b011010001, 0b000000000, 0b111111111, 0b100110110});
 
     Tensor<std::bitset<9>> tensor2 = ~tensor;
+
+    EXPECT_EQ(tensor2, expected);
+}
+
+// (!) ------------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorLogicalNegation_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<bool>(dimensionSizes);
+    tensor.setData({false, true, false, true});
+
+    Tensor<bool> tensor2 = !tensor;
+
+    auto expected = Tensor<bool>(dimensionSizes);
+    expected.setData({true, false, true, false});
+
+    EXPECT_EQ(tensor2, expected);
+}
+
+TEST(tensor_test, operatorLogicalNegation_002){
+
+    const std::vector<uint64_t> dimensionSizes{3};
+
+    auto tensor = Tensor<Tensor<short>>(dimensionSizes);
+    tensor.setData({Tensor<short>({2}, {152, 0}), Tensor<short>({2}, {-1, -10000}), Tensor<short>({1}, {0})});
+
+    auto expected = Tensor<Tensor<bool>>(dimensionSizes);
+    expected.setData({Tensor<bool>({2}, {0, 1}), Tensor<bool>({2}, {0, 0}), Tensor<bool>({1}, {1})});
+
+    Tensor<Tensor<bool>> tensor2 = !tensor;
+
+    EXPECT_EQ(tensor2, expected);
+}
+
+// (+) ------------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorUnaryPlus_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({1, 69, 0, -152});
+
+    Tensor<int> tensor2 = +tensor;
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({1, 69, 0, -152});
+
+    EXPECT_EQ(tensor2, expected);
+}
+
+TEST(tensor_test, operatorUnaryPlus_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({1, 69, 0, -152});
+
+    Tensor<int> tensor2 = +tensor;
+
+    tensor2.getItem({1, 0})++;
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({1, 69, 1, -152});
 
     EXPECT_EQ(tensor2, expected);
 }

@@ -202,7 +202,7 @@ class Tensor {
      * 
      * @return Item on the provided coordinates.
     */
-    T getItem(const std::vector<uint64_t>& coordinates) const;
+    T& getItem(const std::vector<uint64_t>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one value into tensor onto the desired coordinates.
@@ -893,7 +893,7 @@ class Tensor {
      * 
      * @return Resulting tensor.
      */
-    Tensor<T> operator~() const
+    auto operator~() const
     requires requires (T a) {~a;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -901,7 +901,7 @@ class Tensor {
      * 
      * @return Resulting tensor.
      */
-    Tensor<T> operator!() const
+    auto operator!() const
     requires requires (T a) {!a;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -912,7 +912,7 @@ class Tensor {
      * @warning Even if items have unary + implemented as identity (doing nothing), this overload will still traverse to apply
      * the operation.
      */
-    Tensor<T> operator+() const
+    auto operator+() const
     requires requires (T a) {+a;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
@@ -920,7 +920,7 @@ class Tensor {
      * 
      * @return Resulting tensor.
      */
-    Tensor<T> operator-() const
+    auto operator-() const
     requires requires (T a) {-a;};
 
     // /** -----------------------------------------------------------------------------------------------------------------------
@@ -943,6 +943,12 @@ class Tensor {
     Tensor<T>& operator++();
 
     Tensor<T> operator++(int) const;
+
+    Tensor<T>& operator--();
+
+    Tensor<T> operator--(int) const;
+
+    
 
     // OPERATOR OVERLOADS END -------------------------------------------------------------------------------------------------
 

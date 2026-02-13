@@ -294,7 +294,7 @@ namespace gema {
     }
 
     template <class T>
-    T Tensor<T>::getItem(const std::vector<uint64_t>& coordinates) const{
+    T& Tensor<T>::getItem(const std::vector<uint64_t>& coordinates){
 
         return tensor_[getIndex(coordinates)];
     }
@@ -736,7 +736,7 @@ namespace gema {
 
     #define UNARY_OPERATION(OP_SYMBOL)\
         template <class T>\
-        Tensor<T> Tensor<T>::operator OP_SYMBOL() const\
+        auto Tensor<T>::operator OP_SYMBOL() const\
         requires requires (T a) {OP_SYMBOL a;}{\
     /**/\
             return forEachAndReturn([](const T& item){\
