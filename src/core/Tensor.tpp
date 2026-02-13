@@ -731,70 +731,95 @@ namespace gema {
         });
     }
 
+
+    // UNARY OPERATION GENERIC MACRO ------------------------------------------------------------------------------------------
+
+    #define UNARY_OPERATION(OP_SYMBOL)\
+        template <class T>\
+        Tensor<T> Tensor<T>::operator OP_SYMBOL() const\
+        requires requires (T a) {OP_SYMBOL a;}{\
+    /**/\
+            return forEachAndReturn([](const T& item){\
+                return OP_SYMBOL item;\
+            });\
+        }\
+    /**/
+
+    UNARY_OPERATION(~)
+    UNARY_OPERATION(!)
+    UNARY_OPERATION(+)
+    UNARY_OPERATION(-)
+
+    #undef UNARY_OPERATION
+
+    // Specialization for unary + because no need to do anything
+    // template <class T>
+    // Tensor<T> Tensor<T>::operator+() const
+    // requires requires (T a) {+ a;}{
+    //     return Tensor<T>(*this);
+    // }
+
     // (~) --------------------------------------------------------------------------------------------------------------------
 
-    template <class T>
-    Tensor<T> Tensor<T>::operator~(){
+    // template <class T>
+    // Tensor<T> Tensor<T>::operator~(){
 
-        return forEachAndReturn([](const T& item){
+    //     return forEachAndReturn([](const T& item){
 
-            if constexpr(std::is_floating_point<T>::value){
-                return std::bit_cast<T>(~std::bit_cast<typename to_integral<T>::type>(item));
-            } else{
-                return ~item;
-            }
-        });
-    }
+    //         if constexpr(std::is_floating_point<T>::value){
+    //             return std::bit_cast<T>(~std::bit_cast<typename to_integral<T>::type>(item));
+    //         } else{
+    //             return ~item;
+    //         }
+    //     });
+    // }
 
     // (!) --------------------------------------------------------------------------------------------------------------------
 
-    template <class T>
-    Tensor<T> Tensor<T>::operator!()
-    {
+    // template <class T>
+    // Tensor<T> Tensor<T>::operator!()
+    // {
         
-        return forEachAndReturn([](const T& item){
+    //     return forEachAndReturn([](const T& item){
 
-            if constexpr(std::is_floating_point<T>::value){
-                return std::bit_cast<T>(!std::bit_cast<typename to_integral<T>::type>(item));
-            } else{
-                return !item;
-            }
-        });
-    }
+    //         if constexpr(std::is_floating_point<T>::value){
+    //             return std::bit_cast<T>(!std::bit_cast<typename to_integral<T>::type>(item));
+    //         } else{
+    //             return !item;
+    //         }
+    //     });
+    // }
 
-    template <class T>
-    void Tensor<T>::complementInPlace(){
+    // template <class T>
+    // void Tensor<T>::complementInPlace(){
 
-        forEach([](T& item){
-            item = ~item; // TODO: isnt there needed a float specialization?
-        });
-    }
+    //     forEach([](T& item){
+    //         item = ~item; // TODO: isnt there needed a float specialization?
+    //     });
+    // }
 
-    template <class T>
-    Tensor<T> Tensor<T>::operator+() const{
-        return Tensor<T>(*this);
-    }
+    
 
-    template <class T>
-    void Tensor<T>::plusInPlace() const{
+    // template <class T>
+    // void Tensor<T>::plusInPlace() const{
 
-    }
+    // }
 
-    template <class T>
-    Tensor<T> Tensor<T>::operator-() const{
+    // // template <class T>
+    // // Tensor<T> Tensor<T>::operator-() const{
 
-        Tensor<T> newTensor = Tensor<T>(*this);
-        newTensor->negateInPlace();
-        return newTensor;
-    }
+    // //     Tensor<T> newTensor = Tensor<T>(*this);
+    // //     newTensor->negateInPlace();
+    // //     return newTensor;
+    // // }
 
-    template <class T>
-    inline void Tensor<T>::negateInPlace(){
+    // template <class T>
+    // inline void Tensor<T>::opposite(){
 
-        forEach([](T& item){
-            item = -item;
-        });
-    }
+    //     forEach([](T& item){
+    //         item = -item;
+    //     });
+    // }
 
     template <class T>
     template <apply_and_return_callable<T> C>

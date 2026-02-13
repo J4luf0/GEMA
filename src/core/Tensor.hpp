@@ -133,7 +133,12 @@ class Tensor {
     Tensor(const std::vector<uint64_t>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Sets dimensionSizes, then fills the tensor with 
+     * @brief Sets dimensionSizes, then fills the tensor with given data. Following safety rules of this class, this function
+     * does not check for correct size of the data and will forcibly make tensor with given dimension sizes, whether it means
+     * to discard data or fill rest of tensor with default values.
+     * 
+     * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
+     * @param tensorItems one dimensional vector of items to be added by order.
      */
     Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, 
     const std::vector<typename tensor_storage_type<T>::type>& newTensorData);
@@ -650,8 +655,7 @@ class Tensor {
     // BITWISE OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor. Is specialized for floating 
-     * values so it can do bitwise operation on them too.
+     * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor.
      * 
      * @param tensor2 second tensor to perform operation against.
      * 
@@ -684,13 +688,8 @@ class Tensor {
     template<typename U> friend inline auto operator|(const U& value, const Tensor<U>& tensor)
     requires requires (U a, U b) {a | b;};
 
-    //template<typename F = T, typename std::enable_if<!std::is_floating_point<F>::value, double>::type = 0.>
-    //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
-    //template<typename F = T, typename std::enable_if<std::is_floating_point<F>::value, double>::type = 0.>
-    //Tensor<T>* operator|(const Tensor<T>& tensor2) const;
-
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor in place. Is specialized for floating values too.
+     * @brief Performs bitwise "or" on each item in a tensor in place.
      * 
      * @param tensor2 second tensor to perform operation against.
      */
@@ -706,8 +705,7 @@ class Tensor {
     requires requires (T a, T b) {a |= b;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor. Is specialized for floating 
-     * values so it can do bitwise operation on them too.
+     * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor.
      * 
      * @param tensor2 second tensor to perform operation against.
      * 
@@ -715,8 +713,6 @@ class Tensor {
      */
     auto operator&(const Tensor<T>& tensor2) const
     requires requires (T a, T b) {a & b;};
-    /*Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(!std::is_floating_point<T>::value);
-    Tensor<T>* operator&(const Tensor<T>& tensor2) const requires(std::is_floating_point<T>::value);*/
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" between every tensor item and value and returns result as new tensor. 
@@ -743,15 +739,12 @@ class Tensor {
     requires requires (U a, U b) {a & b;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
-     * operation on them too.
+     * @brief Performs bitwise "and" on each item in a tensor in place.
      * 
      * @param tensor2 second tensor to perform operation against.
      */
     void operator&=(const Tensor<T>& tensor2)
     requires requires (T a, T b) {a &= b;};
-    /*void operator&=(const Tensor<T>& tensor2) requires(!std::is_floating_point<T>::value);
-    void operator&=(const Tensor<T>& tensor2) requires(std::is_floating_point<T>::value);*/
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Performs bitwise "and" between each item in a tensor and value in place. Does no size checking.
@@ -762,8 +755,7 @@ class Tensor {
     requires requires (T a, T b) {a &= b;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor. Is specialized for floating 
-     * values so it can do bitwise operation on them too.
+     * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor.
      * 
      * @param tensor2 second tensor to perform operation against.
      * 
@@ -797,8 +789,7 @@ class Tensor {
     requires requires (U a, U b) {a ^ b;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor in place. Is specialized for floating values so it can do bitwise
-     * operation on them too.
+     * @brief Performs bitwise "xor" on each item in a tensor in place.
      * 
      * @param tensor2 second tensor to perform operation against.
      */
@@ -898,43 +889,56 @@ class Tensor {
     // UNARY OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------
     
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise negation on each item in a tensor. Can do bitwise operation on floating types too.
-     */
-    Tensor<T> operator~();
-    /*Tensor<T>* operator~() requires(!std::is_floating_point<T>::value && !std::is_same<T, bool>::value);
-    Tensor<T>* operator~() requires(std::is_same<T, bool>::value);
-    Tensor<T>* operator~() requires(std::is_floating_point<T>::value);*/
-
-    Tensor<T> operator!();
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise negation on each item in a tensor.
-     */
-    void complementInPlace();
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary plus on a tensor and returns it as new object. Does nothing to items so it is basically a copy.
+     * @brief Performs bitwise negation on each item and returns result as new tensor. Does not change original tensor.
      * 
-     * @return Pointer to new object.
+     * @return Resulting tensor.
      */
-    Tensor<T> operator+() const;
+    Tensor<T> operator~() const
+    requires requires (T a) {~a;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary plus on a tensor. Does actually nothing. Is here only for completeness.
-     */
-    void plusInPlace() const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary minus on all items of copy of this object. Returns the pointer to the new object.
+     * @brief Performs logical negation on each item and returns result as new tensor. Does not change original tensor.
      * 
-     * @return New object with items from this object negated.
+     * @return Resulting tensor.
      */
-    Tensor<T> operator-() const;
+    Tensor<T> operator!() const
+    requires requires (T a) {!a;};
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary minus on all items of the tensor.
+     * @brief Performs unary plus on each item and returns result as new tensor. Does not change original tensor.
+     * 
+     * @return Resulting tensor.
+     * 
+     * @warning Even if items have unary + implemented as identity (doing nothing), this overload will still traverse to apply
+     * the operation.
      */
-    inline void negateInPlace();
+    Tensor<T> operator+() const
+    requires requires (T a) {+a;};
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary minus on each item and returns result as new tensor. Does not change original tensor.
+     * 
+     * @return Resulting tensor.
+     */
+    Tensor<T> operator-() const
+    requires requires (T a) {-a;};
+
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise negation on each item in a tensor.
+    //  */
+    // void complementInPlace();
+
+
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary plus on a tensor.
+    //  */
+    // void plusInPlace() const;
+
+
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary minus on all items of the tensor.
+    //  */
+    // inline void opposite();
 
     Tensor<T>& operator++();
 

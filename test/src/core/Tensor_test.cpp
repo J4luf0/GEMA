@@ -1920,15 +1920,15 @@ TEST(tensor_test, operatorNegation_002){
 
     const std::vector<uint64_t> dimensionSizes{4};
 
-    auto tensor = std::make_unique<Tensor<float>>(dimensionSizes);
-    tensor->setData({std::bit_cast<float>(0x40140000), std::numeric_limits<float>::infinity(), 2.520999908447265625, 2.51});
+    auto tensor = Tensor<std::bitset<9>>(dimensionSizes);
+    tensor.setData({0b100101110, 0b111111111, 0b000000000, 0b011001001});
 
-    Tensor<float> tensor2(~*tensor);
+    auto expected = Tensor<std::bitset<9>>(dimensionSizes);
+    expected.setData({0b011010001, 0b000000000, 0b111111111, 0b100110110});
 
-    auto expected = std::make_unique<Tensor<float>>(dimensionSizes);
-    expected->setData({std::bit_cast<float>(0xBFEBFFFF), std::bit_cast<float>(0x807FFFFF), -1.73949992656707763671875, -1.7449999});
+    Tensor<std::bitset<9>> tensor2 = ~tensor;
 
-    EXPECT_EQ(tensor2, *expected);
+    EXPECT_EQ(tensor2, expected);
 }
 
 // OPERATOR OVERLOAD TESTS END
