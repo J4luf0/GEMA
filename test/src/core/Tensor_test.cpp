@@ -1768,7 +1768,7 @@ TEST(tensor_test, operatorBitshiftLeft_001){
     EXPECT_EQ(result, expected);
 }
 
-TEST(tensor_test, operatorBitshiftValue_001){
+TEST(tensor_test, operatorBitshiftLeftValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -1783,7 +1783,7 @@ TEST(tensor_test, operatorBitshiftValue_001){
     EXPECT_EQ(result, expected);
 }
 
-TEST(tensor_test, operatorBitshiftValue_002){
+TEST(tensor_test, operatorBitshiftLeftValue_002){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -1798,7 +1798,7 @@ TEST(tensor_test, operatorBitshiftValue_002){
     EXPECT_EQ(result, expected);
 }
 
-TEST(tensor_test, operatorBitshiftAssign_001){
+TEST(tensor_test, operatorBitshiftLeftAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 1};
 
@@ -1816,7 +1816,7 @@ TEST(tensor_test, operatorBitshiftAssign_001){
     EXPECT_EQ(tensor, expected);
 }
 
-TEST(tensor_test, operatorBitshiftAssignValue_001){
+TEST(tensor_test, operatorBitshiftLeftAssignValue_001){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -1833,7 +1833,71 @@ TEST(tensor_test, operatorBitshiftAssignValue_001){
 
 // (>>) -------------------------------------------------------------------------------------------------------------------
 
+TEST(tensor_test, operatorBitshiftRight_001){
 
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({0, 5, -1, (int)0x80000000});
+
+    auto tensor2 = Tensor<int>(dimensionSizes);
+    tensor2.setData({3, 1, 3, 1});
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({0, 2, -1, (int)-0x40000000});
+
+    Tensor<int> result(tensor >> tensor2);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorBitshiftRightValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = Tensor<uint8_t>(dimensionSizes);
+    tensor.setData({0b10000001, 0b01110010});
+
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({0b00100000, 0b00011100});
+
+    Tensor<int> result(tensor >> (uint8_t)2);
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorBitshiftRightAssign_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 1};
+
+    auto tensor = Tensor<int64_t>(dimensionSizes);
+    tensor.setData({0, 0x40140000});
+
+    auto tensor2 = Tensor<int64_t>(dimensionSizes);
+    tensor2.setData({3, 0x00000010});
+
+    auto expected = Tensor<int64_t>(dimensionSizes);
+    expected.setData({0, 0x4014});
+
+    tensor >>= tensor2;
+
+    EXPECT_EQ(tensor, expected);
+}
+
+TEST(tensor_test, operatorBitshiftRightAssignValue_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+
+    auto tensor = std::make_unique<Tensor<short>>(dimensionSizes);
+    tensor->setData({0x7000, 69});
+
+    auto expected = std::make_unique<Tensor<short>>(dimensionSizes);
+    expected->setData({(short)0x1C00, 0x11});
+    
+    *tensor >>= 0x0002;
+
+    EXPECT_EQ(*tensor, *expected);
+}
 
 // (~) --------------------------------------------------------------------------------------------------------------------
 
