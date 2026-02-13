@@ -1,5 +1,4 @@
 #include <bitset>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -863,7 +862,7 @@ TEST(tensor_test, operatorSubstractValue_002){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setData({-4, -9, -3, -104, -2, 12});
 
-    Tensor<int> result(-4 - *tensor);
+    Tensor<int> result = -4 - *tensor;
 
     EXPECT_EQ(result, *expected);
 }

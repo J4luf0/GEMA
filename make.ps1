@@ -1,4 +1,4 @@
-cmake -G "MinGW Makefiles" -B build
+cmake -G "MinGW Makefiles" -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON # may help with intellisense?
 # mingw32-make -C build clean
 
 # "" > error.log

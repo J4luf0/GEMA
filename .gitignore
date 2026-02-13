@@ -37,3 +37,8 @@ build/
 
 # Specific files
 error.log
+
+# clangd
+.cache/
+.clangd
+compile_commands.json

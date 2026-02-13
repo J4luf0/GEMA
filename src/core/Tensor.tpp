@@ -9,7 +9,7 @@
 #include <numeric>
 #include <vector>
 
-#include "Tensor.hpp" // Not needed, just keep it for intelisense
+//#include "Tensor.hpp" // Not needed, just keep it for intelisense
 
 namespace gema{
 
@@ -23,50 +23,6 @@ namespace gema{
     concept has_ostream = requires(T& t, std::ostream& os) {
         { os << t } -> std::same_as<std::ostream&>;
     };
-
-    /*template <typename T, typename = void>
-    struct has_formatter : std::false_type {};
-
-    template <typename T>
-    struct has_formatter<T, std::void_t<typename std::formatter<T, char>>> : std::true_type {};
-
-    template <typename T>
-    concept is_formattable = has_formatter<T>::value;*/
-
-    // works except last line
-    /*template<typename T>
-    concept is_formattable = requires(const T& t, std::format_context& ctx) {
-        std::formatter<T, char>{};                         // constructible
-        std::formatter<T, char>{}.format(t, ctx);          // callable
-        //std::format("{}", t);   // does not work?
-    };*/
-
-    // This one maybe works
-    /*template<typename T>
-    concept is_formattable = requires (T& v, std::format_context ctx) {
-        std::formatter<std::remove_cvref_t<T>>().format(v, ctx); 
-    };*/
-
-    // This one maybe works
-    /*template<typename T>
-    concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
-        //typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
-        { std::formatter<std::remove_cvref_t<T>, char>().parse(pctx) } -> std::same_as<decltype(pctx.begin())>;
-        { std::formatter<std::remove_cvref_t<T>, char>().format(v, ctx) } -> std::same_as<decltype(ctx.out())>;
-    };*/
-
-    /*template<typename T>
-    concept is_formattable = requires (T& v, std::format_context& ctx, std::format_parse_context& pctx) {
-        //typename std::formatter<std::remove_cvref_t<T>, char>; // checks existence (but doesn't instantiate)
-        std::is_default_constructible_v<std::formatter<T, char>>;
-        std::is_copy_constructible_v<std::formatter<T, char>>;
-        std::is_move_constructible_v<std::formatter<T, char>>;
-        std::is_copy_assignable_v<std::formatter<T, char>>;
-        std::is_move_assignable_v<std::formatter<T, char>>;
-    };*/
-
-    //template <typename T>
-    //concept is_not_formattable = !is_formattable<T>;
 }
 
 // STD specializations of formatter
