@@ -608,18 +608,18 @@ TEST(tensor_test, operatorAdd_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
-    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
-    tensor->setData({0, 5, -1, 100, -2, -16});
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({0, 5, -1, 100, -2, -16});
 
-    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
-    tensor2->setData({3, -8, -2, -100, -5, 0});
+    auto tensor2 = Tensor<int>(dimensionSizes);
+    tensor2.setData({3, -8, -2, -100, -5, 0});
 
-    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
-    expected->setData({3, -3, -3, 0, -7, -16});
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({3, -3, -3, 0, -7, -16});
 
-    Tensor<int> result(*tensor + *tensor2);
+    Tensor<int> result = tensor + tensor2;
 
-    EXPECT_EQ(result, *expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(tensor_test, operatorAdd_002){
@@ -927,18 +927,18 @@ TEST(tensor_test, operatorMultiply_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
-    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
-    tensor->setData({0, 5, -1, 100, -2, -16});
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({0, 5, -1, 100, -2, -16});
 
-    auto tensor2 = std::make_unique<Tensor<int>>(dimensionSizes);
-    tensor2->setData({3, -8, -2, -100, -5, 0});
+    auto tensor2 = Tensor<int>(dimensionSizes);
+    tensor2.setData({3, -8, -2, -100, -5, 0});
 
-    auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
-    expected->setData({0, -40, 2, -10000, 10, 0});
+    auto expected = Tensor<int>(dimensionSizes);
+    expected.setData({0, -40, 2, -10000, 10, 0});
 
-    Tensor<int> result(*tensor * *tensor2);
+    Tensor<int> result = tensor * tensor2;
 
-    EXPECT_EQ(result, *expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(tensor_test, operatorMultiply_002){
@@ -1097,7 +1097,7 @@ TEST(tensor_test, operatorDivideValue_002){
     auto expected = std::make_unique<Tensor<int>>(dimensionSizes);
     expected->setData({(-2)/(-1), (-2)/5});
 
-    Tensor<int> result((-2) / *tensor);
+    Tensor<int> result = (-2) / *tensor;
 
     EXPECT_EQ(result, *expected);
 }
@@ -1168,7 +1168,7 @@ TEST(tensor_test, operatorModulo_002){
     auto expected = Tensor<double>(dimensionSizes);
     expected.setData({0., 2.1, -1., -0.});
 
-    Tensor<double> result(tensor % tensor2);
+    Tensor<double> result = tensor % tensor2;
 
     EXPECT_EQ(result, expected);
 }
@@ -1861,7 +1861,7 @@ TEST(tensor_test, operatorBitshiftRightValue_001){
     auto expected = Tensor<int>(dimensionSizes);
     expected.setData({0b00100000, 0b00011100});
 
-    Tensor<int> result(tensor >> (uint8_t)2);
+    Tensor<int> result = tensor >> (uint8_t)2;
 
     EXPECT_EQ(result, expected);
 }
@@ -1908,12 +1908,12 @@ TEST(tensor_test, operatorBitwiseNegation_001){
     auto tensor = std::make_unique<Tensor<int64_t>>(dimensionSizes);
     tensor->setData({0, 5, -1, 100, -2, -16});
 
-    Tensor<int64_t> tensor2(~*tensor);
+    Tensor<int64_t> result(~*tensor);
 
     auto expected = std::make_unique<Tensor<int64_t>>(dimensionSizes);
     expected->setData({-1, -6, 0, -101, 1, 15});
 
-    EXPECT_EQ(tensor2, *expected);
+    EXPECT_EQ(result, *expected);
 }
 
 TEST(tensor_test, operatorBitwiseNegation_002){
@@ -1926,9 +1926,9 @@ TEST(tensor_test, operatorBitwiseNegation_002){
     auto expected = Tensor<std::bitset<9>>(dimensionSizes);
     expected.setData({0b011010001, 0b000000000, 0b111111111, 0b100110110});
 
-    Tensor<std::bitset<9>> tensor2 = ~tensor;
+    Tensor<std::bitset<9>> result = ~tensor;
 
-    EXPECT_EQ(tensor2, expected);
+    EXPECT_EQ(result, expected);
 }
 
 // (!) ------------------------------------------------------------------------------------------------------------------------
@@ -1940,12 +1940,12 @@ TEST(tensor_test, operatorLogicalNegation_001){
     auto tensor = Tensor<bool>(dimensionSizes);
     tensor.setData({false, true, false, true});
 
-    Tensor<bool> tensor2 = !tensor;
+    Tensor<bool> result = !tensor;
 
     auto expected = Tensor<bool>(dimensionSizes);
     expected.setData({true, false, true, false});
 
-    EXPECT_EQ(tensor2, expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(tensor_test, operatorLogicalNegation_002){
@@ -1958,9 +1958,9 @@ TEST(tensor_test, operatorLogicalNegation_002){
     auto expected = Tensor<Tensor<bool>>(dimensionSizes);
     expected.setData({Tensor<bool>({2}, {0, 1}), Tensor<bool>({2}, {0, 0}), Tensor<bool>({1}, {1})});
 
-    Tensor<Tensor<bool>> tensor2 = !tensor;
+    Tensor<Tensor<bool>> result = !tensor;
 
-    EXPECT_EQ(tensor2, expected);
+    EXPECT_EQ(result, expected);
 }
 
 // (+) ------------------------------------------------------------------------------------------------------------------------
