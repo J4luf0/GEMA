@@ -1972,12 +1972,12 @@ TEST(tensor_test, operatorUnaryPlus_001){
     auto tensor = Tensor<int>(dimensionSizes);
     tensor.setData({1, 69, 0, -152});
 
-    Tensor<int> tensor2 = +tensor;
+    Tensor<int> result = +tensor;
 
     auto expected = Tensor<int>(dimensionSizes);
     expected.setData({1, 69, 0, -152});
 
-    EXPECT_EQ(tensor2, expected);
+    EXPECT_EQ(result, expected);
 }
 
 TEST(tensor_test, operatorUnaryPlus_002){
@@ -1987,14 +1987,58 @@ TEST(tensor_test, operatorUnaryPlus_002){
     auto tensor = Tensor<int>(dimensionSizes);
     tensor.setData({1, 69, 0, -152});
 
-    Tensor<int> tensor2 = +tensor;
+    Tensor<int> result = +tensor;
 
-    tensor2.getItem({1, 0})++;
+    result.getItem({1, 0})++;
+
+    EXPECT_NE(tensor, result);
+}
+
+TEST(tensor_test, operatorUnaryPlus_003){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({1, 69, 0, -152});
+
+    Tensor<int> result = +tensor;
+    Tensor<int> result2 = +tensor;
+
+    result.getItem({1, 0})++;
+
+    EXPECT_NE(result, result2);
+}
+
+// (-) ------------------------------------------------------------------------------------------------------------------------
+
+TEST(tensor_test, operatorUnaryMinus_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({1, 69, 0, -152});
+
+    Tensor<int> result = -tensor;
 
     auto expected = Tensor<int>(dimensionSizes);
-    expected.setData({1, 69, 1, -152});
+    expected.setData({-1, -69, -0, 152});
 
-    EXPECT_EQ(tensor2, expected);
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, operatorUnaryMinus_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2};
+
+    auto tensor = Tensor<float>(dimensionSizes);
+    tensor.setData({1.5, 69.001, 0., -152.65202});
+
+    Tensor<float> result = -tensor;
+
+    auto expected = Tensor<float>(dimensionSizes);
+    expected.setData({-1.5, -69.001, -0., 152.65202});
+
+    EXPECT_EQ(result, expected);
 }
 
 // OPERATOR OVERLOAD TESTS END
