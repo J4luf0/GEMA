@@ -1049,9 +1049,16 @@ class Tensor {
     static void forEach(Tensor<T>& tensor, C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Takes given coordinate as reference and changes it to the next coordinate in ascending order.
+     * @brief Takes given coordinates as reference and changes it to next coordinates in ascending order. If given coordinates
+     * are of the last item, it will loop over to coordinates of first item. Useful for in order traversal and TERRIBLE for 
+     * accesing far (random) items. Shall not be used for jumps bigger than ~(10 * number of dimensions) at a time.
+     * 
+     * @param coordinates coordinates to be changed into coordinates of next item.
+     * @param dimensionSizes used as upper exclusive limits for how coordinate values can be high.
+     * 
+     * @return Is @b true if given coordinate looped over to start, otherwise @b false.
      */
-    static void incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes);
+    static bool incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

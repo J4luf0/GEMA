@@ -951,15 +951,18 @@ namespace gema {
 
     
     template <class T>
-    inline void Tensor<T>::incrementCoords(std::vector<uint64_t> &coordinates, const std::vector<uint64_t> &dimensionSizes){
+    inline bool Tensor<T>::incrementCoords(std::vector<uint64_t> &coordinates, const std::vector<uint64_t> &dimensionSizes){
 
         uint64_t lastCoordIndex = coordinates.size() - 1;
 
         uint64_t coordToIncrement = lastCoordIndex;
-        while(dimensionSizes[coordToIncrement] <= (coordinates[coordToIncrement] + 1)){
+        while((dimensionSizes[coordToIncrement] <= (coordinates[coordToIncrement] + 1))){
             coordToIncrement--;
 
-            if(coordToIncrement > lastCoordIndex) return;
+            if(coordToIncrement > lastCoordIndex){
+                std::fill(coordinates.begin(), coordinates.end(), 0);
+                return true;
+            }
         }
 
         coordinates[coordToIncrement++]++;
@@ -967,6 +970,8 @@ namespace gema {
         while(coordToIncrement <= lastCoordIndex){
             coordinates[coordToIncrement++] = 0;
         }
+
+        return false;
     }
 
     template <class T>
