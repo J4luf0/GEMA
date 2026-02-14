@@ -8,6 +8,7 @@
 #include <memory>
 #include <numeric>
 #include <vector>
+#include "Tensor.hpp"
 
 //#include "Tensor.hpp" // Not needed, just keep it for intelisense
 
@@ -948,12 +949,31 @@ namespace gema {
         //std::transform(tensor.tensor_.begin(), tensor.tensor_.end(), tensor.tensor_.begin(), apply);
     }
 
+    
     template <class T>
-    Tensor<T>::~Tensor(){
-        //
+    inline void Tensor<T>::incrementCoords(std::vector<uint64_t> &coordinates, const std::vector<uint64_t> &dimensionSizes){
+
+        uint64_t lastCoordIndex = coordinates.size() - 1;
+
+        uint64_t coordToIncrement = lastCoordIndex;
+        while(dimensionSizes[coordToIncrement] <= (coordinates[coordToIncrement] + 1)){
+            coordToIncrement--;
+
+            if(coordToIncrement > lastCoordIndex) return;
+        }
+
+        coordinates[coordToIncrement++]++;
+
+        while(coordToIncrement <= lastCoordIndex){
+            coordinates[coordToIncrement++] = 0;
+        }
     }
 
-
+    template <class T>
+    Tensor<T>::~Tensor()
+    {
+        //
+    }
 
     // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 

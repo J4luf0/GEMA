@@ -105,8 +105,10 @@ class Tensor {
 
     private:
 
-    std::vector<typename tensor_storage_type<T>::type> tensor_;                     /// The tensor data itself, represented by vector containing all the items.
-    std::vector<uint64_t> dimensionSizes_;      /// Size od every tensor dimension.
+    /// The tensor data itself, represented by vector containing all the items.
+    std::vector<typename tensor_storage_type<T>::type> tensor_;
+    /// Size od every tensor dimension.
+    std::vector<uint64_t> dimensionSizes_;
 
     /// Function compares items in tensor and represents equality by bool.
     static std::function<EqualsCallable<T>> defaultEquals_;
@@ -1045,6 +1047,11 @@ class Tensor {
      */
     template <foreach_callable<T> C>
     static void forEach(Tensor<T>& tensor, C&& operation);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Takes given coordinate as reference and changes it to the next coordinate in ascending order.
+     */
+    static void incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.
