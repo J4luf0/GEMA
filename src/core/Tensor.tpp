@@ -191,12 +191,14 @@ namespace gema {
 
 
 
+
+
     // PUBLIC METHODS: --------------------------------------------------------------------------------------------------------
 
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
     
-        uint64_t itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
+        const uint64_t itemCounting = calculateNumberOfItems(newTensorDimensionSizes);
 
         tensor_.resize(itemCounting);
     }
@@ -957,19 +959,20 @@ namespace gema {
 
         uint64_t coordToIncrement = lastCoordIndex;
         while((dimensionSizes[coordToIncrement] <= (coordinates[coordToIncrement] + 1))){
-            coordToIncrement--;
+            coordinates[coordToIncrement--] = 0;
+            //coordToIncrement--;
 
             if(coordToIncrement > lastCoordIndex){
-                std::fill(coordinates.begin(), coordinates.end(), 0);
+                //std::fill(coordinates.begin(), coordinates.end(), 0);
                 return true;
             }
         }
 
         coordinates[coordToIncrement++]++;
 
-        while(coordToIncrement <= lastCoordIndex){
-            coordinates[coordToIncrement++] = 0;
-        }
+        // while(coordToIncrement <= lastCoordIndex){
+        //     coordinates[coordToIncrement++] = 0;
+        // }
 
         return false;
     }
@@ -1048,9 +1051,9 @@ namespace gema {
     }
 
     template <class T>
-    int Tensor<T>::calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const{
+    uint64_t Tensor<T>::calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const{
 
-        return std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), 1, std::multiplies<int>());
+        return std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), uint64_t{1}, std::multiplies<uint64_t>());
     }
 
     template <class T>

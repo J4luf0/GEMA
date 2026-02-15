@@ -1122,7 +1122,7 @@ class Tensor {
      * 
      * @warning Do not use outside of constructor! Same result can be achieved by getting size of the tensor itself!
     */
-    int calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const;
+    uint64_t calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two items using "==" and has two specializations for double and float using epsilon-abs comparison.
