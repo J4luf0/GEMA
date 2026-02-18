@@ -90,11 +90,11 @@ namespace gema{
 
         if(data_) {
             if constexpr(std::is_trivially_copyable_v<T>) {
-                std::memcpy(newData, data_, size_*sizeof(T));
+                std::memcpy(newData, data_, size_ * sizeof(T));
             } else {
-                for(size_t i=0;i<size_;++i) {
-                    std::allocator_traits<A>::construct(alloc_, newData+i, std::move(data_[i]));
-                    std::allocator_traits<A>::destroy(alloc_, data_+i);
+                for(size_t i = 0; i < size_; ++i) {
+                    std::allocator_traits<A>::construct(alloc_, newData + i, std::move(data_[i]));
+                    std::allocator_traits<A>::destroy(alloc_, data_ + i);
                 }
             }
             std::allocator_traits<A>::deallocate(alloc_, data_, capacity_);
@@ -146,7 +146,7 @@ namespace gema{
 
         --size_;
         if constexpr(!std::is_trivially_destructible_v<T>){
-            std::allocator_traits<A>::destroy(alloc_, data_+size_);
+            std::allocator_traits<A>::destroy(alloc_, data_ + size_);
         }
     }
 
@@ -163,10 +163,10 @@ namespace gema{
         if(size_!=other.size_) return false;
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            return std::memcmp(data_, other.data_, size_*sizeof(T))==0;
+            return std::memcmp(data_, other.data_, size_ * sizeof(T)) == 0;
         } else {
             for(size_t i = 0; i < size_; ++i){
-                if(!(data_[i]==other.data_[i])) return false;
+                if(!(data_[i] == other.data_[i])) return false;
             }
             return true;
         }
