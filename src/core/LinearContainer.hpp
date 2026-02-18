@@ -65,17 +65,17 @@ public:
     size_t capacity() const;
 
     // Iterators (zero-cost)
-    iterator begin() { return data_; }
-    iterator end()   { return data_ + size_; }
+    iterator begin();
+    iterator end();
 
-    const_iterator begin() const { return data_; }
-    const_iterator end()   const { return data_ + size_; }
+    const_iterator begin() const;
+    const_iterator end() const;
 
-    reverse_iterator rbegin() { return reverse_iterator(end()); }
-    reverse_iterator rend()   { return reverse_iterator(begin()); }
+    reverse_iterator rbegin();
+    reverse_iterator rend();
 
-    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
-    const_reverse_iterator rend()   const { return const_reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const;
+    const_reverse_iterator rend() const;
 };
 
 } // end gema

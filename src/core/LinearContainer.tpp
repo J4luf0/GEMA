@@ -234,4 +234,44 @@ namespace gema{
     size_t LinearContainer<T, A>::capacity() const{
         return capacity_;
     }
+
+    template <class T, class A>
+    LinearContainer<T, A>::iterator LinearContainer<T, A>::begin(){
+        return data_;
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::iterator LinearContainer<T, A>::end(){
+        return data_ + size_;
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::const_iterator LinearContainer<T, A>::begin() const{
+        return data_;
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::const_iterator LinearContainer<T, A>::end() const{
+        return data_ + size_;
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::reverse_iterator LinearContainer<T, A>::rbegin(){
+        return reverse_iterator(end());
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::reverse_iterator LinearContainer<T, A>::rend(){
+        return reverse_iterator(begin());
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::const_reverse_iterator LinearContainer<T, A>::rbegin() const{
+        return const_reverse_iterator(end());
+    }
+
+    template <class T, class A>
+    LinearContainer<T, A>::const_reverse_iterator LinearContainer<T, A>::rend() const{
+        return const_reverse_iterator(begin());
+    }
 }
