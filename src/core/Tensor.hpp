@@ -1,6 +1,8 @@
 #ifndef TENSOR_HPP
 #define TENSOR_HPP
 
+#include "LinearContainer.hpp"
+
 namespace gema{
 
 // Forward declaration just for the concepts.
