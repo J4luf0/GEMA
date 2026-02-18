@@ -358,38 +358,16 @@ namespace gema {
 
     }
 
-    // TODO: check is this is actually needed
     template <class T>
-    inline constexpr Tensor<T>* Tensor<T>::copy() const{
-
-        Tensor<T>* newTensor = new Tensor<T>(dimensionSizes_);
-
-        for(uint64_t i = 0; i < tensor_.size(); ++i){
-            newTensor->tensor_[i] = *(new T(tensor_[i]));
-        }
-
-        return newTensor;
-    }
-
-    template <class T>
-    void Tensor<T>::fillWith(const T& fill) requires(!std::is_same<T, bool>::value){
+    void Tensor<T>::fillWith(const T& fill){
 
         // could use assign method on everything thus dodging the specialization but std::fill is probably faster
-        tensor_.assign(tensor_.size(), fill); 
+        tensor_.assign(tensor_.size(), fill);
+
+        // std::fill(tensor_.begin(), tensor_.end(), fill); // probably better optimalized
 
         /*for(T& item : tensor_){
             item = fill;
-        }*/
-    }
-
-    template <class T>
-    void Tensor<T>::fillWith(const T& fill) requires(std::is_same<T, bool>::value){
-
-        std::fill(tensor_.begin(), tensor_.end(), fill); // probably better optimalized
-
-        // 
-        /*for(uint64_t i = 0; i < tensor_.size(); ++i){
-            tensor_.at(i) = fill;
         }*/
     }
 
@@ -711,43 +689,13 @@ namespace gema {
 
     #undef UNARY_OPERATION
 
-    // Specialization for unary + because no need to do anything
+    // Specialization for unary + because no need to do anything - false, do not specialize because unary + might be overloaded
     // template <class T>
     // Tensor<T> Tensor<T>::operator+() const
     // requires requires (T a) {+ a;}{
     //     return Tensor<T>(*this);
     // }
 
-    // (~) --------------------------------------------------------------------------------------------------------------------
-
-    // template <class T>
-    // Tensor<T> Tensor<T>::operator~(){
-
-    //     return forEachAndReturn([](const T& item){
-
-    //         if constexpr(std::is_floating_point<T>::value){
-    //             return std::bit_cast<T>(~std::bit_cast<typename to_integral<T>::type>(item));
-    //         } else{
-    //             return ~item;
-    //         }
-    //     });
-    // }
-
-    // (!) --------------------------------------------------------------------------------------------------------------------
-
-    // template <class T>
-    // Tensor<T> Tensor<T>::operator!()
-    // {
-        
-    //     return forEachAndReturn([](const T& item){
-
-    //         if constexpr(std::is_floating_point<T>::value){
-    //             return std::bit_cast<T>(!std::bit_cast<typename to_integral<T>::type>(item));
-    //         } else{
-    //             return !item;
-    //         }
-    //     });
-    // }
 
     // template <class T>
     // void Tensor<T>::complementInPlace(){
@@ -803,30 +751,13 @@ namespace gema {
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            // if constexpr(std::is_same_v<T, bool>){
-
-            //     if constexpr (std::is_same_v<A, B>){ // this all just because stupid bool
-            //         bool op1Item = operand1.tensor_.at(i);
-            //         bool op2Item = operand2.tensor_.at(i);
-            //         resultTensorData.at(i) = operation(op1Item, op2Item);
-
-            //     }else if constexpr (std::is_same_v<A, T>){
-            //         bool op2Item = operand2.tensor_.at(i);
-            //         resultTensorData.at(i) = operation(operand1, op2Item);
-
-            //     }else if constexpr (std::is_same_v<B, T>){
-            //         bool op1Item = operand1.tensor_.at(i);
-            //         resultTensorData.at(i) = operation(op1Item, operand2);
-            //     }
-            // }else{
-                if constexpr (std::is_same_v<A, B>){
-                    resultTensorData[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
-                }else if constexpr (std::is_same_v<A, T>){
-                    resultTensorData[i] = operation(operand1, operand2.tensor_[i]);
-                }else if constexpr (std::is_same_v<B, T>){
-                    resultTensorData[i] = operation(operand1.tensor_[i], operand2);
-                }
-            //}
+            if constexpr (std::is_same_v<A, B>){
+                resultTensorData[i] = operation(operand1.tensor_[i], operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<A, T>){
+                resultTensorData[i] = operation(operand1, operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<B, T>){
+                resultTensorData[i] = operation(operand1.tensor_[i], operand2);
+            }
         }
 
         return resultTensor;
@@ -836,16 +767,6 @@ namespace gema {
     template <apply_callable<T> C>
     inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation){
 
-        /*for(uint64_t i = 0; i < tensor_.size(); ++i){
-
-            if constexpr(std::is_same<T, bool>::value){
-                bool tensorItemValue = tensor_.at(i);
-                bool tensor2ItemValue = tensor2.tensor_.at(i);
-                operation(tensorItemValue, tensor2ItemValue);
-            }else{
-                operation(tensor_[i], tensor2.tensor_[i]);
-            }
-        }*/
         Tensor<T>::apply(*this, tensor2, std::forward<C>(operation));
     }
 
@@ -860,42 +781,23 @@ namespace gema {
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
-            // if constexpr(std::is_same_v<T, bool>){
-            //     if constexpr (std::is_same_v<A, B>){
-            //         bool op1Item = operand1.tensor_.at(i);
-            //         bool op2Item = operand2.tensor_.at(i);
-            //         operation(op1Item, op2Item);
-            //         operand1.tensor_.at(i) = op1Item;
-
-            //     }else if constexpr (std::is_same_v<A, T>){
-            //         bool op2Item = operand2.tensor_.at(i);
-            //         operation(operand1, op2Item);
-            //         operand2.tensor_.at(i) = op2Item;
-
-            //     }else if constexpr (std::is_same_v<B, T>){
-            //         bool op1Item = operand1.tensor_.at(i);
-            //         operation(op1Item, operand2);
-            //         operand1.tensor_.at(i) = op1Item;
-            //     }
-            // }else{
-                if constexpr (std::is_same_v<A, B>){
-                    T lhs = static_cast<T>(operand1.tensor_[i]);
-                    const T rhs = static_cast<T>(operand2.tensor_[i]);
-                    operation(lhs, rhs);
-                    operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
-                    //operation(operand1.tensor_[i], operand2.tensor_[i]);
-                }else if constexpr (std::is_same_v<A, T>){
-                    const T rhs = static_cast<T>(operand2.tensor_[i]);
-                    operation(operand1, rhs);
-                    operand2.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(rhs);
-                    //operation(operand1, operand2.tensor_[i]);
-                }else if constexpr (std::is_same_v<B, T>){
-                    T lhs = static_cast<T>(operand1.tensor_[i]);
-                    operation(lhs, operand2);
-                    operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
-                    //operation(operand1.tensor_[i], operand2);
-                }
-            //}
+            if constexpr (std::is_same_v<A, B>){
+                T lhs = static_cast<T>(operand1.tensor_[i]);
+                const T rhs = static_cast<T>(operand2.tensor_[i]);
+                operation(lhs, rhs);
+                operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                //operation(operand1.tensor_[i], operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<A, T>){
+                const T rhs = static_cast<T>(operand2.tensor_[i]);
+                operation(operand1, rhs);
+                operand2.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(rhs);
+                //operation(operand1, operand2.tensor_[i]);
+            }else if constexpr (std::is_same_v<B, T>){
+                T lhs = static_cast<T>(operand1.tensor_[i]);
+                operation(lhs, operand2);
+                operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                //operation(operand1.tensor_[i], operand2);
+            }
         }
         
     }
@@ -938,13 +840,7 @@ namespace gema {
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
 
-            // if constexpr(std::is_same<T, bool>::value){
-            //     bool value = tensor.tensor_.at(i);
-            //     operation(value);
-            //     tensor.tensor_.at(i) = value;
-            // }else{
-                operation(tensor.tensor_[i]);
-            //}
+            operation(tensor.tensor_[i]);
         }
         
         // 2.

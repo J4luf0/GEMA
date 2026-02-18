@@ -108,6 +108,7 @@ class Tensor {
     private:
 
     /// The tensor data itself, represented by vector containing all the items.
+    //LinearContainer<T> tensor_;
     std::vector<typename tensor_storage_type<T>::type> tensor_;
     /// Size od every tensor dimension.
     std::vector<uint64_t> dimensionSizes_;
@@ -290,22 +291,11 @@ class Tensor {
     void parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Copies a tensor, meaning the items in it get copied, and if there is a pointer type stored
-     * in a tensor, then the values pointed to by those pointers will be copied too.
-     * 
-     * @return Pointer to deep copy of this tensor.
-     * 
-     * @warning Do not use, will be deprecated and probably does not work correctly.
-    */
-    constexpr Tensor<T>* copy() const;
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Fills tensor with passed value. Has specialization for bool because of how std::vector is implemented.
+     * @brief Fills tensor with passed value.
      * 
      * @param fill the value to be filled into all items in tensor.
     */
-    void fillWith(const T& fill) requires(!std::is_same<T, bool>::value);
-    void fillWith(const T& fill) requires(std::is_same<T, bool>::value);
+    void fillWith(const T& fill);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
