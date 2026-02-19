@@ -18,9 +18,14 @@ public:
 
 private:
 
-    T* data_ = nullptr;
-    size_t size_ = 0;
-    size_t capacity_ = 0;
+    // T* data_ = nullptr;
+    // size_t size_ = 0;
+    // size_t capacity_ = 0;
+
+    T* begin_ = nullptr;
+    T* end_   = nullptr;
+    T* capEnd_= nullptr;
+
     [[no_unique_address]] A alloc_;
 
 public:
@@ -79,6 +84,10 @@ public:
 
     const_reverse_iterator rbegin() const;
     const_reverse_iterator rend() const;
+
+private:
+
+    void push_back_slow(const T &value);
 };
 
 } // end gema

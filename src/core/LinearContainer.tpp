@@ -20,8 +20,8 @@ namespace gema{
         reserve(init.size());
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(data_, init.begin(), init.size() * sizeof(T));
-            size_ = init.size();
+            std::memcpy(begin_, init.begin(), init.size() * sizeof(T));
+            end_ = begin_ + init.size();
         } else {
             for(const T& v : init){
                 push_back(v);
@@ -32,16 +32,17 @@ namespace gema{
     template<class T, class A>
     LinearContainer<T, A>::LinearContainer(const LinearContainer& other) {
 
-        reserve(other.size_);
+        size_t n = other.size();
+        reserve(n);
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-            size_ = other.size_;
+            std::memcpy(begin_, other.begin_, n * sizeof(T));
+            end_ = begin_ + n;
         } else {
-            for(size_t i = 0; i < other.size_; ++i){
-                std::allocator_traits<A>::construct(alloc_, data_ + i, other.data_[i]);
+            for(size_t i = 0; i < n; ++i){
+                std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
             }
-            size_ = other.size_;
+            end_ = begin_ + n;
         }
     }
 
@@ -55,16 +56,17 @@ namespace gema{
 
         if(this == &other) return *this;
         clear();
-        reserve(other.size_);
+        size_t n = other.size();
+        reserve(n);
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(data_, other.data_, other.size_ * sizeof(T));
-            size_ = other.size_;
+            std::memcpy(begin_, other.begin_, n * sizeof(T));
+            end_ = begin_ + n;
         } else {
-            for(size_t i = 0; i < other.size_; ++i){
-                std::allocator_traits<A>::construct(alloc_, data_ + i, other.data_[i]);
+            for(size_t i = 0; i < n; ++i){
+                std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
             }
-            size_ = other.size_;
+            end_ = begin_ + n;
         }
 
         return *this;
@@ -84,137 +86,179 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::reserve(size_t n) {
 
-        if(n<=capacity_) return;
+        // if(n<=capacity_) return;
+
+        // T* newData = std::allocator_traits<A>::allocate(alloc_, n);
+
+        // if(data_) {
+        //     if constexpr(std::is_trivially_copyable_v<T>) {
+        //         std::memcpy(newData, data_, size_ * sizeof(T));
+        //     } else {
+        //         for(size_t i = 0; i < size_; ++i) {
+        //             std::allocator_traits<A>::construct(alloc_, newData + i, std::move(data_[i]));
+        //             std::allocator_traits<A>::destroy(alloc_, data_ + i);
+        //         }
+        //     }
+        //     std::allocator_traits<A>::deallocate(alloc_, data_, capacity_);
+        // }
+
+        // data_ = newData;
+        // capacity_ = n;
+
+        T* oldBegin = begin_;
+        size_t oldSize = size();
 
         T* newData = std::allocator_traits<A>::allocate(alloc_, n);
 
-        if(data_) {
-            if constexpr(std::is_trivially_copyable_v<T>) {
-                std::memcpy(newData, data_, size_ * sizeof(T));
-            } else {
-                for(size_t i = 0; i < size_; ++i) {
-                    std::allocator_traits<A>::construct(alloc_, newData + i, std::move(data_[i]));
-                    std::allocator_traits<A>::destroy(alloc_, data_ + i);
+        if(oldBegin)
+        {
+            if constexpr(std::is_trivially_copyable_v<T>)
+                std::memcpy(newData, oldBegin, oldSize*sizeof(T));
+            else {
+                for(size_t i=0;i<oldSize;++i) {
+                    std::allocator_traits<A>::construct(
+                        alloc_, newData+i, std::move(oldBegin[i]));
+                    std::allocator_traits<A>::destroy(alloc_, oldBegin+i);
                 }
             }
-            std::allocator_traits<A>::deallocate(alloc_, data_, capacity_);
+
+            std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
         }
 
-        data_ = newData;
-        capacity_ = n;
+        begin_ = newData;
+        end_   = newData + oldSize;
+        capEnd_= newData + n;
+
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::resize(size_t n) {
 
-        if(n>capacity_) reserve(n);
-        size_ = n; // NO initialization
+        // if(n>capacity_) reserve(n);
+        // size_ = n; // NO initialization
+
+        size_t oldSize = size();
+
+        if(n > capacity())
+            reserve(n);
+
+        end_ = begin_ + n;
+
+        if constexpr(!std::is_trivially_default_constructible_v<T>) {
+            for(size_t i = oldSize; i < n; ++i)
+                std::allocator_traits<A>::construct(alloc_, begin_ + i);
+        }
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::clear() {
 
-        if(data_) {
+        if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                for(size_t i=0; i < size_; ++i){
-                    std::allocator_traits<A>::destroy(alloc_, data_ + i);
-                }
+                for(T* p = begin_; p != end_; ++p)
+                    std::allocator_traits<A>::destroy(alloc_, p);
             }
-            std::allocator_traits<A>::deallocate(alloc_, data_, capacity_);
+
+            std::allocator_traits<A>::deallocate(
+                alloc_, begin_, capacity());
         }
 
-        data_ = nullptr;
-        size_ = 0;
-        capacity_ = 0;
+        begin_ = end_ = capEnd_ = nullptr;
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::push_back(const T& value) {
 
         // branch-minimized growth
-        size_t newCap = (capacity_) ? (capacity_ * 2) : 8;
-        if(size_==capacity_){
-            reserve(newCap);
+        // size_t newCap = (capacity_) ? (capacity_ * 2) : 8;
+        // if(size_==capacity_){
+        //     reserve(newCap);
+        // }
+
+        // std::allocator_traits<A>::construct(alloc_, data_ + size_, value);
+        // ++size_;
+
+        T* pos = end_;
+        end_ = pos + 1;
+
+        if(end_ <= capEnd_) [[likely]]
+        {
+            if constexpr(std::is_trivially_copyable_v<T>)
+                *pos = value;
+            else
+                std::allocator_traits<A>::construct(alloc_, pos, value);
+
+            return;
         }
 
-        std::allocator_traits<A>::construct(alloc_, data_ + size_, value);
-        ++size_;
+        // ---- slow path (rare) ----
+        end_ = pos; // rollback
+        push_back_slow(value);
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::pop_back() {
 
-        --size_;
+        --end_;
         if constexpr(!std::is_trivially_destructible_v<T>){
-            std::allocator_traits<A>::destroy(alloc_, data_ + size_);
+            std::allocator_traits<A>::destroy(alloc_, end_);
         }
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::swap(LinearContainer& other) noexcept {
-        std::swap(data_, other.data_);
-        std::swap(size_, other.size_);
-        std::swap(capacity_, other.capacity_);
+        std::swap(begin_, other.begin_);
+        std::swap(end_, other.end_);
+        std::swap(capEnd_, other.capEnd_);
     }
 
     template<class T, class A>
     void LinearContainer<T, A>::assign(size_t count, const T& value){
 
-        if(count > capacity_){
+        if(count > capacity())
             reserve(count);
-        }
 
-        // destroy old elements if needed
         if constexpr(!std::is_trivially_destructible_v<T>) {
-            for(size_t i = 0; i < size_; ++i){
-                std::allocator_traits<A>::destroy(alloc_, data_ + i);
-            }
+            for(T* p = begin_; p != end_; ++p)
+                std::allocator_traits<A>::destroy(alloc_, p);
         }
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            // fast fill
-            if(value == T{}) {
-                std::memset(data_, 0, count * sizeof(T));
-            }else{
-                for(size_t i = 0; i < count; ++i){
-                    data_[i] = value;
-                }
-            }
+            if(value == T{})
+                std::memset(begin_, 0, count*sizeof(T));
+            else
+                for(size_t i=0;i<count;++i) begin_[i] = value;
         } else {
-            for(size_t i = 0; i < count; ++i){
-                std::allocator_traits<A>::construct(alloc_, data_ + i, value);
-            }
+            for(size_t i=0;i<count;++i)
+                std::allocator_traits<A>::construct(alloc_, begin_+i, value);
         }
 
-        size_ = count;
+        end_ = begin_ + count;
     }
 
     template<class T, class A>
     template<class I>
     void LinearContainer<T, A>::assign(I first, I last){
 
-        size_t count = static_cast<size_t>(std::distance(first, last));
+        size_t count = static_cast<size_t>(std::distance(first,last));
 
-        if(count > capacity_){
+        if(count > capacity())
             reserve(count);
-        }
 
         if constexpr(!std::is_trivially_destructible_v<T>) {
-            for(size_t i = 0; i < size_; ++i){
-                std::allocator_traits<A>::destroy(alloc_, data_ + i);
-            }
+            for(T* p = begin_; p != end_; ++p)
+                std::allocator_traits<A>::destroy(alloc_, p);
         }
 
-        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
-            std::memcpy(data_, first, count * sizeof(T));
-        }else{
-            size_t i = 0;
-            for(auto it = first; it != last; ++it, ++i){
-                std::allocator_traits<A>::construct(alloc_, data_ + i, *it);
-            }
+        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>)
+            std::memcpy(begin_, first, count*sizeof(T));
+        else {
+            size_t i=0;
+            for(auto it=first; it!=last; ++it,++i)
+                std::allocator_traits<A>::construct(alloc_, begin_+i, *it);
         }
 
-        size_ = count;
+        end_ = begin_ + count;
     }
 
     template<class T, class A>
@@ -225,99 +269,100 @@ namespace gema{
     template<class T, class A>
     bool LinearContainer<T, A>::operator==(const LinearContainer& other) const {
 
-        if(size_!=other.size_) return false;
+        size_t n = size();
+        if(n != other.size()) return false;
 
-        if constexpr(std::is_trivially_copyable_v<T>) {
-            return std::memcmp(data_, other.data_, size_ * sizeof(T)) == 0;
-        } else {
-            for(size_t i = 0; i < size_; ++i){
-                if(!(data_[i] == other.data_[i])) return false;
-            }
-            return true;
-        }
+        if constexpr(std::is_trivially_copyable_v<T>)
+            return std::memcmp(begin_, other.begin_, n*sizeof(T))==0;
+
+        for(size_t i=0;i<n;++i)
+            if(!(begin_[i] == other.begin_[i])) return false;
+
+        return true;
     }
 
     template<class T, class A>
     auto LinearContainer<T, A>::operator<=>(const LinearContainer& other) const {
 
-        const size_t n = std::min(size_, other.size_);
-        for(size_t i = 0; i < n; ++i) {
-            if(auto cmp = data_[i] <=> other.data_[i]; cmp != 0){
-                return cmp;
-            }
-        }
+        size_t n = std::min(size(), other.size());
 
-        return size_ <=> other.size_;
+        for(size_t i=0;i<n;++i)
+            if(auto cmp = begin_[i] <=> other.begin_[i]; cmp!=0)
+                return cmp;
+
+        return size() <=> other.size();
     }
 
     template<class T, class A>
     T& LinearContainer<T, A>::operator[](size_t i) { 
-        return data_[i];
+        return *(begin_ + i);
     }
 
     template<class T, class A>
     const T& LinearContainer<T, A>::operator[](size_t i) const { 
-        return data_[i];
+        return *(begin_ + i);
     }
 
     template <class T, class A>
     T* LinearContainer<T, A>::data(){
-        return data_;
+        return begin_;
     }
 
     template <class T, class A>
     const T* LinearContainer<T, A>::data() const {
-        return data_;
+        return begin_;
     }
 
     template <class T, class A>
     T& LinearContainer<T, A>::front(){
-        return data_[0];
+        return *begin_;
     }
 
     template <class T, class A>
     const T& LinearContainer<T, A>::front() const{
-        return data_[0];
+        return *begin_;
     }
 
     template <class T, class A>
     T& LinearContainer<T, A>::back(){
-        return data_[size_ - 1];
+        return *(end_-1);
     }
 
     template <class T, class A>
     const T& LinearContainer<T, A>::back() const{
-        return data_[size_ - 1];
+        return *(end_-1);
     }
 
     template <class T, class A>
     size_t LinearContainer<T, A>::size() const{
-        return size_;
+        //return size_;
+        return static_cast<size_t>(end_ - begin_);
     }
 
     template <class T, class A>
     size_t LinearContainer<T, A>::capacity() const{
-        return capacity_;
+        //return capacity_;
+        return static_cast<size_t>(capEnd_ - begin_);
     }
 
     template <class T, class A>
     LinearContainer<T, A>::iterator LinearContainer<T, A>::begin(){
-        return data_;
+        return begin_;
     }
 
     template <class T, class A>
     LinearContainer<T, A>::iterator LinearContainer<T, A>::end(){
-        return data_ + size_;
+        return end_;
     }
 
     template <class T, class A>
     LinearContainer<T, A>::const_iterator LinearContainer<T, A>::begin() const{
-        return data_;
+        return begin_;
     }
 
     template <class T, class A>
     LinearContainer<T, A>::const_iterator LinearContainer<T, A>::end() const{
-        return data_ + size_;
+        return end_;
     }
 
     template <class T, class A>
@@ -338,5 +383,24 @@ namespace gema{
     template <class T, class A>
     LinearContainer<T, A>::const_reverse_iterator LinearContainer<T, A>::rend() const{
         return const_reverse_iterator(begin());
+    }
+
+
+    template<class T, class A>
+    void LinearContainer<T,A>::push_back_slow(const T& value)
+    {
+        size_t oldSize = size();
+        size_t newCap  = capacity() ? (capacity() + (capacity() / 2) + 8) : 8;
+
+        reserve(newCap);
+
+        T* pos = begin_ + oldSize;
+
+        if constexpr(std::is_trivially_copyable_v<T>)
+            *pos = value;
+        else
+            std::allocator_traits<A>::construct(alloc_, pos, value);
+
+        end_ = pos + 1;
     }
 }

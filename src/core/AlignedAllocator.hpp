@@ -8,10 +8,6 @@
 #include <new>
 #include <type_traits>
 
-#if defined(_MSC_VER)
-    #include <malloc.h>   // _aligned_malloc / _aligned_free
-#endif
-
 template<class T, std::size_t Alignment = 64>
 struct AlignedAllocator {
 
@@ -24,7 +20,7 @@ struct AlignedAllocator {
 
     [[nodiscard]]
     T* allocate(std::size_t n){
-        
+
         if(n == 0) return nullptr;
 
         std::size_t bytes = n * sizeof(T);
