@@ -205,8 +205,7 @@ namespace gema {
 
     template <class T>
     inline Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, 
-    const std::vector<typename tensor_storage_type<T>::type>& newTensorData)
-     : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
+    const LinearContainer<T>& newTensorData) : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
 
         // Check actual capacity of dimensions to tensorData
 
@@ -266,13 +265,13 @@ namespace gema {
     }
 
     template <class T>
-    std::vector<typename tensor_storage_type<T>::type>& Tensor<T>::getData(){
+    LinearContainer<T>& Tensor<T>::getData(){
         return tensor_;
     }
 
     // Secure version will need to check for correct tensorItems size
     template <class T>
-    Tensor<T>& Tensor<T>::setData(const std::vector<typename tensor_storage_type<T>::type>& tensorItems){
+    Tensor<T>& Tensor<T>::setData(const LinearContainer<T>& tensorItems){
         tensor_ = tensorItems;
         return *this;
     }
@@ -745,7 +744,7 @@ namespace gema {
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensorOperand->getDimensionSizes());
 
-        std::vector<typename tensor_storage_type<opReturnType>::type>& resultTensorData = resultTensor.getData();
+        LinearContainer<opReturnType>& resultTensorData = resultTensor.getData();
 
         // TODO: find a way to deal with bool or maybe get rid of it
         //#pragma GCC ivdep
@@ -785,17 +784,17 @@ namespace gema {
                 T lhs = static_cast<T>(operand1.tensor_[i]);
                 const T rhs = static_cast<T>(operand2.tensor_[i]);
                 operation(lhs, rhs);
-                operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                operand1.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(lhs);
                 //operation(operand1.tensor_[i], operand2.tensor_[i]);
             }else if constexpr (std::is_same_v<A, T>){
                 const T rhs = static_cast<T>(operand2.tensor_[i]);
                 operation(operand1, rhs);
-                operand2.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(rhs);
+                operand2.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(rhs);
                 //operation(operand1, operand2.tensor_[i]);
             }else if constexpr (std::is_same_v<B, T>){
                 T lhs = static_cast<T>(operand1.tensor_[i]);
                 operation(lhs, operand2);
-                operand1.tensor_[i] = static_cast<typename tensor_storage_type<T>::type>(lhs);
+                operand1.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(lhs);
                 //operation(operand1.tensor_[i], operand2);
             }
         }
@@ -816,7 +815,7 @@ namespace gema {
         using opReturnType = decltype(operation(std::declval<T>()));
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
 
-        std::vector<typename tensor_storage_type<opReturnType>::type>& resultTensorData = resultTensor.getData();
+        LinearContainer<opReturnType>& resultTensorData = resultTensor.getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){

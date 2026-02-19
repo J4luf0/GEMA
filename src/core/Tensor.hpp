@@ -108,8 +108,8 @@ class Tensor {
     private:
 
     /// The tensor data itself, represented by vector containing all the items.
-    //LinearContainer<T> tensor_;
-    std::vector<typename tensor_storage_type<T>::type> tensor_;
+    LinearContainer<T> tensor_;
+    //std::vector<typename tensor_storage_type<T>::type> tensor_;
     /// Size od every tensor dimension.
     std::vector<uint64_t> dimensionSizes_;
 
@@ -145,8 +145,7 @@ class Tensor {
      * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
      * @param tensorItems one dimensional vector of items to be added by order.
      */
-    Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, 
-    const std::vector<typename tensor_storage_type<T>::type>& newTensorData);
+    Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object.
@@ -224,7 +223,7 @@ class Tensor {
      * 
      * @note Exposes the inner implementation of tensor (the flattened data), use carefully.
      */
-    std::vector<typename tensor_storage_type<T>::type>& getData();
+    LinearContainer<T>& getData();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
@@ -235,7 +234,7 @@ class Tensor {
      * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
-    Tensor<T>& setData(const std::vector<typename tensor_storage_type<T>::type>& tensorItems);
+    Tensor<T>& setData(const LinearContainer<T>& tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * 

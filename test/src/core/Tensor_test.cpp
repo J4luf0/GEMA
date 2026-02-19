@@ -434,11 +434,12 @@ TEST(tensor_test, operatorAssign_003){
 TEST(tensor_test, toString_001){
 
     const std::vector<uint64_t> dimensionSizes{2};
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    auto tensor = Tensor<double>(dimensionSizes);
+    tensor.fillWith(0.);
     
     std::string expected = "{0, 0}";
 
-    EXPECT_EQ(tensor->toString(), expected);
+    EXPECT_EQ(tensor.toString(), expected);
 
 }
 
@@ -594,11 +595,13 @@ TEST(tensor_test, operatorEquals_006){
 TEST(tensor_test, operatorEquals_007){
 
     const std::vector<uint64_t> dimensionSizes{1};
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    auto tensor2 = std::make_unique<Tensor<double>>(dimensionSizes);
+    auto tensor = Tensor<double>(dimensionSizes);
+    tensor.fillWith(0.);
+    auto tensor2 = Tensor<double>(dimensionSizes);
+    tensor2.fillWith(-0.);
 
     bool expected = true;
-    EXPECT_EQ(expected, (*tensor == *tensor2));
+    EXPECT_EQ(expected, (tensor == tensor2));
 }
 
 // (+) ------------------------------------------------------------------------------------------------------------------------
@@ -1603,7 +1606,7 @@ TEST(tensor_test, operatorBitwiseAndAssign_002){
     tensor->setData({false, true, true});
 
     auto tensor2 = std::make_unique<Tensor<bool>>(dimensionSizes);
-    tensor2->setData({true, true, 2});
+    tensor2->setData({true, true, (bool)2});
 
     auto expected = std::make_unique<Tensor<bool>>(dimensionSizes);
     expected->setData({false, true, true});

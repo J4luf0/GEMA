@@ -88,6 +88,7 @@ public:
 private:
 
     void push_back_slow(const T &value);
+    void fastFill(T *dst, size_t count, const T &value);
 };
 
 } // end gema
