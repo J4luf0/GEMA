@@ -1,16 +1,15 @@
 #ifndef LINEAR_CONTAINER_HPP
 #define LINEAR_CONTAINER_HPP
 
+#include "AlignedAllocator.hpp"
 #include <memory>
 
 namespace gema{
 
-template<class T, class A = std::allocator<T>>
+template<class T, class A = AlignedAllocator<T, 64>/*std::allocator<T>*/>
 class LinearContainer{
 
 public:
-    //using value_type = T;
-    //using allocator_type = A;
 
     using iterator = T*;
     using const_iterator = const T*;
@@ -45,6 +44,10 @@ public:
     void push_back(const T &value);
     void pop_back();
     void swap(LinearContainer &other) noexcept;
+
+    void assign(size_t count, const T& value);
+    template<class I> void assign(I first, I last);
+    void assign(std::initializer_list<T> ilist);
 
     bool operator==(const LinearContainer &other) const;
     auto operator<=>(const LinearContainer &other) const;

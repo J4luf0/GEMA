@@ -158,6 +158,71 @@ namespace gema{
     }
 
     template<class T, class A>
+    void LinearContainer<T, A>::assign(size_t count, const T& value){
+
+        if(count > capacity_){
+            reserve(count);
+        }
+
+        // destroy old elements if needed
+        if constexpr(!std::is_trivially_destructible_v<T>) {
+            for(size_t i = 0; i < size_; ++i){
+                std::allocator_traits<A>::destroy(alloc_, data_ + i);
+            }
+        }
+
+        if constexpr(std::is_trivially_copyable_v<T>) {
+            // fast fill
+            if(value == T{}) {
+                std::memset(data_, 0, count * sizeof(T));
+            }else{
+                for(size_t i = 0; i < count; ++i){
+                    data_[i] = value;
+                }
+            }
+        } else {
+            for(size_t i = 0; i < count; ++i){
+                std::allocator_traits<A>::construct(alloc_, data_ + i, value);
+            }
+        }
+
+        size_ = count;
+    }
+
+    template<class T, class A>
+    template<class I>
+    void LinearContainer<T, A>::assign(I first, I last){
+
+        size_t count = static_cast<size_t>(std::distance(first, last));
+
+        if(count > capacity_){
+            reserve(count);
+        }
+
+        if constexpr(!std::is_trivially_destructible_v<T>) {
+            for(size_t i = 0; i < size_; ++i){
+                std::allocator_traits<A>::destroy(alloc_, data_ + i);
+            }
+        }
+
+        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
+            std::memcpy(data_, first, count * sizeof(T));
+        }else{
+            size_t i = 0;
+            for(auto it = first; it != last; ++it, ++i){
+                std::allocator_traits<A>::construct(alloc_, data_ + i, *it);
+            }
+        }
+
+        size_ = count;
+    }
+
+    template<class T, class A>
+    void LinearContainer<T, A>::assign(std::initializer_list<T> ilist){
+        assign(ilist.begin(), ilist.end());
+    }
+
+    template<class T, class A>
     bool LinearContainer<T, A>::operator==(const LinearContainer& other) const {
 
         if(size_!=other.size_) return false;
