@@ -86,38 +86,18 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::reserve(size_t n) {
 
-        // if(n<=capacity_) return;
-
-        // T* newData = std::allocator_traits<A>::allocate(alloc_, n);
-
-        // if(data_) {
-        //     if constexpr(std::is_trivially_copyable_v<T>) {
-        //         std::memcpy(newData, data_, size_ * sizeof(T));
-        //     } else {
-        //         for(size_t i = 0; i < size_; ++i) {
-        //             std::allocator_traits<A>::construct(alloc_, newData + i, std::move(data_[i]));
-        //             std::allocator_traits<A>::destroy(alloc_, data_ + i);
-        //         }
-        //     }
-        //     std::allocator_traits<A>::deallocate(alloc_, data_, capacity_);
-        // }
-
-        // data_ = newData;
-        // capacity_ = n;
-
         T* oldBegin = begin_;
         size_t oldSize = size();
 
         T* newData = std::allocator_traits<A>::allocate(alloc_, n);
 
-        if(oldBegin)
-        {
-            if constexpr(std::is_trivially_copyable_v<T>)
-                std::memcpy(newData, oldBegin, oldSize*sizeof(T));
-            else {
-                for(size_t i=0;i<oldSize;++i) {
-                    std::allocator_traits<A>::construct(
-                        alloc_, newData+i, std::move(oldBegin[i]));
+        if(oldBegin){
+
+            if constexpr(std::is_trivially_copyable_v<T>){
+                std::memcpy(newData, oldBegin, oldSize * sizeof(T));
+            }else {
+                for(size_t i = 0; i < oldSize; ++i) {
+                    std::allocator_traits<A>::construct(alloc_, newData+i, std::move(oldBegin[i]));
                     std::allocator_traits<A>::destroy(alloc_, oldBegin+i);
                 }
             }
@@ -134,19 +114,18 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::resize(size_t n) {
 
-        // if(n>capacity_) reserve(n);
-        // size_ = n; // NO initialization
-
         size_t oldSize = size();
 
-        if(n > capacity())
+        if(n > capacity()){
             reserve(n);
+        }
 
         end_ = begin_ + n;
 
         if constexpr(!std::is_trivially_default_constructible_v<T>) {
-            for(size_t i = oldSize; i < n; ++i)
+            for(size_t i = oldSize; i < n; ++i){
                 std::allocator_traits<A>::construct(alloc_, begin_ + i);
+            }
         }
     }
 
@@ -155,12 +134,12 @@ namespace gema{
 
         if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                for(T* p = begin_; p != end_; ++p)
+                for(T* p = begin_; p != end_; ++p){
                     std::allocator_traits<A>::destroy(alloc_, p);
+                }
             }
 
-            std::allocator_traits<A>::deallocate(
-                alloc_, begin_, capacity());
+            std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
         }
 
         begin_ = end_ = capEnd_ = nullptr;
@@ -169,29 +148,21 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::push_back(const T& value) {
 
-        // branch-minimized growth
-        // size_t newCap = (capacity_) ? (capacity_ * 2) : 8;
-        // if(size_==capacity_){
-        //     reserve(newCap);
-        // }
-
-        // std::allocator_traits<A>::construct(alloc_, data_ + size_, value);
-        // ++size_;
-
         T* pos = end_;
         end_ = pos + 1;
 
-        if(end_ <= capEnd_) [[likely]]
-        {
-            if constexpr(std::is_trivially_copyable_v<T>)
+        if(end_ <= capEnd_) [[likely]]{
+
+            if constexpr(std::is_trivially_copyable_v<T>){
                 *pos = value;
-            else
+            }else{
                 std::allocator_traits<A>::construct(alloc_, pos, value);
+            }
 
             return;
         }
 
-        // ---- slow path (rare) ----
+        // slow path (rare)
         end_ = pos; // rollback
         push_back_slow(value);
     }
@@ -215,22 +186,26 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::assign(size_t count, const T& value){
 
-        if(count > capacity())
+        if(count > capacity()){
             reserve(count);
+        }
 
         if constexpr(!std::is_trivially_destructible_v<T>) {
-            for(T* p = begin_; p != end_; ++p)
+            for(T* p = begin_; p != end_; ++p){
                 std::allocator_traits<A>::destroy(alloc_, p);
+            }
         }
 
         if constexpr(std::is_trivially_copyable_v<T>) {
-            if(value == T{})
-                std::memset(begin_, 0, count*sizeof(T));
-            else
-                for(size_t i=0;i<count;++i) begin_[i] = value;
+            if(value == T{}){
+                std::memset(begin_, 0, count * sizeof(T));
+            }else{
+                for(size_t i = 0; i < count; ++i) begin_[i] = value;
+            }
         } else {
-            for(size_t i=0;i<count;++i)
-                std::allocator_traits<A>::construct(alloc_, begin_+i, value);
+            for(size_t i = 0; i < count; ++i){
+                std::allocator_traits<A>::construct(alloc_, begin_ + i, value);
+            }
         }
 
         end_ = begin_ + count;
@@ -240,22 +215,25 @@ namespace gema{
     template<class I>
     void LinearContainer<T, A>::assign(I first, I last){
 
-        size_t count = static_cast<size_t>(std::distance(first,last));
+        size_t count = static_cast<size_t>(std::distance(first, last));
 
-        if(count > capacity())
+        if(count > capacity()){
             reserve(count);
-
-        if constexpr(!std::is_trivially_destructible_v<T>) {
-            for(T* p = begin_; p != end_; ++p)
-                std::allocator_traits<A>::destroy(alloc_, p);
         }
 
-        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>)
-            std::memcpy(begin_, first, count*sizeof(T));
-        else {
-            size_t i=0;
-            for(auto it=first; it!=last; ++it,++i)
-                std::allocator_traits<A>::construct(alloc_, begin_+i, *it);
+        if constexpr(!std::is_trivially_destructible_v<T>) {
+            for(T* p = begin_; p != end_; ++p){
+                std::allocator_traits<A>::destroy(alloc_, p);
+            }
+        }
+
+        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
+            std::memcpy(begin_, first, count * sizeof(T));
+        }else {
+            size_t i = 0;
+            for(auto it = first; it != last; ++it, ++i){
+                std::allocator_traits<A>::construct(alloc_, begin_ + i, *it);
+            }
         }
 
         end_ = begin_ + count;
@@ -272,11 +250,13 @@ namespace gema{
         size_t n = size();
         if(n != other.size()) return false;
 
-        if constexpr(std::is_trivially_copyable_v<T>)
-            return std::memcmp(begin_, other.begin_, n*sizeof(T))==0;
+        if constexpr(std::is_trivially_copyable_v<T>){
+            return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
+        }
 
-        for(size_t i=0;i<n;++i)
+        for(size_t i = 0; i < n; ++i){
             if(!(begin_[i] == other.begin_[i])) return false;
+        }
 
         return true;
     }
@@ -286,9 +266,11 @@ namespace gema{
 
         size_t n = std::min(size(), other.size());
 
-        for(size_t i=0;i<n;++i)
-            if(auto cmp = begin_[i] <=> other.begin_[i]; cmp!=0)
+        for(size_t i = 0; i < n; ++i){
+            if(auto cmp = begin_[i] <=> other.begin_[i]; cmp != 0){
                 return cmp;
+            }
+        }
 
         return size() <=> other.size();
     }
@@ -335,13 +317,11 @@ namespace gema{
 
     template <class T, class A>
     size_t LinearContainer<T, A>::size() const{
-        //return size_;
         return static_cast<size_t>(end_ - begin_);
     }
 
     template <class T, class A>
     size_t LinearContainer<T, A>::capacity() const{
-        //return capacity_;
         return static_cast<size_t>(capEnd_ - begin_);
     }
 
@@ -396,11 +376,12 @@ namespace gema{
 
         T* pos = begin_ + oldSize;
 
-        if constexpr(std::is_trivially_copyable_v<T>)
+        if constexpr(std::is_trivially_copyable_v<T>){
             *pos = value;
-        else
+        }else{
             std::allocator_traits<A>::construct(alloc_, pos, value);
-
+        }
+            
         end_ = pos + 1;
     }
 }
