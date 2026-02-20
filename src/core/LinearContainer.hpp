@@ -50,6 +50,8 @@ public:
     void pop_back();
     void swap(LinearContainer &other) noexcept;
 
+    void fill(const T &value);
+
     void assign(size_t count, const T& value);
     template<class I> void assign(I first, I last);
     void assign(std::initializer_list<T> ilist);

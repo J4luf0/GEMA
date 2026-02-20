@@ -41,16 +41,12 @@ struct AlignedAllocator {
 };
 
 template<class T1, size_t A1, class T2, size_t A2>
-constexpr bool operator==(const AlignedAllocator<T1,A1>&,
-                          const AlignedAllocator<T2,A2>&) noexcept
-{
+constexpr bool operator==(const AlignedAllocator<T1,A1>&, const AlignedAllocator<T2,A2>&) noexcept {
     return A1 == A2;
 }
 
 template<class T1, size_t A1, class T2, size_t A2>
-constexpr bool operator!=(const AlignedAllocator<T1,A1>& a,
-                          const AlignedAllocator<T2,A2>& b) noexcept
-{
+constexpr bool operator!=(const AlignedAllocator<T1,A1>& a, const AlignedAllocator<T2,A2>& b) noexcept {
     return !(a == b);
 }
 

@@ -358,16 +358,19 @@ namespace gema {
     }
 
     template <class T>
-    void Tensor<T>::fillWith(const T& fill){
+    void Tensor<T>::fillWith(const T& value){
 
         // could use assign method on everything thus dodging the specialization but std::fill is probably faster
-        tensor_.assign(tensor_.size(), fill);
+        //tensor_.assign(tensor_.size(), value);
 
-        // std::fill(tensor_.begin(), tensor_.end(), fill); // probably better optimalized
+        // std::fill(tensor_.begin(), tensor_.end(), value); // probably better optimalized
 
         /*for(T& item : tensor_){
-            item = fill;
+            item = value;
         }*/
+
+        // Or maybe this?
+        tensor_.fill(value);
     }
 
     template <class T>
