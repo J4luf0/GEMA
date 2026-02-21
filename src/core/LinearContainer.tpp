@@ -40,15 +40,17 @@ namespace gema{
         size_t otherSize = other.size();
         reserve(otherSize);
 
-        if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
-            end_ = begin_ + otherSize;
-        } else {
-            for(size_t i = 0; i < otherSize; ++i){
-                std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
-            }
-            end_ = begin_ + otherSize;
-        }
+        std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
+
+        // if constexpr(std::is_trivially_copyable_v<T>) {
+        //     std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
+        // } else {
+        //     for(size_t i = 0; i < otherSize; ++i){
+        //         std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
+        //     }
+        // }
+
+        end_ = begin_ + otherSize;
     }
 
     template<class T, class A>
@@ -66,17 +68,31 @@ namespace gema{
     LinearContainer<T, A>& LinearContainer<T, A>::operator=(const LinearContainer& other) {
 
         if(this == &other) return *this;
-        clear();
-        size_t otherSize = other.size();
-        reserve(otherSize);
 
-        if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
+        size_t otherSize = other.size();
+
+        if(otherSize > capacity()){
+            clear();
+            reserve(otherSize);
         } else {
-            for(size_t i = 0; i < otherSize; ++i){
-                std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
+            if constexpr(!std::is_trivially_destructible_v<T>){
+                std::destroy(begin_, end_);
             }
         }
+
+        std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
+
+        // clear();
+        // size_t otherSize = other.size();
+        // reserve(otherSize);
+
+        // if constexpr(std::is_trivially_copyable_v<T>) {
+        //     std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
+        // } else {
+        //     for(size_t i = 0; i < otherSize; ++i){
+        //         std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
+        //     }
+        // }
 
         end_ = begin_ + otherSize;
 
@@ -164,9 +180,10 @@ namespace gema{
 
         if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                for(T* p = begin_; p != end_; ++p){
-                    std::allocator_traits<A>::destroy(alloc_, p);
-                }
+                std::destroy(begin_, end_);
+                // for(T* p = begin_; p != end_; ++p){
+                //     std::allocator_traits<A>::destroy(alloc_, p);
+                // }
             }
 
             std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
@@ -210,7 +227,8 @@ namespace gema{
 
         --end_;
         if constexpr(!std::is_trivially_destructible_v<T>){
-            std::allocator_traits<A>::destroy(alloc_, end_);
+            std::destroy_at(end_);
+            //std::allocator_traits<A>::destroy(alloc_, end_);
         }
     }
 
@@ -233,15 +251,29 @@ namespace gema{
             reserve(count);
         }
 
-        if constexpr(!std::is_trivially_destructible_v<T>) {
-            if(count != size()){
-                for(T* p = begin_; p != end_; ++p){
-                    std::allocator_traits<A>::destroy(alloc_, p);
-                }
+        size_t oldSize = size();
+        size_t common = std::min(oldSize, count);
+
+        // assign into existing objects
+        fastFill(begin_, common, value);
+
+        if(count > oldSize){
+            std::uninitialized_fill_n(begin_ + oldSize, count - oldSize, value);
+        }else if(count < oldSize){
+            if constexpr(!std::is_trivially_destructible_v<T>){
+                std::destroy(begin_ + count, end_);
             }
         }
 
-        fastFill(begin_, count, value);
+        // if constexpr(!std::is_trivially_destructible_v<T>) {
+        //     if(count != size()){
+        //         for(T* p = begin_; p != end_; ++p){
+        //             std::allocator_traits<A>::destroy(alloc_, p);
+        //         }
+        //     }
+        // }
+
+        // fastFill(begin_, count, value);
 
         end_ = begin_ + count;
     }
@@ -431,7 +463,7 @@ namespace gema{
     }
 
     template<class T, class A>
-    inline void LinearContainer<T, A>::fastFill(T* dst, size_t count, const T& value){
+    void LinearContainer<T, A>::fastFill(T* dst, size_t count, const T& value){
 
         if constexpr(std::is_trivially_copyable_v<T>){
 
@@ -441,31 +473,39 @@ namespace gema{
             }
 
             // SIMD-friendly unrolled fill
-            size_t i = 0;
+            // size_t i = 0;
 
-            constexpr size_t UNROLL = 8;
+            // constexpr size_t UNROLL = 8;
 
-            for(; i + UNROLL <= count; i += UNROLL){
+            // for(; i + UNROLL <= count; i += UNROLL){
 
-                dst[i+0] = value;
-                dst[i+1] = value;
-                dst[i+2] = value;
-                dst[i+3] = value;
-                dst[i+4] = value;
-                dst[i+5] = value;
-                dst[i+6] = value;
-                dst[i+7] = value;
-            }
+            //     dst[i+0] = value;
+            //     dst[i+1] = value;
+            //     dst[i+2] = value;
+            //     dst[i+3] = value;
+            //     dst[i+4] = value;
+            //     dst[i+5] = value;
+            //     dst[i+6] = value;
+            //     dst[i+7] = value;
+            // }
 
-            for(; i < count; ++i){
+            // for(; i < count; ++i){
+            //     dst[i] = value;
+            // }
+
+            for(size_t i = 0; i < count; ++i){
                 dst[i] = value;
             }
 
         }else{
-            std::uninitialized_fill_n(dst, count, value);
+            //std::uninitialized_fill_n(dst, count, value);
             // for(size_t i = 0; i < count; ++i){
             //     std::allocator_traits<A>::construct(alloc_, dst + i, value);
             // }
+
+            for(size_t i=0;i<count;++i){
+                dst[i] = value;
+            }
         }
     }
 }

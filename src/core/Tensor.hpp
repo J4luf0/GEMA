@@ -113,6 +113,8 @@ class Tensor {
     /// Size od every tensor dimension.
     std::vector<uint64_t> dimensionSizes_;
 
+    /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
+    /// dimension on flattened data. Used for optimization, shall not be leaked outside.
     std::vector<uint64_t> dimensionJumps_;
     std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
 
@@ -240,12 +242,9 @@ class Tensor {
     */
     Tensor<T>& setData(const LinearContainer<T>& tensorItems);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * 
-     */
-    void setEquals(const std::function<EqualsCallable<T>>& equals);
+    // void setEquals(const std::function<EqualsCallable<T>>& equals);
 
-    void setOrder(const std::function<OrderCallable<T>>& order);
+    // void setOrder(const std::function<OrderCallable<T>>& order);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the tensor through this->showTensor() method.
@@ -1110,6 +1109,15 @@ class Tensor {
      * @return Number of items in tensor.
     */
     uint64_t updateNumberOfItems();
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Calculates dimensionJumps_.
+     * 
+     * @return Number of items in tensor.
+     */
+    uint64_t updateDimensionJump();
+
+    void update();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two items using "==" and has two specializations for double and float using epsilon-abs comparison.

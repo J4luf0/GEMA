@@ -272,19 +272,19 @@ namespace gema {
         return *this;
     }
 
-    template <class T>
-    void Tensor<T>::setEquals(const std::function<EqualsCallable<T>>& equals){
+    // template <class T>
+    // void Tensor<T>::setEquals(const std::function<EqualsCallable<T>>& equals){
         
-        userEquals_ = equals;
-        equals_ = &userEquals_;
-    }
+    //     userEquals_ = equals;
+    //     equals_ = &userEquals_;
+    // }
 
-    template <class T>
-    void Tensor<T>::setOrder(const std::function<OrderCallable<T>>& order){
+    // template <class T>
+    // void Tensor<T>::setOrder(const std::function<OrderCallable<T>>& order){
 
-        userOrder_ = order;
-        order_ = &userOrder_;
-    }
+    //     userOrder_ = order;
+    //     order_ = &userOrder_;
+    // }
 
     template <class T>
     void Tensor<T>::setTensorOutput(const std::function<void(const T&)>& tensorOutput){
@@ -416,13 +416,13 @@ namespace gema {
         // TODO: decide if to actually copy this
         // TODO: can it be done without if statements?
         // Argument for yes: tensor that does not have these functions defined is not comparable
-        if(tensor2.userEquals_){
-            setEquals(tensor2.userEquals_);
-        }
+        // if(tensor2.userEquals_){
+        //     setEquals(tensor2.userEquals_);
+        // }
 
-        if(tensor2.userOrder_){
-            setOrder(tensor2.userOrder_);
-        }
+        // if(tensor2.userOrder_){
+        //     setOrder(tensor2.userOrder_);
+        // }
 
         // TODO: decide what to do with tensorOutput and itemOutput
         return *this;
@@ -955,11 +955,33 @@ namespace gema {
     template <class T>
     uint64_t Tensor<T>::updateNumberOfItems(){
 
-        uint64_t itemCount = 
+        const uint64_t itemCount = 
             std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), uint64_t{1}, std::multiplies<uint64_t>());
         tensor_.resize(itemCount);
 
         return itemCount;
+    }
+
+    template <class T>
+    uint64_t Tensor<T>::updateDimensionJump(){
+
+        const uint64_t dimensionCount = dimensionSizes_.size();
+        if(dimensionJumps_.size() != dimensionCount){
+            dimensionJumps_.resize(dimensionCount);
+        }
+
+        uint64_t jump = 1;
+        for(uint64_t i = dimensionCount - 1; i >= 0; --i){
+            dimensionJumps_[i] = jump;
+            jump *= dimensionSizes_[i];
+        }
+
+        return jump;
+    }
+
+    template <class T>
+    void Tensor<T>::update(){
+        tensor_.resize(updateDimensionJump());
     }
 
     template <class T>
