@@ -113,6 +113,10 @@ class Tensor {
     /// Size od every tensor dimension.
     std::vector<uint64_t> dimensionSizes_;
 
+    std::vector<uint64_t> dimensionJumps_;
+    std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
+
+
     /// Function compares items in tensor and represents equality by bool.
     static std::function<EqualsCallable<T>> defaultEquals_;
     std::function<EqualsCallable<T>>* equals_ = &defaultEquals_;
@@ -1103,17 +1107,11 @@ class Tensor {
     int littleGetIndex(const std::vector<uint64_t>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Calculates the number of possible items in a tensor based on given dimension sizes.
-     * @par
-     * Is used to calculate the number of items before the tensor itself is allocated, and should be useless afterwards.
+     * @brief Calculates the number of items in a tensor based on dimension sizes and resizes tensor to that number.
      * 
-     * @param dimensionSizes vector containing size of each dimension.
-     * 
-     * @return Total number of items that can fit into a tensor.
-     * 
-     * @warning Do not use outside of constructor! Same result can be achieved by getting size of the tensor itself!
+     * @return Number of items in tensor.
     */
-    uint64_t calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const;
+    uint64_t updateNumberOfItems();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two items using "==" and has two specializations for double and float using epsilon-abs comparison.

@@ -198,9 +198,7 @@ namespace gema {
     template <class T>
     Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
     
-        const uint64_t itemCount = calculateNumberOfItems(newTensorDimensionSizes);
-
-        tensor_.resize(itemCount);
+        updateNumberOfItems();
     }
 
     template <class T>
@@ -209,9 +207,7 @@ namespace gema {
 
         // Check actual capacity of dimensions to tensorData
 
-        uint64_t itemCount = calculateNumberOfItems(newTensorDimensionSizes);
-
-        tensor_.resize(itemCount);
+        updateNumberOfItems();
     }
 
     template <class T>
@@ -949,9 +945,13 @@ namespace gema {
     }
 
     template <class T>
-    uint64_t Tensor<T>::calculateNumberOfItems(const std::vector<uint64_t>& dimensionSizes) const{
+    uint64_t Tensor<T>::updateNumberOfItems(){
 
-        return std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), uint64_t{1}, std::multiplies<uint64_t>());
+        uint64_t itemCount = 
+            std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), uint64_t{1}, std::multiplies<uint64_t>());
+        tensor_.resize(itemCount);
+
+        return itemCount;
     }
 
     template <class T>
