@@ -20,15 +20,18 @@ namespace gema{
         size_t initSize = init.size();
         reserve(initSize);
 
-        if constexpr(std::is_trivially_copyable_v<T>) {
-            std::memcpy(begin_, init.begin(), initSize * sizeof(T));
-            end_ = begin_ + initSize;
-        } else {
-            for(const T& v : init){
-                // Wouldn't direct assigment be faster that push_back?
-                push_back(v);
-            }
-        }
+        std::uninitialized_copy(init.begin(), init.end(), begin_);
+
+        // if constexpr(std::is_trivially_copyable_v<T>) {
+        //     std::memcpy(begin_, init.begin(), initSize * sizeof(T));
+        // } else {
+        //     T* dst = begin_;
+        //     for (const T& v : init) {
+        //         std::allocator_traits<A>::construct(alloc_, dst++, v);
+        //     }
+        // }
+
+        end_ = begin_ + initSize;
     }
 
     template<class T, class A>
@@ -50,9 +53,13 @@ namespace gema{
 
     template<class T, class A>
     LinearContainer<T, A>::LinearContainer(LinearContainer&& other) noexcept {
-        // Why is swap used for move contructor? Isnt giving other container this containers begin_, end_ and capEnd_ 
-        // unnecesarry?
-        swap(other);
+        //swap(other);
+
+        begin_  = other.begin_;
+        end_    = other.end_;
+        capEnd_ = other.capEnd_;
+
+        other.begin_ = other.end_ = other.capEnd_ = nullptr;
     }
 
     template<class T, class A>
@@ -78,8 +85,6 @@ namespace gema{
 
     template<class T, class A>
     LinearContainer<T, A>& LinearContainer<T, A>::operator=(LinearContainer&& other) noexcept {
-        // Why is swap used for move assigment? Isnt giving other container this containers begin_, end_ and capEnd_ 
-        // unnecesarry?
         swap(other);
         return *this;
     }
@@ -92,23 +97,29 @@ namespace gema{
     template<class T, class A>
     void LinearContainer<T, A>::reserve(size_t n) {
 
+        if (n <= capacity())[[unlikely]] return;
+
         T* oldBegin = begin_;
         size_t oldSize = size();
 
-        // SHouldn't reserve function do nothing when n is lower or equal to capacity()?
-        // This always allocates something without checking for n value
         T* newData = std::allocator_traits<A>::allocate(alloc_, n);
 
         if(oldBegin){
 
-            if constexpr(std::is_trivially_copyable_v<T>){
-                std::memcpy(newData, oldBegin, oldSize * sizeof(T));
-            }else {
-                for(size_t i = 0; i < oldSize; ++i) {
-                    std::allocator_traits<A>::construct(alloc_, newData + i, std::move(oldBegin[i]));
-                    std::allocator_traits<A>::destroy(alloc_, oldBegin + i);
-                }
+            std::uninitialized_move(oldBegin, oldBegin + oldSize, newData);
+
+            if constexpr(!std::is_trivially_destructible_v<T>) {
+                std::destroy(oldBegin, oldBegin + oldSize);
             }
+
+            // if constexpr(std::is_trivially_copyable_v<T>){
+            //     std::memcpy(newData, oldBegin, oldSize * sizeof(T));
+            // }else {
+            //     for(size_t i = 0; i < oldSize; ++i) {
+            //         std::allocator_traits<A>::construct(alloc_, newData + i, std::move(oldBegin[i]));
+            //         std::allocator_traits<A>::destroy(alloc_, oldBegin + i);
+            //     }
+            // }
 
             std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
         }
@@ -127,15 +138,25 @@ namespace gema{
             reserve(n);
         }
 
-        end_ = begin_ + n;
+        if(n > oldSize){
 
-        // Do we have to construct in case of non trivially contructible?
-        // Why dont we just fill with 0?
-        if constexpr(!std::is_trivially_default_constructible_v<T>) {
-            for(size_t i = oldSize; i < n; ++i){
-                std::allocator_traits<A>::construct(alloc_, begin_ + i);
+            std::uninitialized_default_construct(begin_ + oldSize, begin_ + n);
+
+        } else if(n < oldSize){
+
+            if constexpr(!std::is_trivially_destructible_v<T>) {
+                std::destroy(begin_ + n, begin_ + oldSize);
             }
         }
+
+        end_ = begin_ + n;
+
+        // Why construct at all since we are fine with uninitialized memory
+        // if constexpr(!std::is_trivially_default_constructible_v<T>) {
+        //     for(size_t i = oldSize; i < n; ++i){
+        //         std::allocator_traits<A>::construct(alloc_, begin_ + i);
+        //     }
+        // }
     }
 
     template<class T, class A>
@@ -158,22 +179,29 @@ namespace gema{
     void LinearContainer<T, A>::push_back(const T& value) {
 
         T* pos = end_;
-        end_ = pos + 1;
 
-        // Why <= and not <. I though capEnd_ is already first outside of capacity?
-        if(end_ <= capEnd_) [[likely]]{
+        if(pos < capEnd_) [[likely]]{
 
-            if constexpr(std::is_trivially_copyable_v<T>){
-                *pos = value;
-            }else{
-                std::allocator_traits<A>::construct(alloc_, pos, value);
-            }
-
+            std::construct_at(pos, value);
+            ++end_;
             return;
         }
 
-        // slow path (rare)
-        end_ = pos; // rollback
+        // end_ = pos + 1;
+
+        // if(end_ <= capEnd_) [[likely]]{
+
+        //     if constexpr(std::is_trivially_copyable_v<T>){
+        //         *pos = value;
+        //     }else{
+        //         std::allocator_traits<A>::construct(alloc_, pos, value);
+        //     }
+
+        //     return;
+        // }
+
+        // // slow path (rare)
+        // end_ = pos; // rollback
         push_back_slow(value);
     }
 
@@ -229,19 +257,25 @@ namespace gema{
         }
 
         if constexpr(!std::is_trivially_destructible_v<T>) {
-            for(T* p = begin_; p != end_; ++p){
-                std::allocator_traits<A>::destroy(alloc_, p);
-            }
+            std::destroy(begin_, end_);
         }
 
-        if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
-            std::memcpy(begin_, first, count * sizeof(T));
-        }else {
-            T* dst = begin_;
-            for(; first!=last; ++first, ++dst){
-                std::allocator_traits<A>::construct(alloc_, dst, *first);
-            }
-        }
+        std::uninitialized_copy(first, last, begin_);
+
+        // if constexpr(!std::is_trivially_destructible_v<T>) {
+        //     for(T* p = begin_; p != end_; ++p){
+        //         std::allocator_traits<A>::destroy(alloc_, p);
+        //     }
+        // }
+
+        // if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
+        //     std::memcpy(begin_, first, count * sizeof(T));
+        // }else {
+        //     T* dst = begin_;
+        //     for(; first!=last; ++first, ++dst){
+        //         std::allocator_traits<A>::construct(alloc_, dst, *first);
+        //     }
+        // }
 
         end_ = begin_ + count;
     }
@@ -374,27 +408,30 @@ namespace gema{
 
 
     template<class T, class A>
-    void LinearContainer<T,A>::push_back_slow(const T& value){
+    void LinearContainer<T, A>::push_back_slow(const T& value){
 
         size_t oldSize = size();
-        // Why is this optimal? Why not just double the capacity?
         size_t newCap  = capacity() ? (capacity() + (capacity() / 2) + 8) : 8;
 
         reserve(newCap);
 
-        T* pos = begin_ + oldSize;
+        std::construct_at(begin_ + oldSize, value);
 
-        if constexpr(std::is_trivially_copyable_v<T>){
-            *pos = value;
-        }else{
-            std::allocator_traits<A>::construct(alloc_, pos, value);
-        }
+        end_ = begin_ + oldSize + 1;
+
+        // T* pos = begin_ + oldSize;
+
+        // if constexpr(std::is_trivially_copyable_v<T>){
+        //     *pos = value;
+        // }else{
+        //     std::allocator_traits<A>::construct(alloc_, pos, value);
+        // }
             
-        end_ = pos + 1;
+        // end_ = pos + 1;
     }
 
     template<class T, class A>
-    inline void LinearContainer<T,A>::fastFill(T* dst, size_t count, const T& value){
+    inline void LinearContainer<T, A>::fastFill(T* dst, size_t count, const T& value){
 
         if constexpr(std::is_trivially_copyable_v<T>){
 
@@ -425,9 +462,10 @@ namespace gema{
             }
 
         }else{
-            for(size_t i = 0; i < count; ++i){
-                std::allocator_traits<A>::construct(alloc_, dst + i, value);
-            }
+            std::uninitialized_fill_n(dst, count, value);
+            // for(size_t i = 0; i < count; ++i){
+            //     std::allocator_traits<A>::construct(alloc_, dst + i, value);
+            // }
         }
     }
 }

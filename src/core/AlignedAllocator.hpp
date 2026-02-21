@@ -12,6 +12,7 @@ template<class T, std::size_t Alignment = 64>
 struct AlignedAllocator {
 
     using value_type = T;
+    using is_always_equal = std::true_type;
 
     AlignedAllocator() noexcept = default;
 
