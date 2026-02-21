@@ -920,22 +920,20 @@ class Tensor {
     auto operator-() const
     requires requires (T a) {-a;};
 
-    // /** -----------------------------------------------------------------------------------------------------------------------
-    //  * @brief Performs bitwise negation on each item in a tensor.
-    //  */
-    // void complementInPlace();
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs bitwise negation (~) on each item in a tensor.
+     */
+    void complementInPlace();
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary plus (+) on a tensor.
+     */
+    void plusInPlace();
 
-    // /** -----------------------------------------------------------------------------------------------------------------------
-    //  * @brief Performs unary plus on a tensor.
-    //  */
-    // void plusInPlace() const;
-
-
-    // /** -----------------------------------------------------------------------------------------------------------------------
-    //  * @brief Performs unary minus on all items of the tensor.
-    //  */
-    // inline void opposite();
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Performs unary minus (-) on all items of the tensor.
+     */
+    void oppositeInPlace();
 
     Tensor<T>& operator++();
 

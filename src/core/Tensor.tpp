@@ -687,44 +687,52 @@ namespace gema {
 
     #undef UNARY_OPERATION
 
-    // Specialization for unary + because no need to do anything - false, do not specialize because unary + might be overloaded
-    // template <class T>
-    // Tensor<T> Tensor<T>::operator+() const
-    // requires requires (T a) {+ a;}{
-    //     return Tensor<T>(*this);
-    // }
-
-
-    // template <class T>
-    // void Tensor<T>::complementInPlace(){
-
-    //     forEach([](T& item){
-    //         item = ~item; // TODO: isnt there needed a float specialization?
-    //     });
-    // }
-
+    template <class T>
+    void Tensor<T>::complementInPlace(){
+        forEach([](T& item){
+            item = ~item;
+        });
+    }
     
+    template <class T>
+    void Tensor<T>::plusInPlace(){
+        forEach([](T& item){
+            item = +item;
+        });
+    }
 
-    // template <class T>
-    // void Tensor<T>::plusInPlace() const{
+    template <class T>
+    void Tensor<T>::oppositeInPlace(){
+        forEach([](T& item){
+            item = -item;
+        });
+    }
 
-    // }
+    #define PREFIX_POSTFIX(OP_SYMBOL)\
+        template <class T>\
+        Tensor<T>& Tensor<T>::operator OP_SYMBOL(){\
+    /**/\
+            forEach([](T& item){\
+                OP_SYMBOL item;\
+            });\
+    /**/\
+            return *this;\
+        }\
+    /**/\
+        template <class T>\
+        Tensor<T> Tensor<T>::operator OP_SYMBOL(int) const{\
+            Tensor<T> temporary(*this);\
+            operator++();\
+            return temporary;\
+        }\
+    /**/
 
-    // // template <class T>
-    // // Tensor<T> Tensor<T>::operator-() const{
+    PREFIX_POSTFIX(++)
+    PREFIX_POSTFIX(--)
 
-    // //     Tensor<T> newTensor = Tensor<T>(*this);
-    // //     newTensor->negateInPlace();
-    // //     return newTensor;
-    // // }
+    #undef PREFIX_POSTFIX
 
-    // template <class T>
-    // inline void Tensor<T>::opposite(){
 
-    //     forEach([](T& item){
-    //         item = -item;
-    //     });
-    // }
 
     template <class T>
     template <apply_and_return_callable<T> C>
