@@ -1117,6 +1117,10 @@ class Tensor {
      */
     uint64_t updateDimensionJump();
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Updates number of items and dimensionJumps_ at once. Is slightly faster that using methods updateNumberOfItems
+     * and updateDimensionJump individually.
+     */
     void update();
 
     /** -----------------------------------------------------------------------------------------------------------------------
