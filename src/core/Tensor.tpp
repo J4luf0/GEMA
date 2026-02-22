@@ -888,7 +888,7 @@ namespace gema {
     // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 
     template <class T>
-    std::vector<uint64_t> Tensor<T>::getCoords(int itemIndex) const{
+    std::vector<uint64_t> Tensor<T>::getCoords(uint64_t itemIndex) const{
 
         std::vector<uint64_t> coordinates;
         coordinates.resize(dimensionSizes_.size());

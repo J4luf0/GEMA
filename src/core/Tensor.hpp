@@ -1068,7 +1068,7 @@ class Tensor {
      * 
      * @return Coordinates of the item in the tensor.
     */
-    std::vector<uint64_t> getCoords(int itemIndex) const;
+    std::vector<uint64_t> getCoords(uint64_t itemIndex) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Get items index in a tensor, this is inverse method of "getCoords".
