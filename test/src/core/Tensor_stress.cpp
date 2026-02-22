@@ -201,3 +201,42 @@ TEST(tensor_stress_test, getItem_001_control){
         Tensor<int>::incrementCoords(currentCoords, dimensionSizes);
     }
 }
+
+TEST(tensor_stress_test, getItem_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+    const uint64_t numberOfDimensions = dimensionSizes.size();
+    const uint64_t loopCount = (getItemMultiplier);
+
+    Tensor<int> tensor = Tensor<int>(dimensionSizes);
+
+    std::vector<uint64_t> currentCoords = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint64_t i = 0;
+    for(; i < loopCount; i++){
+        
+        tensor.getItem(currentCoords);
+
+        if(i == loopCount - 1) break;
+
+        Tensor<int>::incrementCoords(currentCoords, dimensionSizes);
+    }
+}
+
+TEST(tensor_stress_test, getItem_002_control){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+    const uint64_t numberOfDimensions = dimensionSizes.size();
+    const uint64_t loopCount = (getItemMultiplier);
+
+    Tensor<int> tensor = Tensor<int>(dimensionSizes);
+
+    std::vector<uint64_t> currentCoords = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    for(uint64_t i = 0; i < loopCount; i++){
+        
+        //tensor.getItem(currentCoords);
+
+        if(i == loopCount - 1) break;
+
+        Tensor<int>::incrementCoords(currentCoords, dimensionSizes);
+    }
+}

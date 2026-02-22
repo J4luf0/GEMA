@@ -412,6 +412,7 @@ namespace gema {
         
         this->tensor_ = tensor2.tensor_;
         this->dimensionSizes_ = tensor2.dimensionSizes_;
+        this->dimensionJumps_ = tensor2.dimensionJumps_;
 
         // TODO: decide if to actually copy this
         // TODO: can it be done without if statements?
@@ -908,14 +909,21 @@ namespace gema {
     template <class T>
     uint64_t Tensor<T>::getIndex(const std::vector<uint64_t>& coordinates) const{
         
+    //     uint64_t itemIndex = 0;
+    //     //uint64_t dimensionProduct = 1;
+
+    //    for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
+
+    //         itemIndex += coordinates[i] * dimensionJumps_[i];
+    //         //dimensionProduct *= dimensionSizes_[i];
+    //    }
+
+
         uint64_t itemIndex = 0;
-        uint64_t dimensionProduct = 1;
-
-       for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
-
-            itemIndex += coordinates[i] * dimensionProduct;
-            dimensionProduct *= dimensionSizes_[i];
-       }
+        const uint64_t dimensionCount = dimensionSizes_.size();
+        for (size_t i = 0; i < dimensionCount; ++i){
+            itemIndex = itemIndex * dimensionSizes_[i] + coordinates[i];
+        }
 
         return itemIndex;
     }
