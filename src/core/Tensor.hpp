@@ -1077,7 +1077,7 @@ class Tensor {
      * 
      * @return Index of one item in the tensor.
     */
-    int getIndex(const std::vector<uint64_t>& coordinates) const;
+    uint64_t getIndex(const std::vector<uint64_t>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Calculates coordinates from items index in tensor, this

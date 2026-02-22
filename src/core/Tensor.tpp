@@ -906,10 +906,10 @@ namespace gema {
     }
 
     template <class T>
-    int Tensor<T>::getIndex(const std::vector<uint64_t>& coordinates) const{
+    uint64_t Tensor<T>::getIndex(const std::vector<uint64_t>& coordinates) const{
         
-        int itemIndex = 0;
-        int dimensionProduct = 1;
+        uint64_t itemIndex = 0;
+        uint64_t dimensionProduct = 1;
 
        for(uint64_t i = dimensionSizes_.size() - 1; i < dimensionSizes_.size(); --i){
 
