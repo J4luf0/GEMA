@@ -503,7 +503,8 @@ namespace gema{
             //     std::allocator_traits<A>::construct(alloc_, dst + i, value);
             // }
 
-            for(size_t i=0;i<count;++i){
+            // todo: je toto správně pro netriviálně kopírovatelné?
+            for(size_t i = 0; i < count; ++i){
                 dst[i] = value;
             }
         }
