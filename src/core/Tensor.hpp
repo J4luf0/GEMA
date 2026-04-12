@@ -32,6 +32,10 @@ concept apply_and_return_callable = std::is_invocable_v<C, const T&, const T&>;
 template <typename C, class T>
 concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
 
+/// Checks for void(T&, const std::vector<uint64_t>&) signature.
+template <typename C, class T>
+concept foreach_coord_callable = std::is_invocable_r_v<void, C, T&, const std::vector<uint64_t>&>;
+
 // Checks for T(const T&) signature.
 template <typename C, class T>
 //concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
