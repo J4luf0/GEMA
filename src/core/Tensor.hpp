@@ -304,6 +304,21 @@ class Tensor {
     void fillWith(const T& fill);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Fills tensor with values from other tensor. Preserves copied items coordinates. Values from other tensor that are
+     * out of this tensor dimension sizes are not copied. If other tensor cannot provide item for valid place at this item, 
+     * nothing happens.
+     * 
+     * @param otherTensor tensor that is providing values to copy into this tensor.
+     * @param thisFromCoordsInclusive starting inclusive coordinates of this tensor to copy to. Zeroed out coords means that
+     * filling starts from the first item.
+     * @param thisToCoordsExclusive ending exclusive coordinates. If equal to dimension sizes, then this tensor can be filled 
+     * to the last item.
+     * @param otherFromCoordsInclusive starting inclusive coordinates of other tensors.
+     */
+    void copyOver(const Tensor<T>& otherTensor, const std::vector<uint64_t>& thisFromCoordsInclusive, 
+    const std::vector<uint64_t>& thisToCoordsExclusive, const std::vector<uint64_t>& otherFromCoordsInclusive);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
      * 
      * @param dim1 first dimension to swap, default value is 0.
@@ -312,6 +327,12 @@ class Tensor {
      * @return A pointer to new allocated tensor, that got two dimensions transposed.
     */
     Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
+
+    void resize(const std::vector<uint64_t>& newDimensionSizes);
+
+    void addDimension(const uint64_t newDimensionSize, const uint64_t putBefore);
+
+    void removeDimension(const uint64_t removedDimensionIndex);
 
 
     
@@ -1055,6 +1076,12 @@ class Tensor {
      * @return Is @b true if given coordinate looped over to start, otherwise @b false.
      */
     static bool incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * 
+     */
+    static std::vector<std::vector<uint64_t>> coordsInRange(const std::vector<uint64_t>& coordsFromInclusive, 
+    const std::vector<uint64_t>& coordsToExclusive, const std::vector<uint64_t>& dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.
