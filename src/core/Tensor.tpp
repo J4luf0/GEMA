@@ -405,6 +405,13 @@ namespace gema {
         return tensorTransposed;
     }
 
+    template <class T>
+    inline void Tensor<T>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex){
+
+        
+
+    }
+
     // SPECIAL OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
     // Does not need macros.
     template <class T>

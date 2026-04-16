@@ -231,7 +231,7 @@ class Tensor {
      * 
      * @return Reference to data of the tensor.
      * 
-     * @note Exposes the inner implementation of tensor (the flattened data), use carefully.
+     * @note Exposes the inner implementation of tensor (the flattened data), use carefully (do not resize!).
      */
     LinearContainer<T>& getData();
 
@@ -241,7 +241,7 @@ class Tensor {
      * 
      * @param tensorItems one dimensional vector of items to be added by order.
      * 
-     * @note Risky and kinda shows the inner implementation by dodging the coordinate to index calculation, but its much faster
+     * @note Risky and shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
     Tensor<T>& setData(const LinearContainer<T>& tensorItems);
@@ -329,6 +329,8 @@ class Tensor {
     Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     void resize(const std::vector<uint64_t>& newDimensionSizes);
+
+    void resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex);
 
     void addDimension(const uint64_t newDimensionSize, const uint64_t putBefore);
 
