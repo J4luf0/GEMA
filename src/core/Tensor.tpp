@@ -216,9 +216,8 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T>::Tensor(Tensor<T>&& otherTensor) noexcept : 
-    tensor_(std::move(otherTensor.tensor_)), dimensionSizes_(std::move(otherTensor.dimensionSizes_)){
-
+    Tensor<T>::Tensor(Tensor<T>&& otherTensor) noexcept{
+        *this = std::move(otherTensor);
     }
 
     template <class T>
@@ -406,20 +405,115 @@ namespace gema {
     }
 
     template <class T>
-    inline void Tensor<T>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex){
+    void Tensor<T>::resize(const std::vector<uint64_t>& newDimensionSizes){
 
+        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+        dimensionSizes_ = newDimensionSizes;
+        const uint64_t newItemCount = updateDimensionJump();
+
+        // New allocation because it is likely anyway, even if tensor_.resize() would be used
+        // Because even change of 1 to any dimension size likely means multiplicative increase/decrease in item count
+        LinearContainer<T> newTensor(newItemCount);
+
+        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        for(uint64_t i = 0; i < tensor_.size(); i++){
+
+            if(isValidCoordinates(currentCoordsSource)){
+                uint64_t destinationIndex = getIndex(currentCoordsSource);
+                newTensor[destinationIndex] = std::move(tensor_[i]);
+            }
+
+            incrementCoords(currentCoordsSource, oldDimensionSizes);
+        }
         
-
+        tensor_ = std::move(newTensor);
     }
+
+    // template<class T>
+    // void Tensor<T>::resize(uint64_t newSize, uint64_t dim) {
+    //     auto oldSizes = dimensionSizes_;
+    //     dimensionSizes_[dim] = newSize;
+    //     uint64_t newCount = updateDimensionJump();
+
+    //     LinearContainer<T> newTensor(newCount);
+
+    //     std::vector<uint64_t> coords(oldSizes.size(), 0);
+
+    //     while (true) {
+    //         // check if coords fit into new tensor
+    //         if (coords[dim] < newSize) {
+    //             uint64_t oldIdx = getIndex(coords, oldSizes);
+    //             uint64_t newIdx = getIndex(coords, dimensionSizes_);
+    //             newTensor[newIdx] = std::move(tensor_[oldIdx]);
+    //         }
+
+    //         // increment coords
+    //         int d = coords.size() - 1;
+    //         while (d >= 0) {
+    //             coords[d]++;
+    //             if (coords[d] < oldSizes[d]) break;
+    //             coords[d] = 0;
+    //             d--;
+    //         }
+    //         if (d < 0) break;
+    //     }
+
+    //     tensor_ = std::move(newTensor);
+    // }
+
+    template<class T>
+    void Tensor<T>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex) {
+
+        std::vector<uint64_t> newDimensionSizes = dimensionSizes_;
+        newDimensionSizes[dimensionIndex] = newDimensionSize;
+        resize(newDimensionSizes);
+
+        // const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+        // dimensionSizes_[dimensionIndex] = newDimensionSize;
+        // const uint64_t newItemCount = updateDimensionJump();
+
+        // // New allocation because it is likely anyway, even if tensor_.resize() would be used
+        // // Because even change of 1 to any dimension size likely means multiplicative increase/decrease in item count
+        // LinearContainer<T> newTensor(newItemCount);
+
+        // std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        // for(uint64_t i = 0; i < tensor_.size(); i++){
+
+        //     if(isValidCoordinates(currentCoordsSource)){
+        //         uint64_t destinationIndex = getIndex(currentCoordsSource);
+        //         newTensor[destinationIndex] = std::move(tensor_[i]);
+        //     }
+
+        //     incrementCoords(currentCoordsSource, oldDimensionSizes);
+        // }
+        
+        // tensor_ = std::move(newTensor);
+    }
+
+    template <class T>
+    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords) const{
+
+        if(dimensionSizes_.size() != coords.size()) return false;
+
+        for(const uint64_t coord : coords){
+            if(coord == 0) return false;
+        }
+
+        return true;
+    }
+
+
 
     // SPECIAL OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
     // Does not need macros.
     template <class T>
-    Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor2){
+    Tensor<T>& Tensor<T>::operator=(const Tensor<T>& otherTensor){
         
-        this->tensor_ = tensor2.tensor_;
-        this->dimensionSizes_ = tensor2.dimensionSizes_;
-        this->dimensionJumps_ = tensor2.dimensionJumps_;
+        this->tensor_ = otherTensor.tensor_;
+        this->dimensionSizes_ = otherTensor.dimensionSizes_;
+        this->dimensionJumps_ = otherTensor.dimensionJumps_;
 
         // TODO: decide if to actually copy this
         // TODO: can it be done without if statements?
@@ -433,6 +527,16 @@ namespace gema {
         // }
 
         // TODO: decide what to do with tensorOutput and itemOutput
+        return *this;
+    }
+
+    template <class T>
+    Tensor<T>& Tensor<T>::operator=(Tensor<T>&& otherTensor) noexcept{
+        
+        tensor_ = std::move(otherTensor.tensor_);
+        dimensionSizes_ = std::move(otherTensor.dimensionSizes_);
+        dimensionJumps_ = std::move(otherTensor.dimensionJumps_);
+        
         return *this;
     }
 
@@ -863,7 +967,7 @@ namespace gema {
 
     
     template <class T>
-    inline bool Tensor<T>::incrementCoords(std::vector<uint64_t> &coordinates, const std::vector<uint64_t> &dimensionSizes){
+    bool Tensor<T>::incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes){
 
         uint64_t lastCoordIndex = coordinates.size() - 1;
 

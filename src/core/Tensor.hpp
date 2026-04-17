@@ -14,38 +14,42 @@ template<class T>
 struct tensor_storage_type{
     using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
 };
+
+// Concept that checks void(T&, const T&) invocable signature.
+template <typename C, class T>
+concept binary_operation_on_items = std::is_invocable_r_v<void, C, T&, const T&>;
     
 // Concept that checks if type X is of type T or Tensor<T>. Useful for operator overloads.
 template <typename X, class T>
 concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
 
-/// Checks for void(T&, const T&) signature.
+/// Checks for void(T&, const T&) invocable signature.
 template <typename C, class T>
 concept apply_callable = std::is_invocable_r_v<void, C, T&, const T&>;
 
-/// Checks for T(const T&, const T&) signature.
+/// Checks for T(const T&, const T&) invocable signature.
 template <typename C, class T>
 //concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
 concept apply_and_return_callable = std::is_invocable_v<C, const T&, const T&>;
 
-/// Checks for void(T&) signature.
+/// Checks for void(T&) invocable signature.
 template <typename C, class T>
 concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
 
-/// Checks for void(T&, const std::vector<uint64_t>&) signature.
+/// Checks for void(T&, const std::vector<uint64_t>&) invocable signature.
 template <typename C, class T>
 concept foreach_coord_callable = std::is_invocable_r_v<void, C, T&, const std::vector<uint64_t>&>;
 
-// Checks for T(const T&) signature.
+// Checks for T(const T&) invocable signature.
 template <typename C, class T>
 //concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
 concept foreach_and_return_callable = std::is_invocable_v<C, const T&>;
 
-// Checks for bool(const T&, const T&) signature.
+// Checks for bool(const T&, const T&) invocable signature.
 template <typename C, class T>
 concept equals_callable = std::is_invocable_r_v<bool, C, const T&, const T&>;
 
-// Checks for int(const T&, const T&) signature.
+// Checks for int(const T&, const T&) invocable signature.
 template <typename C, class T>
 concept order_callable = std::is_invocable_r_v<int, C, const T&, const T&>;
 
@@ -304,9 +308,8 @@ class Tensor {
     void fillWith(const T& fill);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Fills tensor with values from other tensor. Preserves copied items coordinates. Values from other tensor that are
-     * out of this tensor dimension sizes are not copied. If other tensor cannot provide item for valid place at this item, 
-     * nothing happens.
+     * @brief Fills tensor with values from other tensor. Values from other tensor that are out of this tensor dimension sizes 
+     * are not copied. If other tensor cannot provide item for valid place at this item, nothing happens.
      * 
      * @param otherTensor tensor that is providing values to copy into this tensor.
      * @param thisFromCoordsInclusive starting inclusive coordinates of this tensor to copy to. Zeroed out coords means that
@@ -328,6 +331,10 @@ class Tensor {
     */
     Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * 
+     * 
+     */
     void resize(const std::vector<uint64_t>& newDimensionSizes);
 
     void resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex);
@@ -336,18 +343,46 @@ class Tensor {
 
     void removeDimension(const uint64_t removedDimensionIndex);
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Checks if given coordinates is valid as this tensors coordinates.
+     * 
+     * @param coords coordinates to check.
+     * 
+     * @return Bool @b true if coordinates are valid, @b false otherwise.
+     */
+    bool isValidCoordinates(const std::vector<uint64_t>& coords) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Accumulates all items in specified dimension using given binary operation and deletes that dimension, putting
+     * result of accumulation into place where first accumulated item was.
+     * 
+     * @param dimensionIndex index of dimension to collapse.
+     * @param binaryOperation invocable having correct signature defined in its concept.
+     */
+    template <binary_operation_on_items<T> I> 
+    void collapse(const uint64_t dimensionIndex, const I& binaryOperation);
+
 
     
     // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Copies one tensor to another by value.
+     * @brief Copies other tensor to this tensor.
      * 
-     * @param tensor2 tensor which values are copied into this tensor.
+     * @param otherTensor tensor which values are copied into this tensor.
      * 
      * @return Reference to this tensor after the copying.
      */
-    Tensor<T>& operator=(const Tensor<T>& tensor2);
+    Tensor<T>& operator=(const Tensor<T>& otherTensor);
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Moves other tensor to this tensor.
+     * 
+     * @param otherTensor tensor which values are copied into this tensor.
+     * 
+     * @return Reference to this tensor after the copying.
+     */
+    Tensor<T>& operator=(Tensor<T>&& otherTensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal.
