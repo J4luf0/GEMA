@@ -296,6 +296,69 @@ TEST(tensor_test, isEquilateral_004){
     EXPECT_EQ(tensor->isEquilateral(), true);
 }
 
+TEST(tensor_test, toString_001){
+
+    const std::vector<uint64_t> dimensionSizes{2};
+    auto tensor = Tensor<double>(dimensionSizes);
+    tensor.fillWith(0.);
+    
+    std::string expected = "{0, 0}";
+
+    EXPECT_EQ(tensor.toString(), expected);
+
+}
+
+TEST(tensor_test, toString_002){
+
+    const std::vector<uint64_t> dimensionSizes{1, 2, 2};
+    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
+    tensor->setData({5.1, 0, -0.000001, 500000});
+    
+    std::string expected = "{{{5.1, 0}, {-1e-06, 5e+05}}}";
+
+    EXPECT_EQ(tensor->toString(), expected);
+}
+
+TEST(tensor_test, toString_003){
+
+    const std::vector<uint64_t> dimensionSizes{2, 2, 2};
+    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
+    tensor->setData({0, 5, -1, 100, 24, -24, 5, 45});
+    
+    std::string expected = "{{{0, 5}, {-1, 100}}, {{24, -24}, {5, 45}}}";
+
+    EXPECT_EQ(tensor->toString(), expected);
+}
+
+TEST(tensor_test, toString_004){
+
+    const std::vector<uint64_t> dimensionSizes{3, 2};
+
+    Tensor<double>* tensor = new Tensor<double>(dimensionSizes);
+
+    // Little endian approach
+    /*tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {1, 0});
+    tensor->setItem(-0,     {2, 0});
+    tensor->setItem(-2,      {0, 1});
+    tensor->setItem(4.5,   {1, 1});
+    tensor->setItem(7,    {2, 1});*/
+
+    tensor->setItem(5,     {0, 0});
+    tensor->setItem(0.55,    {0, 1});
+    tensor->setItem(-0,     {1, 0});
+    tensor->setItem(-2,      {1, 1});
+    tensor->setItem(4.5,   {2, 0});
+    tensor->setItem(7,    {2, 1});
+    
+    //string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";
+    std::string expected = "{{5, 0.55}, {0, -2}, {4.5, 7}}";
+
+    EXPECT_EQ(tensor->toString(), expected);
+
+    delete tensor;
+}
+
 TEST(tensor_test, fillWith_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
@@ -431,68 +494,7 @@ TEST(tensor_test, operatorAssign_003){
     delete tensor;
 }
 
-TEST(tensor_test, toString_001){
 
-    const std::vector<uint64_t> dimensionSizes{2};
-    auto tensor = Tensor<double>(dimensionSizes);
-    tensor.fillWith(0.);
-    
-    std::string expected = "{0, 0}";
-
-    EXPECT_EQ(tensor.toString(), expected);
-
-}
-
-TEST(tensor_test, toString_002){
-
-    const std::vector<uint64_t> dimensionSizes{1, 2, 2};
-    auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
-    tensor->setData({5.1, 0, -0.000001, 500000});
-    
-    std::string expected = "{{{5.1, 0}, {-1e-06, 5e+05}}}";
-
-    EXPECT_EQ(tensor->toString(), expected);
-}
-
-TEST(tensor_test, toString_003){
-
-    const std::vector<uint64_t> dimensionSizes{2, 2, 2};
-    auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
-    tensor->setData({0, 5, -1, 100, 24, -24, 5, 45});
-    
-    std::string expected = "{{{0, 5}, {-1, 100}}, {{24, -24}, {5, 45}}}";
-
-    EXPECT_EQ(tensor->toString(), expected);
-}
-
-TEST(tensor_test, toString_004){
-
-    const std::vector<uint64_t> dimensionSizes{3, 2};
-
-    Tensor<double>* tensor = new Tensor<double>(dimensionSizes);
-
-    // Little endian approach
-    /*tensor->setItem(5,     {0, 0});
-    tensor->setItem(0.55,    {1, 0});
-    tensor->setItem(-0,     {2, 0});
-    tensor->setItem(-2,      {0, 1});
-    tensor->setItem(4.5,   {1, 1});
-    tensor->setItem(7,    {2, 1});*/
-
-    tensor->setItem(5,     {0, 0});
-    tensor->setItem(0.55,    {0, 1});
-    tensor->setItem(-0,     {1, 0});
-    tensor->setItem(-2,      {1, 1});
-    tensor->setItem(4.5,   {2, 0});
-    tensor->setItem(7,    {2, 1});
-    
-    //string expected = "{{5, 0.55, 0}, {-2, 4.5, 7}}";
-    std::string expected = "{{5, 0.55}, {0, -2}, {4.5, 7}}";
-
-    EXPECT_EQ(tensor->toString(), expected);
-
-    delete tensor;
-}
 
 
 

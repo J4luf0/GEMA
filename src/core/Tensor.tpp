@@ -296,6 +296,18 @@ namespace gema {
     }
 
     template <class T>
+    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords) const{
+
+        if(dimensionSizes_.size() != coords.size()) return false;
+
+        for(const uint64_t coord : coords){
+            if(coord == 0) return false;
+        }
+
+        return true;
+    }
+
+    template <class T>
     bool Tensor<T>::isEquilateral() const{
         return std::adjacent_find(dimensionSizes_.begin(), dimensionSizes_.end(), std::not_equal_to<int>()) == dimensionSizes_.end();
     }
@@ -493,16 +505,59 @@ namespace gema {
     }
 
     template <class T>
-    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords) const{
+    void Tensor<T>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
 
-        if(dimensionSizes_.size() != coords.size()) return false;
+        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+        //const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
 
-        for(const uint64_t coord : coords){
-            if(coord == 0) return false;
+        dimensionSizes_.insert(dimensionSizes_.begin() + putBefore, newDimensionSize);
+
+        const uint64_t newItemCount = updateDimensionJump();
+
+        LinearContainer<T> newTensor(newItemCount);
+
+        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        for(uint64_t i = 0; i < tensor_.size(); i++){
+
+            if(isValidCoordinates(currentCoordsSource)){
+                uint64_t destinationIndex = getIndex(currentCoordsSource);
+                newTensor[destinationIndex] = std::move(tensor_[i]);
+            }
+
+            incrementCoords(currentCoordsSource, oldDimensionSizes);
         }
 
-        return true;
+        tensor_ = std::move(newTensor);
     }
+
+    template <class T>
+    void Tensor<T>::removeDimension(const uint64_t removedDimensionIndex){
+
+        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+        //const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
+
+        dimensionSizes_.erase(dimensionSizes_.begin() + removedDimensionIndex);
+
+        const uint64_t newItemCount = updateDimensionJump();
+
+        LinearContainer<T> newTensor(newItemCount);
+        
+        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        for(uint64_t i = 0; i < tensor_.size(); i++){
+
+            if(isValidCoordinates(currentCoordsSource)){
+                uint64_t destinationIndex = getIndex(currentCoordsSource);
+                newTensor[destinationIndex] = std::move(tensor_[i]);
+            }
+
+            incrementCoords(currentCoordsSource, oldDimensionSizes);
+        }
+
+        tensor_ = std::move(newTensor);
+    }
+
 
 
 

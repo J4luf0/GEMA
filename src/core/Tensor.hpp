@@ -269,6 +269,15 @@ class Tensor {
     void setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Checks if given coordinates is valid as this tensors coordinates.
+     * 
+     * @param coords coordinates to check.
+     * 
+     * @return Bool @b true if coordinates are valid, @b false otherwise.
+     */
+    bool isValidCoordinates(const std::vector<uint64_t>& coords) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.
      * 
      * @return Bool @b true if the tensor is equilateral and @b false if not.
@@ -332,25 +341,37 @@ class Tensor {
     Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Resizes tensor. Items coordinates are preserved if those coordinates are valid. If items coordinates are not
+     * valid, the items ceases to exist.
      * 
-     * 
+     * @param newDimensionSizes vector filled with new sizes of dimensions. Number of dimensions should not change.
      */
     void resize(const std::vector<uint64_t>& newDimensionSizes);
 
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Resizes tensor. Items coordinates are preserved if those coordinates are valid. If items coordinates are not
+     * valid, the items ceases to exist.
+     * 
+     * @param newDimensionSize new size of dimension.
+     * @param dimensionIndex dimension to be resized.
+     */
     void resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex);
-
+    
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Adds dimension before specified dimension index. Reallocates the tensor based on new dimensions.
+     * 
+     * @param newDimensionSize size of dimension to be inserted.
+     * @param putBefore index of dimension to be inserted before.
+     */
     void addDimension(const uint64_t newDimensionSize, const uint64_t putBefore);
 
-    void removeDimension(const uint64_t removedDimensionIndex);
-
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Checks if given coordinates is valid as this tensors coordinates.
+     * @brief Removes dimension at specified dimension index. Reallocates the tensor based on new dimensions. Items outside of
+     * valid coordinates will be lost.
      * 
-     * @param coords coordinates to check.
-     * 
-     * @return Bool @b true if coordinates are valid, @b false otherwise.
+     * @param removedDimensionIndex index of dimension to be removed.
      */
-    bool isValidCoordinates(const std::vector<uint64_t>& coords) const;
+    void removeDimension(const uint64_t removedDimensionIndex);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Accumulates all items in specified dimension using given binary operation and deletes that dimension, putting
@@ -359,8 +380,8 @@ class Tensor {
      * @param dimensionIndex index of dimension to collapse.
      * @param binaryOperation invocable having correct signature defined in its concept.
      */
-    template <binary_operation_on_items<T> I> 
-    void collapse(const uint64_t dimensionIndex, const I& binaryOperation);
+    template <binary_operation_on_items<T> I>
+    void collapseDimension(const uint64_t dimensionIndex, const I& binaryOperation);
 
 
     
