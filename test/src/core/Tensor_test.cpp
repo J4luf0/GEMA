@@ -418,6 +418,21 @@ TEST(tensor_test, transposition_002){
     EXPECT_EQ(result, *expected);
 }
 
+TEST(tensor_test, resize_001){
+
+
+}
+
+TEST(tensor_test, addDimension_001){
+
+
+}
+
+TEST(tensor_test, removeDimension_001){
+
+
+}
+
 TEST(tensor_test, operatorAssign_001){
 
     const std::vector<uint64_t> dimensionSizes{3, 2};
