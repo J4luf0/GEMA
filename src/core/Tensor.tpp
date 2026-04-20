@@ -513,7 +513,7 @@ namespace gema {
     void Tensor<T>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
 
         const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
-        //const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
 
         dimensionSizes_.insert(dimensionSizes_.begin() + putBefore, newDimensionSize);
 
@@ -521,17 +521,31 @@ namespace gema {
 
         LinearContainer<T> newTensor(newItemCount);
 
-        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+        uint64_t j = 0;
+        uint64_t jCounter = 0;
+        const uint64_t moveAmount = dimensionJumps_[putBefore];
+        const uint64_t skipAmount = moveAmount * (dimensionSizes_[putBefore] - 1);
+        for(uint64_t i = 0; i < tensor_.size(); i++, j++){
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+            newTensor[j] = std::move(tensor_[i]);
 
-            if(isValidCoordinates(currentCoordsSource)){
-                uint64_t destinationIndex = getIndex(currentCoordsSource);
-                newTensor[destinationIndex] = std::move(tensor_[i]);
+            if(++jCounter >= moveAmount)[[unlikely]]{
+                j += skipAmount;
+                jCounter = 0;
             }
-
-            incrementCoords(currentCoordsSource, oldDimensionSizes);
         }
+
+        // std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        // for(uint64_t i = 0; i < tensor_.size(); i++){
+
+        //     if(isValidCoordinates(currentCoordsSource)){
+        //         uint64_t destinationIndex = getIndex(currentCoordsSource);
+        //         newTensor[destinationIndex] = std::move(tensor_[i]);
+        //     }
+
+        //     incrementCoords(currentCoordsSource, oldDimensionSizes);
+        // }
 
         tensor_ = std::move(newTensor);
     }
@@ -540,7 +554,7 @@ namespace gema {
     void Tensor<T>::removeDimension(const uint64_t removedDimensionIndex){
 
         const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
-        //const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
 
         dimensionSizes_.erase(dimensionSizes_.begin() + removedDimensionIndex);
 
@@ -548,17 +562,31 @@ namespace gema {
 
         LinearContainer<T> newTensor(newItemCount);
         
-        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+        uint64_t j = 0;
+        uint64_t jCounter = 0;
+        const uint64_t moveAmount = oldDimensionJumps[removedDimensionIndex];
+        const uint64_t skipAmount = moveAmount * (oldDimensionSizes[removedDimensionIndex] - 1);
+        for(uint64_t i = 0; i < newTensor.size(); i++, j++){
 
-        for(uint64_t i = 0; i < tensor_.size(); i++){
+            newTensor[i] = std::move(tensor_[j]);
 
-            if(isValidCoordinates(currentCoordsSource)){
-                uint64_t destinationIndex = getIndex(currentCoordsSource);
-                newTensor[destinationIndex] = std::move(tensor_[i]);
+            if(++jCounter >= moveAmount)[[unlikely]]{
+                j += skipAmount;
+                jCounter = 0;
             }
-
-            incrementCoords(currentCoordsSource, oldDimensionSizes);
         }
+
+        // std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+
+        // for(uint64_t i = 0; i < tensor_.size(); i++){
+
+        //     if(isValidCoordinates(currentCoordsSource)){
+        //         uint64_t destinationIndex = getIndex(currentCoordsSource);
+        //         newTensor[destinationIndex] = std::move(tensor_[i]);
+        //     }
+
+        //     incrementCoords(currentCoordsSource, oldDimensionSizes);
+        // }
 
         tensor_ = std::move(newTensor);
     }

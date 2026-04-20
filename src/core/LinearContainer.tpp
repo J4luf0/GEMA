@@ -22,15 +22,6 @@ namespace gema{
 
         std::uninitialized_copy(init.begin(), init.end(), begin_);
 
-        // if constexpr(std::is_trivially_copyable_v<T>) {
-        //     std::memcpy(begin_, init.begin(), initSize * sizeof(T));
-        // } else {
-        //     T* dst = begin_;
-        //     for (const T& v : init) {
-        //         std::allocator_traits<A>::construct(alloc_, dst++, v);
-        //     }
-        // }
-
         end_ = begin_ + initSize;
     }
 
@@ -41,14 +32,6 @@ namespace gema{
         reserve(otherSize);
 
         std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
-
-        // if constexpr(std::is_trivially_copyable_v<T>) {
-        //     std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
-        // } else {
-        //     for(size_t i = 0; i < otherSize; ++i){
-        //         std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
-        //     }
-        // }
 
         end_ = begin_ + otherSize;
     }
@@ -72,7 +55,7 @@ namespace gema{
         size_t otherSize = other.size();
 
         if(otherSize > capacity()){
-            clear();
+            //clear();
             reserve(otherSize);
         } else {
             if constexpr(!std::is_trivially_destructible_v<T>){
@@ -81,18 +64,6 @@ namespace gema{
         }
 
         std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
-
-        // clear();
-        // size_t otherSize = other.size();
-        // reserve(otherSize);
-
-        // if constexpr(std::is_trivially_copyable_v<T>) {
-        //     std::memcpy(begin_, other.begin_, otherSize * sizeof(T));
-        // } else {
-        //     for(size_t i = 0; i < otherSize; ++i){
-        //         std::allocator_traits<A>::construct(alloc_, begin_ + i, other.begin_[i]);
-        //     }
-        // }
 
         end_ = begin_ + otherSize;
 
@@ -128,15 +99,6 @@ namespace gema{
                 std::destroy(oldBegin, oldBegin + oldSize);
             }
 
-            // if constexpr(std::is_trivially_copyable_v<T>){
-            //     std::memcpy(newData, oldBegin, oldSize * sizeof(T));
-            // }else {
-            //     for(size_t i = 0; i < oldSize; ++i) {
-            //         std::allocator_traits<A>::construct(alloc_, newData + i, std::move(oldBegin[i]));
-            //         std::allocator_traits<A>::destroy(alloc_, oldBegin + i);
-            //     }
-            // }
-
             std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
         }
 
@@ -167,12 +129,6 @@ namespace gema{
 
         end_ = begin_ + n;
 
-        // Why construct at all since we are fine with uninitialized memory
-        // if constexpr(!std::is_trivially_default_constructible_v<T>) {
-        //     for(size_t i = oldSize; i < n; ++i){
-        //         std::allocator_traits<A>::construct(alloc_, begin_ + i);
-        //     }
-        // }
     }
 
     template<class T, class A>
@@ -181,9 +137,6 @@ namespace gema{
         if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
                 std::destroy(begin_, end_);
-                // for(T* p = begin_; p != end_; ++p){
-                //     std::allocator_traits<A>::destroy(alloc_, p);
-                // }
             }
 
             std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
@@ -203,19 +156,6 @@ namespace gema{
             ++end_;
             return;
         }
-
-        // end_ = pos + 1;
-
-        // if(end_ <= capEnd_) [[likely]]{
-
-        //     if constexpr(std::is_trivially_copyable_v<T>){
-        //         *pos = value;
-        //     }else{
-        //         std::allocator_traits<A>::construct(alloc_, pos, value);
-        //     }
-
-        //     return;
-        // }
 
         // // slow path (rare)
         // end_ = pos; // rollback
@@ -265,16 +205,6 @@ namespace gema{
             }
         }
 
-        // if constexpr(!std::is_trivially_destructible_v<T>) {
-        //     if(count != size()){
-        //         for(T* p = begin_; p != end_; ++p){
-        //             std::allocator_traits<A>::destroy(alloc_, p);
-        //         }
-        //     }
-        // }
-
-        // fastFill(begin_, count, value);
-
         end_ = begin_ + count;
     }
 
@@ -293,21 +223,6 @@ namespace gema{
         }
 
         std::uninitialized_copy(first, last, begin_);
-
-        // if constexpr(!std::is_trivially_destructible_v<T>) {
-        //     for(T* p = begin_; p != end_; ++p){
-        //         std::allocator_traits<A>::destroy(alloc_, p);
-        //     }
-        // }
-
-        // if constexpr(std::is_pointer_v<I> && std::is_trivially_copyable_v<T>){
-        //     std::memcpy(begin_, first, count * sizeof(T));
-        // }else {
-        //     T* dst = begin_;
-        //     for(; first!=last; ++first, ++dst){
-        //         std::allocator_traits<A>::construct(alloc_, dst, *first);
-        //     }
-        // }
 
         end_ = begin_ + count;
     }
@@ -451,15 +366,6 @@ namespace gema{
 
         end_ = begin_ + oldSize + 1;
 
-        // T* pos = begin_ + oldSize;
-
-        // if constexpr(std::is_trivially_copyable_v<T>){
-        //     *pos = value;
-        // }else{
-        //     std::allocator_traits<A>::construct(alloc_, pos, value);
-        // }
-            
-        // end_ = pos + 1;
     }
 
     template<class T, class A>
@@ -472,36 +378,11 @@ namespace gema{
                 return;
             }
 
-            // SIMD-friendly unrolled fill
-            // size_t i = 0;
-
-            // constexpr size_t UNROLL = 8;
-
-            // for(; i + UNROLL <= count; i += UNROLL){
-
-            //     dst[i+0] = value;
-            //     dst[i+1] = value;
-            //     dst[i+2] = value;
-            //     dst[i+3] = value;
-            //     dst[i+4] = value;
-            //     dst[i+5] = value;
-            //     dst[i+6] = value;
-            //     dst[i+7] = value;
-            // }
-
-            // for(; i < count; ++i){
-            //     dst[i] = value;
-            // }
-
             for(size_t i = 0; i < count; ++i){
                 dst[i] = value;
             }
 
         }else{
-            //std::uninitialized_fill_n(dst, count, value);
-            // for(size_t i = 0; i < count; ++i){
-            //     std::allocator_traits<A>::construct(alloc_, dst + i, value);
-            // }
 
             // todo: je toto správně pro netriviálně kopírovatelné?
             for(size_t i = 0; i < count; ++i){
