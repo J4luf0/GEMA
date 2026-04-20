@@ -4,7 +4,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public // Hack pro možnost otestovat i privátní funkce
 #include "core/Tensor.hpp"
+#undef private
 
 using gema::Tensor;
 
@@ -29,6 +31,16 @@ namespace std{
 TEST(tensor_test, constructor_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
+    Tensor<double> tensor = Tensor<double>(dimensionSizes);
+
+    Tensor<double> tensor2 = Tensor<double>({2, 3});
+
+    EXPECT_EQ(tensor.getDimensionSizes(), tensor2.getDimensionSizes());
+}
+
+TEST(tensor_test, constructor_002){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
     auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
 
     tensor->setItem(5,     {0, 0});
@@ -47,7 +59,7 @@ TEST(tensor_test, constructor_001){
     }
 }
 
-TEST(tensor_test, constructor_002){
+TEST(tensor_test, constructor_003){
 
     const std::vector<uint64_t> dimensionSizes{2, 2, 3};
     auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
@@ -73,7 +85,7 @@ TEST(tensor_test, constructor_002){
     }
 }
 
-TEST(tensor_test, constructor_003){
+TEST(tensor_test, constructor_004){
 
     const std::vector<uint64_t> dimensionSizes{2};
     auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
@@ -91,7 +103,7 @@ TEST(tensor_test, constructor_003){
     }
 }
 
-TEST(tensor_test, constructor_004){
+TEST(tensor_test, constructor_005){
 
     const std::vector<uint64_t> dimensionSizes{2};
     auto tensor = std::make_unique<Tensor<Tensor<int>>>(dimensionSizes);
@@ -113,7 +125,7 @@ TEST(tensor_test, constructor_004){
     }
 }
 
-TEST(tensor_test, constructor_005){
+TEST(tensor_test, constructor_006){
 
     const std::vector<uint64_t> dimensionSizes{0};
     auto tensor = std::make_unique<Tensor<double>>(dimensionSizes);
@@ -121,7 +133,7 @@ TEST(tensor_test, constructor_005){
     EXPECT_EQ(tensor->getNumberOfDimensions(), 1);
 }
 
-TEST(tensor_test, constructor_006){
+TEST(tensor_test, constructor_007){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -133,7 +145,7 @@ TEST(tensor_test, constructor_006){
     EXPECT_EQ(*tensor, *result);
 }
 
-TEST(tensor_test, constructor_007){
+TEST(tensor_test, constructor_008){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -146,7 +158,7 @@ TEST(tensor_test, constructor_007){
     EXPECT_NE(*tensor, *result);
 }
 
-TEST(tensor_test, constructor_008){
+TEST(tensor_test, constructor_009){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -169,7 +181,7 @@ TEST(tensor_test, constructor_008){
     EXPECT_NE(*tensor, *result);
 }
 
-TEST(tensor_test, constructor_009){
+TEST(tensor_test, constructor_010){
 
     const std::vector<uint64_t> dimensionSizes{2};
 
@@ -2063,6 +2075,51 @@ TEST(tensor_test, operatorUnaryMinus_002){
 // OPERATOR OVERLOAD TESTS END
 
 
+TEST(tensor_test, getCoords_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+    Tensor<std::string> tensor = Tensor<std::string>(dimensionSizes);
+
+    std::vector<std::vector<uint64_t>> result = {
+        tensor.getCoords(0),
+        tensor.getCoords(1),
+        tensor.getCoords(2),
+        tensor.getCoords(3),
+        tensor.getCoords(4),
+        tensor.getCoords(5),
+    };
+
+    std::vector<std::vector<uint64_t>> expected = {
+        {0, 0},
+        {0, 1},
+        {0, 2},
+        {1, 0},
+        {1, 1},
+        {1, 2},
+    };
+
+    EXPECT_EQ(result, expected);
+}
+
+TEST(tensor_test, getIndex_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+    Tensor<std::string> tensor = Tensor<std::string>(dimensionSizes);
+
+    std::vector<uint64_t> result = {
+        tensor.getIndex({0, 0}),
+        tensor.getIndex({0, 1}),
+        tensor.getIndex({0, 2}),
+        tensor.getIndex({1, 0}),
+        tensor.getIndex({1, 1}),
+        tensor.getIndex({1, 2}),
+    };
+
+    std::vector<uint64_t> expected = {0, 1, 2, 3, 4, 5};
+
+    EXPECT_EQ(result, expected);
+    
+}
 
 TEST(tensor_test, showDebug){
 

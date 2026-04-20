@@ -10,10 +10,14 @@ template<class T>
 class Tensor;
 
 // Avoids std::vector<bool> specialization, that would be otherwise problematic
-template<class T>
-struct tensor_storage_type{
-    using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
-};
+// template<class T>
+// struct tensor_storage_type{
+//     using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
+// };
+
+// Concept that checks if given type is tensor or derivate of it.
+template <typename Type, class T>
+concept TensorType = std::is_same_v<Type, Tensor<T>> || std::derived_from<Type, Tensor<T>>;
 
 // Concept that checks void(T&, const T&) invocable signature.
 template <typename C, class T>
@@ -117,7 +121,6 @@ class Tensor {
 
     /// The tensor data itself, represented by vector containing all the items.
     LinearContainer<T> tensor_;
-    //std::vector<typename tensor_storage_type<T>::type> tensor_;
     /// Size od every tensor dimension.
     std::vector<uint64_t> dimensionSizes_;
 
@@ -269,13 +272,23 @@ class Tensor {
     void setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Checks if given coordinates is valid as this tensors coordinates.
+     * @brief Checks if given coordinates is valid as this tensors coordinates according to dimension sizes.
      * 
      * @param coords coordinates to check.
      * 
      * @return Bool @b true if coordinates are valid, @b false otherwise.
      */
     bool isValidCoordinates(const std::vector<uint64_t>& coords) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Checks if given coordinates is valid to tensor of given dimension sizes.
+     * 
+     * @param coords coordinates to check.
+     * @param dimensionSizes dimension sizes to compare validity of coordinates to.
+     * 
+     * @return Bool @b true if coordinates are valid, @b false otherwise.
+     */
+    static bool isValidCoordinates(const std::vector<uint64_t> &coords, const std::vector<uint64_t>& dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.

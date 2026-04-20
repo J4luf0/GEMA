@@ -297,8 +297,13 @@ namespace gema {
 
     template <class T>
     bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords) const{
+        return Tensor<T>::isValidCoordinates(coords, dimensionSizes_);
+    }
 
-        if(dimensionSizes_.size() != coords.size()) return false;
+    template <class T>
+    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords, const std::vector<uint64_t>& dimensionSizes){
+
+        if(dimensionSizes.size() != coords.size()) return false;
 
         for(const uint64_t coord : coords){
             if(coord == 0) return false;
@@ -324,7 +329,7 @@ namespace gema {
         uint64_t dimensionProduct = tensor_.size();
 
         //for(uint64_t i = dimensionSizes_.size() - 1; (i >= 0) && (i < dimensionSizes_.size()); --i){ // Opposite endianness
-        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){ // Identity endianness
+        for(uint64_t i = 0; i < dimensionSizes_.size(); i++){ // Identity endianness
 
             for(uint64_t j = 0; j < tensor_.size(); ++j){
 
@@ -1057,16 +1062,23 @@ namespace gema {
     template <class T>
     std::vector<uint64_t> Tensor<T>::getCoords(uint64_t itemIndex) const{
 
-        std::vector<uint64_t> coordinates;
-        coordinates.resize(dimensionSizes_.size());
+        std::vector<uint64_t> coordinates(dimensionSizes_.size());
 
-        uint64_t divisor = tensor_.size();
+        // uint64_t divisor = tensor_.size();
         
-        for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
+        // for(uint64_t i = 0; i < dimensionSizes_.size(); ++i){
 
-            divisor /= dimensionSizes_[i];
-            coordinates[i] = itemIndex / divisor;
-            itemIndex %= divisor;
+        //     divisor /= dimensionSizes_[i];
+        //     coordinates[i] = itemIndex / divisor;
+        //     itemIndex %= divisor;
+        // }
+
+        //uint64_t remaining = itemIndex;
+
+        for (size_t i = 0; i < dimensionSizes_.size(); ++i) {
+            uint64_t coord = itemIndex / dimensionJumps_[i];
+            coordinates[i] = coord;
+            itemIndex -= coord * dimensionJumps_[i];
         }
 
         return coordinates;

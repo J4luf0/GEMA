@@ -5,12 +5,12 @@
 
 namespace gema{
 
-template<class T>
+template<class T, TensorType<T> ITensor = Tensor<T>>
 class Matrix{
 
     private:
 
-    Tensor<T> tensor_;
+    ITensor<T> tensor_;
 
     public:
 
@@ -47,6 +47,8 @@ class Matrix{
     void fillWith(const T& fill);
 
     Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
+
+    void resize(const uint64_t dim1, const uint64_t dim2);
 
     Tensor<T>& operator=(const Tensor<T>& tensor2);
 
