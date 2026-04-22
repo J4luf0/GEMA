@@ -42,3 +42,9 @@ error.log
 .cache/
 .clangd
 compile_commands.json
+
+# packages
+*.deb
+
+# temporary
+~*

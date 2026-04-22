@@ -16,6 +16,22 @@
             "cStandard": "c23",
             "cppStandard": "gnu++23",
             "intelliSenseMode": "windows-gcc-x64"
+        },
+        {
+            "name": "WSL-Ubuntu",
+            "includePath": [
+                "/home/st72579/bakalarka/GEMA/**",
+                "/home/st72579/bakalarka/GEMA/build/_deps/googletest-src/googletest/include"
+            ],
+            "defines": [],
+            "cStandard": "c23",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "linux-gcc-x64",
+            "mergeConfigurations": false,
+            "recursiveIncludes": {},
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4
