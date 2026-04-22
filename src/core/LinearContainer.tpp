@@ -55,7 +55,7 @@ namespace gema{
         size_t otherSize = other.size();
 
         if(otherSize > capacity()){
-            //clear();
+            clear();
             reserve(otherSize);
         } else {
             if constexpr(!std::is_trivially_destructible_v<T>){

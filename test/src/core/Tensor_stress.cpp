@@ -6,19 +6,10 @@
 #include <gtest/gtest.h>
 
 #include "core/Tensor.hpp"
+#include "TestUtils.hpp"
 
 using gema::Tensor;
 
-template<typename I>
-void printVector(const std::vector<I>& vector){
-    for(auto& item : vector) std::cout << item << ", ";
-    std::cout << std::endl;
-}
-
-inline void doNotOptimizeAway(const void* p) {
-    //asm volatile("" ::: "memory");
-    asm volatile("" : : "g"(p) : "memory");
-}
 
 constexpr uint64_t globalMultiplier = 1;
 
