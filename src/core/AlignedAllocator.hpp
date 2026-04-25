@@ -1,3 +1,5 @@
+// Unused in project since sycl memory allocation is not compatible with std allocator design
+
 #ifndef ALIGNED_ALLOCATOR_HPP
 #define ALIGNED_ALLOCATOR_HPP
 

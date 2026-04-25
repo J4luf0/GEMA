@@ -6,12 +6,9 @@
 TEST(acpp_test, device_001){
     sycl::queue q;
 
-    std::cout << q.get_device().get_info<sycl::info::device::name>() << std::endl;
     //std::cout << "PATH=" << std::getenv("PATH") << "\n";
 
-    std::cout << "Device: "
-                << q.get_device().get_info<sycl::info::device::name>()
-                << "\n";
+    std::cout << "Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
 
     sycl::queue q2{sycl::gpu_selector{}};
 }

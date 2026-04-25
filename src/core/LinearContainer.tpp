@@ -6,32 +6,32 @@
 
 namespace gema{
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer() 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer() 
     requires std::default_initializable<IMemoryBackend> {
 
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(const IMemoryBackend& memoryBackend)
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(const IMemoryBackend& memoryBackend)
     : memoryBackend_(memoryBackend){
 
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(size_t n) 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(size_t n) 
     requires std::default_initializable<IMemoryBackend>{
         resize(n);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(size_t n, const IMemoryBackend& memoryBackend)
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(size_t n, const IMemoryBackend& memoryBackend)
     : memoryBackend_(memoryBackend){
         resize(n);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(std::initializer_list<T> init) 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(std::initializer_list<T> init) 
     requires std::default_initializable<IMemoryBackend> {
 
         size_t initSize = init.size();
@@ -42,8 +42,8 @@ namespace gema{
         end_ = begin_ + initSize;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(const LinearContainer& other) 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(const LinearContainer<T, IMemoryBackend>& other) 
     : memoryBackend_(other.memoryBackend_){
 
         size_t otherSize = other.size();
@@ -54,8 +54,8 @@ namespace gema{
         end_ = begin_ + otherSize;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::LinearContainer(LinearContainer&& other) noexcept {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer(LinearContainer<T, IMemoryBackend>&& other) noexcept {
         //swap(other);
 
         begin_  = other.begin_;
@@ -66,8 +66,8 @@ namespace gema{
         other.begin_ = other.end_ = other.capEnd_ = nullptr;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>& LinearContainer<T, IMemoryBackend, A>::operator=(const LinearContainer& other) {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=(const LinearContainer<T, IMemoryBackend>& other) {
 
         if(this == &other) return *this;
         
@@ -91,27 +91,28 @@ namespace gema{
         return *this;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>& LinearContainer<T, IMemoryBackend, A>::operator=(LinearContainer&& other) noexcept {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=(LinearContainer<T, IMemoryBackend>&& other) noexcept {
         swap(other);
         memoryBackend_ = std::move(other.memoryBackend_);
         return *this;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::~LinearContainer() {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::~LinearContainer() {
         clear();
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::reserve(size_t n) {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::reserve(size_t n) {
 
         if (n <= capacity())[[unlikely]] return;
 
         T* oldBegin = begin_;
         size_t oldSize = size();
 
-        T* newData = std::allocator_traits<A>::allocate(alloc_, n);
+        //T* newData = std::allocator_traits<A>::allocate(alloc_, n);
+        T* newData = memoryBackend_.allocate(n);
 
         if(oldBegin){
 
@@ -121,7 +122,8 @@ namespace gema{
                 std::destroy(oldBegin, oldBegin + oldSize);
             }
 
-            std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
+            //std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
+            memoryBackend_.deallocate(begin_, capacity());
         }
 
         begin_ = newData;
@@ -129,8 +131,8 @@ namespace gema{
         capEnd_= newData + n;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::resize(size_t n) {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::resize(size_t n) {
 
         size_t oldSize = size();
 
@@ -153,22 +155,23 @@ namespace gema{
 
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::clear() {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::clear() {
 
         if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
                 std::destroy(begin_, end_);
             }
 
-            std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
+            //std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
+            memoryBackend_.deallocate(begin_, capacity());
         }
 
         begin_ = end_ = capEnd_ = nullptr;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::push_back(const T& value) {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::push_back(const T& value) {
 
         T* pos = end_;
 
@@ -184,8 +187,8 @@ namespace gema{
         push_back_slow(value);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::pop_back() {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::pop_back() {
 
         --end_;
         if constexpr(!std::is_trivially_destructible_v<T>){
@@ -194,20 +197,20 @@ namespace gema{
         }
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::swap(LinearContainer& other) noexcept {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::swap(LinearContainer<T, IMemoryBackend>& other) noexcept {
         std::swap(begin_, other.begin_);
         std::swap(end_, other.end_);
         std::swap(capEnd_, other.capEnd_);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::fill(const T& value){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::fill(const T& value){
         fastFill(begin_, size(), value);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::assign(size_t count, const T& value){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::assign(size_t count, const T& value){
 
         if(count > capacity()){
             reserve(count);
@@ -230,9 +233,9 @@ namespace gema{
         end_ = begin_ + count;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
     template<class I>
-    void LinearContainer<T, IMemoryBackend, A>::assign(I first, I last){
+    void LinearContainer<T, IMemoryBackend>::assign(I first, I last){
 
         size_t count = static_cast<size_t>(std::distance(first, last));
 
@@ -249,13 +252,13 @@ namespace gema{
         end_ = begin_ + count;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::assign(std::initializer_list<T> ilist){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::assign(std::initializer_list<T> ilist){
         assign(ilist.begin(), ilist.end());
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    bool LinearContainer<T, IMemoryBackend, A>::operator==(const LinearContainer& other) const {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    bool LinearContainer<T, IMemoryBackend>::operator==(const LinearContainer<T, IMemoryBackend>& other) const {
 
         size_t n = size();
         if(n != other.size()) return false;
@@ -271,8 +274,8 @@ namespace gema{
         return true;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    auto LinearContainer<T, IMemoryBackend, A>::operator<=>(const LinearContainer& other) const {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    auto LinearContainer<T, IMemoryBackend>::operator<=>(const LinearContainer<T, IMemoryBackend>& other) const {
 
         size_t n = std::min(size(), other.size());
 
@@ -285,99 +288,99 @@ namespace gema{
         return size() <=> other.size();
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    T& LinearContainer<T, IMemoryBackend, A>::operator[](size_t i) { 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    T& LinearContainer<T, IMemoryBackend>::operator[](size_t i) { 
         return *(begin_ + i);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    const T& LinearContainer<T, IMemoryBackend, A>::operator[](size_t i) const { 
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    const T& LinearContainer<T, IMemoryBackend>::operator[](size_t i) const { 
         return *(begin_ + i);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    T* LinearContainer<T, IMemoryBackend, A>::data(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    T* LinearContainer<T, IMemoryBackend>::data(){
         return begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    const T* LinearContainer<T, IMemoryBackend, A>::data() const {
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    const T* LinearContainer<T, IMemoryBackend>::data() const {
         return begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    T& LinearContainer<T, IMemoryBackend, A>::front(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    T& LinearContainer<T, IMemoryBackend>::front(){
         return *begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    const T& LinearContainer<T, IMemoryBackend, A>::front() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    const T& LinearContainer<T, IMemoryBackend>::front() const{
         return *begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    T& LinearContainer<T, IMemoryBackend, A>::back(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    T& LinearContainer<T, IMemoryBackend>::back(){
         return *(end_-1);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    const T& LinearContainer<T, IMemoryBackend, A>::back() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    const T& LinearContainer<T, IMemoryBackend>::back() const{
         return *(end_-1);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    size_t LinearContainer<T, IMemoryBackend, A>::size() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    size_t LinearContainer<T, IMemoryBackend>::size() const{
         return static_cast<size_t>(end_ - begin_);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    size_t LinearContainer<T, IMemoryBackend, A>::capacity() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    size_t LinearContainer<T, IMemoryBackend>::capacity() const{
         return static_cast<size_t>(capEnd_ - begin_);
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::iterator LinearContainer<T, IMemoryBackend, A>::begin(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::iterator LinearContainer<T, IMemoryBackend>::begin(){
         return begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::iterator LinearContainer<T, IMemoryBackend, A>::end(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::iterator LinearContainer<T, IMemoryBackend>::end(){
         return end_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::const_iterator LinearContainer<T, IMemoryBackend, A>::begin() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::const_iterator LinearContainer<T, IMemoryBackend>::begin() const{
         return begin_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::const_iterator LinearContainer<T, IMemoryBackend, A>::end() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::const_iterator LinearContainer<T, IMemoryBackend>::end() const{
         return end_;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::reverse_iterator LinearContainer<T, IMemoryBackend, A>::rbegin(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::reverse_iterator LinearContainer<T, IMemoryBackend>::rbegin(){
         return reverse_iterator(end());
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::reverse_iterator LinearContainer<T, IMemoryBackend, A>::rend(){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::reverse_iterator LinearContainer<T, IMemoryBackend>::rend(){
         return reverse_iterator(begin());
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::const_reverse_iterator LinearContainer<T, IMemoryBackend, A>::rbegin() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::const_reverse_iterator LinearContainer<T, IMemoryBackend>::rbegin() const{
         return const_reverse_iterator(end());
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    LinearContainer<T, IMemoryBackend, A>::const_reverse_iterator LinearContainer<T, IMemoryBackend, A>::rend() const{
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::const_reverse_iterator LinearContainer<T, IMemoryBackend>::rend() const{
         return const_reverse_iterator(begin());
     }
 
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::push_back_slow(const T& value){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::push_back_slow(const T& value){
 
         size_t oldSize = size();
         size_t newCap  = capacity() ? (capacity() + (capacity() / 2) + 8) : 8;
@@ -390,8 +393,8 @@ namespace gema{
 
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend, class A>
-    void LinearContainer<T, IMemoryBackend, A>::fastFill(T* dst, size_t count, const T& value){
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::fastFill(T* dst, size_t count, const T& value){
 
         if constexpr(std::is_trivially_copyable_v<T>){
 

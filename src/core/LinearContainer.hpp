@@ -3,15 +3,14 @@
 
 #include <memory>
 
-#include "AlignedAllocator.hpp"
 #include "MemoryBackend.hpp"
 #include "MemoryBackendConcept.hpp"
 
 namespace gema{
 
 template<class T,
-         MemoryBackendConcept<T> IMemoryBackend = MemoryBackend<T>,
-         class A = AlignedAllocator<T, 64>/*std::allocator<T>*/
+         MemoryBackendConcept<T> IMemoryBackend = MemoryBackend<T>//,
+         //class A = AlignedAllocator<T, 64>/*std::allocator<T>*/
 >
 class LinearContainer{
 
@@ -34,7 +33,7 @@ private:
 
     IMemoryBackend memoryBackend_;
 
-    [[no_unique_address]] A alloc_;
+    //[[no_unique_address]] A alloc_;
 
 public:
 
