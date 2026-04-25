@@ -4,7 +4,10 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/build/_deps/googletest-src/googletest/include"
+                "${workspaceFolder}/build/_deps/googletest-src/googletest/include",
+                "/usr/local/include/AdaptiveCpp",
+                "/usr/local/include/AdaptiveCpp/AdaptiveCpp/sycl",
+                "/usr/local/include/AdaptiveCpp/AdaptiveCpp"
             ],
             "defines": [
                 "_DEBUG",
@@ -12,7 +15,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.22621.0",
-            "compilerPath": "C:/mingw64/bin/g++.exe",
+            "compilerPath": "/usr/bin/clang++-18",
             "cStandard": "c23",
             "cppStandard": "gnu++23",
             "intelliSenseMode": "windows-gcc-x64"

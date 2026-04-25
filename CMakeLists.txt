@@ -29,7 +29,8 @@ add_executable(GEMA_tests ${SRC_FILES} ${TEST_FILES})
 # target_compile_options(GEMA PRIVATE -O3 -march=native)
 
 set(SYCL_FILES
-    src/core/TensorParallel.cpp
+    src/core/MemoryBackendUSM.tpp
+    src/core/TensorParallel.tpp
     test/src/core/Acpp_test.cpp
 )
 

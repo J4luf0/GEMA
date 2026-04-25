@@ -40,7 +40,8 @@ export ACPP_DEFAULT_TARGETS="cuda:sm_89"
 cmake -B build -G Ninja \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
-  -DCMAKE_BUILD_TYPE=Release
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always"
 
 cmake --build build
 

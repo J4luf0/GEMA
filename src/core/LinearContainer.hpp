@@ -1,12 +1,18 @@
 #ifndef LINEAR_CONTAINER_HPP
 #define LINEAR_CONTAINER_HPP
 
-#include "AlignedAllocator.hpp"
 #include <memory>
+
+#include "AlignedAllocator.hpp"
+#include "MemoryBackend.hpp"
+#include "MemoryBackendConcept.hpp"
 
 namespace gema{
 
-template<class T, class A = AlignedAllocator<T, 64>/*std::allocator<T>*/>
+template<class T,
+         MemoryBackendConcept<T> IMemoryBackend = MemoryBackend<T>,
+         class A = AlignedAllocator<T, 64>/*std::allocator<T>*/
+>
 class LinearContainer{
 
 public:
@@ -26,13 +32,17 @@ private:
     T* end_   = nullptr;
     T* capEnd_= nullptr;
 
+    IMemoryBackend memoryBackend_;
+
     [[no_unique_address]] A alloc_;
 
 public:
 
-    LinearContainer();
-    explicit LinearContainer(size_t n);
-    LinearContainer(std::initializer_list<T> init);
+    LinearContainer() requires std::default_initializable<IMemoryBackend>;
+    LinearContainer(const IMemoryBackend& memoryBackend);
+    explicit LinearContainer(size_t n) requires std::default_initializable<IMemoryBackend>;
+    LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
+    LinearContainer(std::initializer_list<T> init) requires std::default_initializable<IMemoryBackend>;
 
     LinearContainer(const LinearContainer& other);
     LinearContainer(LinearContainer&& other) noexcept;
