@@ -1,14 +1,30 @@
 #ifndef TENSOR_PARALLEL_HPP
 #define TENSOR_PARALLEL_HPP
 
+#include <sycl/sycl.hpp>
+
 #include "Tensor.hpp"
 
 namespace gema{
 
 template<class T>
-class TensorParallel : Tensor<T>{
+class TensorParallel : public Tensor<T>{
+
+    inline static sycl::queue queue_{sycl::property::queue::in_order{}};
 
     public:
+
+    TensorParallel(const std::vector<uint64_t>& newTensorDimensionSizes);
+
+    TensorParallel(const std::vector<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData);
+
+    TensorParallel(const TensorParallel<T>& otherTensor);
+
+    TensorParallel(TensorParallel<T>&& otherTensor) noexcept;
+
+    TensorParallel(const TensorParallel<T>* otherTensor);
+
+    TensorParallel();
 
     template <apply_and_return_callable<T> C>
     inline auto applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;

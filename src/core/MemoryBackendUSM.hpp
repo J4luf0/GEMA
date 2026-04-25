@@ -10,7 +10,7 @@
 namespace gema {
 
 template<class T, sycl::usm::alloc Kind, size_t Alignment = 64>
-class MemoryBackendUSM : MemoryBackend<T, Aligment> {
+class MemoryBackendUSM : public MemoryBackend<T, Alignment> {
 
     private:
 

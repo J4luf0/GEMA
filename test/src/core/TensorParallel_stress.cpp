@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#include "core/Tensor.hpp"
+#include "core/TensorParallel.hpp"
 #include "TestUtils.hpp"
 
-using gema::Tensor;
+using gema::TensorParallel;
 
 constexpr uint64_t globalMultiplier = 1;
 
@@ -19,7 +19,7 @@ TEST(tensorparallel_stress_test, construction_001){
 
     const uint64_t loopCount = (constructionMultiplier);
     for(uint64_t i = 0; i < loopCount; i++){
-        Tensor<int> tensor = Tensor<int>(dimensionSizes);
+        TensorParallel<int> tensor = TensorParallel<int>(dimensionSizes);
         doNotOptimizeAway(&i);
     }
 }
@@ -30,7 +30,7 @@ TEST(tensorparallel_stress_test, construction_001_control){
 
     const uint64_t loopCount = (constructionMultiplier);
     for(uint64_t i = 0; i < loopCount; i++){
-        //Tensor<int> tensor = Tensor<int>(dimensionSizes);
+        //TensorParallel<int> tensor = TensorParallel<int>(dimensionSizes);
         doNotOptimizeAway(&i);
     }
 }

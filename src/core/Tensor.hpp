@@ -117,7 +117,7 @@ template <class T> using OrderCallable = int(const T&, const T&);
 template<class T> 
 class Tensor {
 
-    private:
+    protected:
 
     /// The tensor data itself, represented by vector containing all the items.
     LinearContainer<T> tensor_;
@@ -127,7 +127,7 @@ class Tensor {
     /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
     /// dimension on flattened data. Used for optimization, shall not be leaked outside.
     std::vector<uint64_t> dimensionJumps_;
-    std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
+    //std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
 
 
     /// Function compares items in tensor and represents equality by bool.
