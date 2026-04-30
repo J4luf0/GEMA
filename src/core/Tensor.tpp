@@ -641,34 +641,34 @@ namespace gema {
 
     // Do not simplify
     template <class T>
-    bool Tensor<T>::operator==(const Tensor<T>& tensor2) const{
+    bool Tensor<T>::operator==(const Tensor<T>& otherTensor) const{
 
         // Values should be compared first, as tensors of same dimensions are more likely to be compared
-        //return (this->tensor_ == tensor2.tensor_) && (this->dimensionSizes_ == tensor2.dimensionSizes_);
+        //return (this->tensor_ == otherTensor.tensor_) && (this->dimensionSizes_ == otherTensor.dimensionSizes_);
 
         // Too complicated
-        /*if(this->tensor_.size() != tensor2.tensor_.size()){
+        /*if(this->tensor_.size() != otherTensor.tensor_.size()){
             return false;
         }
 
         // Check if all items are equal
-        return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [&](const auto& a, const auto& b){
+        return std::equal(this->tensor_.begin(), this->tensor_.end(), otherTensor.tensor_.begin(), [&](const auto& a, const auto& b){
 
             return compareItems(a, b);
         });*/
 
         // This is the implementation similar to std::vector::oprator== workings, but with possibility of custom comparison function
-        return std::equal(this->tensor_.begin(), this->tensor_.end(), tensor2.tensor_.begin(), [this](const auto& a, const auto& b){
+        return std::equal(this->tensor_.begin(), this->tensor_.end(), otherTensor.tensor_.begin(), [this](const auto& a, const auto& b){
 
             return (*equals_)(a, b); //was: compareItems
 
-        }) && (this->dimensionSizes_ == tensor2.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
+        }) && (this->dimensionSizes_ == otherTensor.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
 
     template <class T>
-    bool Tensor<T>::operator!=(const Tensor<T> &tensor2) const
+    bool Tensor<T>::operator!=(const Tensor<T>& otherTensor) const
     {
-        return !(*this == tensor2);
+        return !(*this == otherTensor);
     }
 
     // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------

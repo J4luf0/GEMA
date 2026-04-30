@@ -88,10 +88,6 @@ template <class T> using OrderCallable = int(const T&, const T&);
  * safe use. Working directly with this class might be dangerous if the user is not sure about validity of the data.
  * 
  * @tparam Type of data that is stored in the tensor.
- * 
- * @warning Even though the bool is supported, it is advised to use char or 8 bit int instead, unless user is looking to take 
- * advantage of std::vector bit bool storing for effectivity in memory (might be less optimized for methods that iterate like
- * forEach(), etc...) and thus slower.
  */
 template<class T> 
 class Tensor : public AbstractOperation<Tensor<T>, T> {
@@ -119,8 +115,8 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
     std::function<OrderCallable<T>>* order_ = &defaultOrder_;
     std::function<OrderCallable<T>> userOrder_;
 
-    std::function<void(const T&)> tensorOutput_;
-    std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
+    // std::function<void(const T&)> tensorOutput_;
+    // std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
 
     public:
 
@@ -221,7 +217,6 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      */
     T* getData();
     const T* getData() const;
-    //LinearContainer<T>& getData();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
@@ -233,10 +228,6 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
     Tensor<T>& setData(const LinearContainer<T>& tensorItems);
-
-    // void setEquals(const std::function<EqualsCallable<T>>& equals);
-
-    // void setOrder(const std::function<OrderCallable<T>>& order);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the tensor through this->showTensor() method.
@@ -402,21 +393,21 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal.
      * 
-     * @param tensor2 a second tensor to be compared by value.
+     * @param otherTensor a second tensor to be compared by value.
      * 
      * @return Boolean @b true if the tensors are the same and @b false in not.
      */
-    bool operator==(const Tensor<T>& tensor2) const;
+    bool operator==(const Tensor<T>& otherTensor) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal. Then returns bool
      * negation of the result.
      * 
-     * @param tensor2 a second tensor to be compared by value.
+     * @param otherTensor a second tensor to be compared by value.
      * 
      * @return Boolean @b false if the tensors are the same and @b true in not.
      */
-    bool operator!=(const Tensor<T>& tensor2) const;
+    bool operator!=(const Tensor<T>& otherTensor) const;
 
 
 
@@ -1078,11 +1069,6 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
     //  * @param operand2 second operand either tensor or value of type T.
     //  * @param operation binary operation returning T and having correct signature defined in concept.
     //  */
-    // template <typename A, typename B, apply_callable<T> C> 
-    // static void apply(A& operand1, B& operand2, C&& operation)
-    // requires(tensor_or_t_or_bothtensor<A, B, T>);
-
-
     template <apply_callable<T> C>
     static void apply(Tensor<T>& operand1, const Tensor<T>& operand2, C&& operation);
 
@@ -1092,6 +1078,9 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
     template <apply_reverse_callable<T> C>
     static void apply(const T& operand1, Tensor<T>& operand2, C&& operation);
 
+    // template <typename A, typename B, apply_callable<T> C> 
+    // static void apply(A& operand1, B& operand2, C&& operation)
+    // requires(tensor_or_t_or_bothtensor<A, B, T>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as this tensor and applies passed callable on all items, then writes 
