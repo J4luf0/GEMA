@@ -37,7 +37,7 @@ namespace gema{
         size_t initSize = init.size();
         reserve(initSize);
 
-        std::uninitialized_copy(init.begin(), init.end(), begin_);
+        memoryBackend_.uninitialized_copy(init.begin(), init.end(), begin_);
 
         end_ = begin_ + initSize;
     }
@@ -49,7 +49,7 @@ namespace gema{
         size_t otherSize = other.size();
         reserve(otherSize);
 
-        std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
+        memoryBackend_.uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
 
         end_ = begin_ + otherSize;
     }
@@ -80,11 +80,11 @@ namespace gema{
             reserve(otherSize);
         } else {
             if constexpr(!std::is_trivially_destructible_v<T>){
-                std::destroy(begin_, end_);
+                memoryBackend_.destroy(begin_, end_);
             }
         }
 
-        std::uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
+        memoryBackend_.uninitialized_copy(other.begin_, other.begin_ + otherSize, begin_);
 
         end_ = begin_ + otherSize;
 
@@ -116,7 +116,7 @@ namespace gema{
 
         if(oldBegin){
 
-            std::uninitialized_move(oldBegin, oldBegin + oldSize, newData);
+            memoryBackend_.uninitialized_move(oldBegin, oldBegin + oldSize, newData);
 
             if constexpr(!std::is_trivially_destructible_v<T>) {
                 std::destroy(oldBegin, oldBegin + oldSize);
@@ -142,12 +142,12 @@ namespace gema{
 
         if(n > oldSize){
 
-            std::uninitialized_default_construct(begin_ + oldSize, begin_ + n);
+            memoryBackend_.uninitialized_default_construct(begin_ + oldSize, begin_ + n);
 
         } else if(n < oldSize){
 
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                std::destroy(begin_ + n, begin_ + oldSize);
+                memoryBackend_.destroy(begin_ + n, begin_ + oldSize);
             }
         }
 
@@ -160,7 +160,7 @@ namespace gema{
 
         if(begin_) {
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                std::destroy(begin_, end_);
+                memoryBackend_.destroy(begin_, end_);
             }
 
             //std::allocator_traits<A>::deallocate(alloc_, begin_, capacity());
@@ -177,7 +177,7 @@ namespace gema{
 
         if(pos < capEnd_) [[likely]]{
 
-            std::construct_at(pos, value);
+            memoryBackend_.construct_at(pos, value);
             ++end_;
             return;
         }
@@ -192,7 +192,7 @@ namespace gema{
 
         --end_;
         if constexpr(!std::is_trivially_destructible_v<T>){
-            std::destroy_at(end_);
+            memoryBackend_.destroy_at(end_);
             //std::allocator_traits<A>::destroy(alloc_, end_);
         }
     }
@@ -223,10 +223,10 @@ namespace gema{
         fastFill(begin_, common, value);
 
         if(count > oldSize){
-            std::uninitialized_fill_n(begin_ + oldSize, count - oldSize, value);
+            memoryBackend_.uninitialized_fill_n(begin_ + oldSize, count - oldSize, value);
         }else if(count < oldSize){
             if constexpr(!std::is_trivially_destructible_v<T>){
-                std::destroy(begin_ + count, end_);
+                memoryBackend_.destroy(begin_ + count, end_);
             }
         }
 
@@ -244,10 +244,10 @@ namespace gema{
         }
 
         if constexpr(!std::is_trivially_destructible_v<T>) {
-            std::destroy(begin_, end_);
+            memoryBackend_.destroy(begin_, end_);
         }
 
-        std::uninitialized_copy(first, last, begin_);
+        memoryBackend_.uninitialized_copy(first, last, begin_);
 
         end_ = begin_ + count;
     }
@@ -264,7 +264,8 @@ namespace gema{
         if(n != other.size()) return false;
 
         if constexpr(std::is_trivially_copyable_v<T>){
-            return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
+            //return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
+            return memoryBackend_.compare(begin_, other.begin_, n * sizeof(T)) == 0;
         }
 
         for(size_t i = 0; i < n; ++i){
@@ -387,31 +388,32 @@ namespace gema{
 
         reserve(newCap);
 
-        std::construct_at(begin_ + oldSize, value);
+        memoryBackend_.construct_at(begin_ + oldSize, value);
 
         end_ = begin_ + oldSize + 1;
 
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    void LinearContainer<T, IMemoryBackend>::fastFill(T* dst, size_t count, const T& value){
+    void LinearContainer<T, IMemoryBackend>::fastFill(T* dest, size_t count, const T& value){
 
         if constexpr(std::is_trivially_copyable_v<T>){
 
             if(value == T{}){
-                std::memset(dst, 0, count * sizeof(T));
+                //std::memset(dest, 0, count * sizeof(T));
+                memoryBackend_.memory_set(dest, 0, count * sizeof(T));
                 return;
             }
 
             for(size_t i = 0; i < count; ++i){
-                dst[i] = value;
+                dest[i] = value;
             }
 
         }else{
 
             // todo: je toto správně pro netriviálně kopírovatelné?
             for(size_t i = 0; i < count; ++i){
-                dst[i] = value;
+                dest[i] = value;
             }
         }
     }

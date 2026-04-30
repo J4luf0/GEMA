@@ -1,23 +1,18 @@
 #ifndef TENSOR_HPP
 #define TENSOR_HPP
 
+#include "AbstractOperation.hpp"
+#include "TensorConcepts.hpp"
 #include "LinearContainer.hpp"
 
 namespace gema{
 
-// Forward declaration just for the concepts.
-template<class T>
-class Tensor;
 
 // Avoids std::vector<bool> specialization, that would be otherwise problematic
 // template<class T>
 // struct tensor_storage_type{
 //     using type = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
 // };
-
-// Concept that checks if given type is tensor or derivate of it.
-template <typename Type, class T>
-concept TensorType = std::is_same_v<Type, Tensor<T>> || std::derived_from<Type, Tensor<T>>;
 
 // Concept that checks void(T&, const T&) invocable signature.
 template <typename C, class T>
@@ -27,27 +22,11 @@ concept binary_operation_on_items = std::is_invocable_r_v<void, C, T&, const T&>
 template <typename X, class T>
 concept is_tensor_or_t = std::is_same_v<X, T> || std::is_same_v<X, Tensor<T>>;
 
-/// Checks for void(T&, const T&) invocable signature.
-template <typename C, class T>
-concept apply_callable = std::is_invocable_r_v<void, C, T&, const T&>;
-
-/// Checks for T(const T&, const T&) invocable signature.
-template <typename C, class T>
-//concept apply_and_return_callable = std::is_invocable_r_v<T, C, const T&, const T&>;
-concept apply_and_return_callable = std::is_invocable_v<C, const T&, const T&>;
-
-/// Checks for void(T&) invocable signature.
-template <typename C, class T>
-concept foreach_callable = std::is_invocable_r_v<void, C, T&>;
-
-/// Checks for void(T&, const std::vector<uint64_t>&) invocable signature.
-template <typename C, class T>
-concept foreach_coord_callable = std::is_invocable_r_v<void, C, T&, const std::vector<uint64_t>&>;
-
-// Checks for T(const T&) invocable signature.
-template <typename C, class T>
-//concept foreach_and_return_callable = std::is_invocable_r_v<T, C, const T&>;
-concept foreach_and_return_callable = std::is_invocable_v<C, const T&>;
+template <typename A, typename B, class T>
+concept tensor_or_t_or_bothtensor = 
+    (std::is_same_v<std::remove_cvref_t<A>, Tensor<T>> && std::is_same_v<std::remove_cvref_t<B>, Tensor<T>>) ||
+    (std::is_same_v<std::remove_cvref_t<A>, Tensor<T>> && std::is_same_v<std::remove_cvref_t<B>, T>) ||
+    (std::is_same_v<std::remove_cvref_t<A>, T> && std::is_same_v<std::remove_cvref_t<B>, Tensor<T>>);
 
 // Checks for bool(const T&, const T&) invocable signature.
 template <typename C, class T>
@@ -115,7 +94,7 @@ template <class T> using OrderCallable = int(const T&, const T&);
  * forEach(), etc...) and thus slower.
  */
 template<class T> 
-class Tensor {
+class Tensor : public AbstractOperation<Tensor<T>, T> {
 
     protected:
 
@@ -234,13 +213,15 @@ class Tensor {
     void setItem(const T& value, const std::vector<uint64_t>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Exposes tensor data as reference to std::vector. Modifying its elements will directly modify elements in tensor.
+     * @brief Exposes tensor data as pointer to array.
      * 
-     * @return Reference to data of the tensor.
+     * @return Reference to data of the tensor as pointer.
      * 
-     * @note Exposes the inner implementation of tensor (the flattened data), use carefully (do not resize!).
+     * @note Exposes the inner implementation of tensor (the flattened data), use carefully.
      */
-    LinearContainer<T>& getData();
+    T* getData();
+    const T* getData() const;
+    //LinearContainer<T>& getData();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
@@ -439,542 +420,547 @@ class Tensor {
 
 
 
-    // ARITHMETIC OPERATOR OVERLOADS ------------------------------------------------------------------------------------------
+    // // ARITHMETIC OPERATOR OVERLOADS ------------------------------------------------------------------------------------------
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds tensor with tensor item by item and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor2 addend tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-    */
-    inline auto operator+(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a + b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Adds tensor with tensor item by item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor2 addend tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    // */
+    // inline auto operator+(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a + b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds every tensor item to value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor addend tensor.
-     * @param value addend value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend inline auto operator+(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a + b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Adds every tensor item to value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor addend tensor.
+    //  * @param value addend value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend inline auto operator+(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a + b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds value to every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param value addend value.
-     * @param tensor addend tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend inline auto operator+(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a + b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Adds value to every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value addend value.
+    //  * @param tensor addend tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend inline auto operator+(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a + b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds tensor to tensor item by item in place. Does no size checking.
-     * 
-     * @param tensor2 addend tensor.
-    */
-    void operator+=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a += b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Adds tensor to tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param tensor2 addend tensor.
+    // */
+    // void operator+=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a += b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Adds value to tensor item by item in place. Does no size checking.
-     * 
-     * @param value addend value.
-    */
-    void operator+=(const T& value)
-    requires requires (T a, T b) {a += b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Adds value to tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param value addend value.
+    // */
+    // void operator+=(const T& value)
+    // requires requires (T a, T b) {a += b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts tensor with tensor item by item and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor2 substrahend tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    //template <class U> requires requires (U a, U b) { a - b; }
-    auto operator-(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a - b;};
-    //-> Tensor<decltype(std::declval<U>() - std::declval<U>())>;
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Substracts tensor with tensor item by item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor2 substrahend tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // //template <class U> requires requires (U a, U b) { a - b; }
+    // auto operator-(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a - b;};
+    // //-> Tensor<decltype(std::declval<U>() - std::declval<U>())>;
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts value from every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor minuend tensor.
-     * @param value substrahend value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator-(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a - b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Substracts value from every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor minuend tensor.
+    //  * @param value substrahend value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator-(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a - b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts every tensor item from value and returns result as new tensor. Does no size checking.
-     * 
-     * @param value minuend value.
-     * @param tensor substrahend tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator-(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a - b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Substracts every tensor item from value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value minuend value.
+    //  * @param tensor substrahend tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator-(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a - b;};
     
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts tensor from a tensor item by item in place. Does no size checking.
-     * 
-     * @param tensor2 substrahend tensor.
-     */
-    void operator-=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a -= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Substracts tensor from a tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param tensor2 substrahend tensor.
+    //  */
+    // void operator-=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a -= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Substracts value from tensor item by item in place. Does no size checking.
-     * 
-     * @param value substrahend value.
-    */
-    void operator-=(const T& value)
-    requires requires (T a, T b) {a -= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Substracts value from tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param value substrahend value.
+    // */
+    // void operator-=(const T& value)
+    // requires requires (T a, T b) {a -= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies tensor with tensor item by item and returns result as new tensor. Does not size checking.
-     * 
-     * @param tensor2 multiplier tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator*(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a * b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies tensor with tensor item by item and returns result as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 multiplier tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator*(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a * b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor multiplicand tensor.
-     * @param value multiplier value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator*(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a * b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor multiplicand tensor.
+    //  * @param value multiplier value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator*(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a * b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param value multiplicand value.
-     * @param tensor multiplier tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator*(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a * b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value multiplicand value.
+    //  * @param tensor multiplier tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator*(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a * b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies tensor from a tensor item by item in place. Does no size checking.
-     * 
-     * @param tensor2 product tensor.
-     */
-    void operator*=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a *= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies tensor from a tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param tensor2 product tensor.
+    //  */
+    // void operator*=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a *= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies tensor item by item by value in place. Does no size checking.
-     * 
-     * @param value multiplier value.
-    */
-    void operator*=(const T& value)
-    requires requires (T a, T b) {a *= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies tensor item by item by value in place. Does no size checking.
+    //  * 
+    //  * @param value multiplier value.
+    // */
+    // void operator*=(const T& value)
+    // requires requires (T a, T b) {a *= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Divides tensor with tensor item by item and returns result as new tensor. Does not size checking.
-     * 
-     * @param tensor2 divisor tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator/(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a / b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Divides tensor with tensor item by item and returns result as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 divisor tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator/(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a / b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Divides every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor dividend tensor.
-     * @param value divisor value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator/(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a / b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Divides every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor dividend tensor.
+    //  * @param value divisor value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator/(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a / b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Multiplies value by every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param value dividend value.
-     * @param tensor divisor tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator/(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a / b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Multiplies value by every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value dividend value.
+    //  * @param tensor divisor tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator/(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a / b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Divides tensor from a tensor item by item in place. Does no size checking.
-     * 
-     * @param tensor2 divisor tensor.
-     */
-    void operator/=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a /= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Divides tensor from a tensor item by item in place. Does no size checking.
+    //  * 
+    //  * @param tensor2 divisor tensor.
+    //  */
+    // void operator/=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a /= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Divides tensor item by item by value in place. Does no size checking.
-     * 
-     * @param value divisor value.
-    */
-    void operator/=(const T& value)
-    requires requires (T a, T b) {a /= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Divides tensor item by item by value in place. Does no size checking.
+    //  * 
+    //  * @param value divisor value.
+    // */
+    // void operator/=(const T& value)
+    // requires requires (T a, T b) {a /= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs modulo item by item and returns result as new tensor. Does not size checking.
-     * 
-     * @param tensor2 divisor tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator%(const Tensor<T>& tensor2) const;
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs modulo item by item and returns result as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 divisor tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator%(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a % b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs modulo every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor dividend tensor.
-     * @param value divisor value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator%(const Tensor<U>& tensor, const U& value);
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs modulo every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor dividend tensor.
+    //  * @param value divisor value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator%(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a % b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs modulo value by every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param value dividend value.
-     * @param tensor divisor tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator%(const U& value, const Tensor<U>& tensor);
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs modulo value by every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value dividend value.
+    //  * @param tensor divisor tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator%(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a % b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs modulo item by item in place. Does no size checking.
-     * 
-     * @param tensor2 divisor tensor.
-     */
-    void operator%=(const Tensor<T>& tensor2);
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs modulo item by item in place. Does no size checking.
+    //  * 
+    //  * @param tensor2 divisor tensor.
+    //  */
+    // void operator%=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a %= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs modulo every tensor item by value in place. Does no size checking.
-     * 
-     * @param value divisor value.
-    */
-    void operator%=(const T& value);
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs modulo every tensor item by value in place. Does no size checking.
+    //  * 
+    //  * @param value divisor value.
+    // */
+    // void operator%=(const T& value)
+    // requires requires (T a, T b) {a %= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "and" item by item and returns result as new tensor. Does not size checking.
-     * 
-     * @param tensor2 right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator&&(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a && b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "and" item by item and returns result as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator&&(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a && b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "and" with every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor left-hand side operand.
-     * @param value right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator&&(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a && b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "and" with every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor left-hand side operand.
+    //  * @param value right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator&&(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a && b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "and" with value by every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param value left-hand side operand.
-     * @param tensor right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator&&(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a && b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "and" with value by every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value left-hand side operand.
+    //  * @param tensor right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator&&(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a && b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "or" item by item and returns result as new tensor. Does not size checking.
-     * 
-     * @param tensor2 right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator||(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a || b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "or" item by item and returns result as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator||(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a || b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "or" with every tensor item by value and returns result as new tensor. Does no size checking.
-     * 
-     * @param tensor left-hand side operand.
-     * @param value right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator||(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a || b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "or" with every tensor item by value and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param tensor left-hand side operand.
+    //  * @param value right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator||(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a || b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical "or" with value by every tensor item and returns result as new tensor. Does no size checking.
-     * 
-     * @param value left-hand side operand.
-     * @param tensor right-hand size operand.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator||(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a || b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical "or" with value by every tensor item and returns result as new tensor. Does no size checking.
+    //  * 
+    //  * @param value left-hand side operand.
+    //  * @param tensor right-hand size operand.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator||(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a || b;};
 
 
 
-    // BITWISE OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
+    // // BITWISE OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator|(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a | b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "or" on each item in a tensor and returns result as new tensor.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator|(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a | b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" between every tensor item and value and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param tensor operand tensor.
-     * @param value operand value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator|(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a | b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "or" between every tensor item and value and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param tensor operand tensor.
+    //  * @param value operand value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator|(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a | b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" between value and every tensor item and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param value operand value.
-     * @param tensor operand tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend inline auto operator|(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a | b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "or" between value and every tensor item and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    //  * @param tensor operand tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend inline auto operator|(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a | b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" on each item in a tensor in place.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     */
-    void operator|=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a |= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "or" on each item in a tensor in place.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  */
+    // void operator|=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a |= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "or" between each item in a tensor and value in place. Does no size checking.
-     * 
-     * @param value operand value.
-    */
-    void operator|=(const T& value)
-    requires requires (T a, T b) {a |= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "or" between each item in a tensor and value in place. Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    // */
+    // void operator|=(const T& value)
+    // requires requires (T a, T b) {a |= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator&(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a & b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "and" on each item in a tensor and returns result as new tensor.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator&(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a & b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" between every tensor item and value and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param tensor operand tensor.
-     * @param value operand value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator&(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a & b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "and" between every tensor item and value and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param tensor operand tensor.
+    //  * @param value operand value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator&(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a & b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" between value and every tensor item and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param value operand value.
-     * @param tensor operand tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator&(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a & b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "and" between value and every tensor item and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    //  * @param tensor operand tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator&(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a & b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" on each item in a tensor in place.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     */
-    void operator&=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a &= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "and" on each item in a tensor in place.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  */
+    // void operator&=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a &= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "and" between each item in a tensor and value in place. Does no size checking.
-     * 
-     * @param value operand value.
-    */
-    void operator&=(const T& value)
-    requires requires (T a, T b) {a &= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "and" between each item in a tensor and value in place. Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    // */
+    // void operator&=(const T& value)
+    // requires requires (T a, T b) {a &= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator^(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a ^ b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "xor" on each item in a tensor and returns result as new tensor.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator^(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a ^ b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" between every tensor item and value and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param tensor operand tensor.
-     * @param value operand value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator^(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a ^ b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "xor" between every tensor item and value and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param tensor operand tensor.
+    //  * @param value operand value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator^(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a ^ b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" between value and every tensor item and returns result as new tensor. 
-     * Does no size checking.
-     * 
-     * @param value operand value.
-     * @param tensor operand tensor.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator^(const U& value, const Tensor<U>& tensor)
-    requires requires (U a, U b) {a ^ b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "xor" between value and every tensor item and returns result as new tensor. 
+    //  * Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    //  * @param tensor operand tensor.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator^(const U& value, const Tensor<U>& tensor)
+    // requires requires (U a, U b) {a ^ b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" on each item in a tensor in place.
-     * 
-     * @param tensor2 second tensor to perform operation against.
-     */
-    void operator^=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a ^= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "xor" on each item in a tensor in place.
+    //  * 
+    //  * @param tensor2 second tensor to perform operation against.
+    //  */
+    // void operator^=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a ^= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise "xor" between each item in a tensor and value in place. Does no size checking.
-     * 
-     * @param value operand value.
-    */
-    void operator^=(const T& value)
-    requires requires (T a, T b) {a ^= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise "xor" between each item in a tensor and value in place. Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    // */
+    // void operator^=(const T& value)
+    // requires requires (T a, T b) {a ^= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item and returns result 
-     * as new tensor. Does not size checking.
-     * 
-     * @param tensor2 tensor specifying bit shift amount.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator<<(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a << b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item and returns result 
+    //  * as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 tensor specifying bit shift amount.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator<<(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a << b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs left bit shift between every tensor item by given value and returns result as new tensor. Does no size 
-     * checking.
-     * 
-     * @param tensor operand tensor.
-     * @param value operand value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator<<(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a << b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs left bit shift between every tensor item by given value and returns result as new tensor. Does no size 
+    //  * checking.
+    //  * 
+    //  * @param tensor operand tensor.
+    //  * @param value operand value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator<<(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a << b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
-     * size checking.
-     * 
-     * @param tensor2 tensor specifying bit shift amount.
-     */
-    void operator<<=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a <<= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs left bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
+    //  * size checking.
+    //  * 
+    //  * @param tensor2 tensor specifying bit shift amount.
+    //  */
+    // void operator<<=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a <<= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs left bit shift on each item in a tensor by given value in place. Does no size checking.
-     * 
-     * @param value operand value.
-    */
-    void operator<<=(const T& value)
-    requires requires (T a, T b) {a <<= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs left bit shift on each item in a tensor by given value in place. Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    // */
+    // void operator<<=(const T& value)
+    // requires requires (T a, T b) {a <<= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item and returns result 
-     * as new tensor. Does not size checking.
-     * 
-     * @param tensor2 tensor specifying bit shift amount.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    auto operator>>(const Tensor<T>& tensor2) const
-    requires requires (T a, T b) {a >> b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item and returns result 
+    //  * as new tensor. Does not size checking.
+    //  * 
+    //  * @param tensor2 tensor specifying bit shift amount.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // auto operator>>(const Tensor<T>& tensor2) const
+    // requires requires (T a, T b) {a >> b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs right bit shift between every tensor item by given value and returns result as new tensor. Does no size 
-     * checking.
-     * 
-     * @param tensor operand tensor.
-     * @param value operand value.
-     * 
-     * @return Pointer to new resulting tensor.
-     */
-    template<typename U> friend auto operator>>(const Tensor<U>& tensor, const U& value)
-    requires requires (U a, U b) {a >> b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs right bit shift between every tensor item by given value and returns result as new tensor. Does no size 
+    //  * checking.
+    //  * 
+    //  * @param tensor operand tensor.
+    //  * @param value operand value.
+    //  * 
+    //  * @return Pointer to new resulting tensor.
+    //  */
+    // template<typename U> friend auto operator>>(const Tensor<U>& tensor, const U& value)
+    // requires requires (U a, U b) {a >> b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
-     * size checking.
-     * 
-     * @param tensor2 tensor specifying bit shift amount.
-     */
-    void operator>>=(const Tensor<T>& tensor2)
-    requires requires (T a, T b) {a >>= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs right bit shift as this tensors item being shifted by amount in second tensors item in place. Does not 
+    //  * size checking.
+    //  * 
+    //  * @param tensor2 tensor specifying bit shift amount.
+    //  */
+    // void operator>>=(const Tensor<T>& tensor2)
+    // requires requires (T a, T b) {a >>= b;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs right bit shift on each item in a tensor by given value in place. Does no size checking.
-     * 
-     * @param value operand value.
-    */
-    void operator>>=(const T& value)
-    requires requires (T a, T b) {a >>= b;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs right bit shift on each item in a tensor by given value in place. Does no size checking.
+    //  * 
+    //  * @param value operand value.
+    // */
+    // void operator>>=(const T& value)
+    // requires requires (T a, T b) {a >>= b;};
 
 
 
@@ -1054,7 +1040,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <apply_and_return_callable<T> C>
-    inline auto applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
+    auto applyAndReturn(const Tensor<T>& tensor2, C&& operation) const;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
@@ -1068,9 +1054,9 @@ class Tensor {
      * 
      * @return A pointer to new resulting tensor.
      */
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C> 
+    template <typename A, typename B, apply_and_return_callable<T> C> 
     static auto applyAndReturn(const A& operand1, const B& operand2, C&& operation)
-    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
+    requires(tensor_or_t_or_bothtensor<A, B, T>);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Allows to apply custom operation between each item of two tensors and then store the result into caller tensor.
@@ -1079,22 +1065,33 @@ class Tensor {
      * @param operation a binary function that defines operation between two items.
      */
     template <apply_callable<T> C>
-    inline void apply(const Tensor<T>& tensor2, C&& operation); /*requires(std::is_invocable_r_v<void, C, T&, const T&>)*/
+    void apply(const Tensor<T>& tensor2, C&& operation);
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
-     * of type T, or both arguments are tensor. In case of value, the operation is performed on every tensor item with value in
-     * given order, in case of both arguments being tensor, the operation is performed item on item. In this case, both tensors
-     * should have same sizes. Operation is done in place, where the storing operand is the first one, with exception of case,
-     * where the first operand is value of type T.
-     * 
-     * @param operand1 first operand either tensor or value of type T.
-     * @param operand2 second operand either tensor or value of type T.
-     * @param operation binary operation returning T and having correct signature defined in concept.
-     */
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_callable<T> C> 
-    static void apply(A& operand1, const B& operand2, C&& operation)
-    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>);
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Allows to apply custom operation two arguments where either one of them is tensor and one of them is value
+    //  * of type T, or both arguments are tensor. In case of value, the operation is performed on every tensor item with value in
+    //  * given order, in case of both arguments being tensor, the operation is performed item on item. In this case, both tensors
+    //  * should have same sizes. Operation is done in place, where the storing operand is the first one, with exception of case,
+    //  * where the first operand is value of type T.
+    //  * 
+    //  * @param operand1 first operand either tensor or value of type T.
+    //  * @param operand2 second operand either tensor or value of type T.
+    //  * @param operation binary operation returning T and having correct signature defined in concept.
+    //  */
+    // template <typename A, typename B, apply_callable<T> C> 
+    // static void apply(A& operand1, B& operand2, C&& operation)
+    // requires(tensor_or_t_or_bothtensor<A, B, T>);
+
+
+    template <apply_callable<T> C>
+    static void apply(Tensor<T>& operand1, const Tensor<T>& operand2, C&& operation);
+
+    template <apply_callable<T> C>
+    static void apply(Tensor<T>& operand1, const T& operand2, C&& operation);
+
+    template <apply_reverse_callable<T> C>
+    static void apply(const T& operand1, Tensor<T>& operand2, C&& operation);
+
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as this tensor and applies passed callable on all items, then writes 
@@ -1105,7 +1102,7 @@ class Tensor {
      * @return A pointer to new resulting tensor.
      */
     template <foreach_and_return_callable<T> C>
-    inline auto forEachAndReturn(C&& operation) const;
+    auto forEachAndReturn(C&& operation) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Creates new instance with same dimensions as given tensor and applies passed callable on all items, then writes 
@@ -1125,7 +1122,7 @@ class Tensor {
      * @param operation unary operation, having correct signature defined in concept.
      */
     template <foreach_callable<T> C> 
-    inline void forEach(C&& operation);
+    void forEach(C&& operation);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Applies operation on all items in given tensor with passed callable. Looping order is unspecified.

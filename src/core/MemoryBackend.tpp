@@ -85,12 +85,12 @@ namespace gema {
 
     template <class T, size_t Alignment>
     void MemoryBackend<T, Alignment>::copy(T* dest, const T* src, size_t count){
-        return std::memcpy(dest, src, count);
+        std::memcpy(dest, src, count);
     }
 
     template <class T, size_t Alignment>
     T* MemoryBackend<T, Alignment>::memory_set(T* dest, size_t ch, size_t count){
-        return std::memset(dest, ch, count);
+        return static_cast<T*>(std::memset(dest, ch, count));
     }
 
     template <class T, size_t Alignment>

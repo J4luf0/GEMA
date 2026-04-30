@@ -259,9 +259,14 @@ namespace gema {
         tensor_[itemIndex] = value;
     }
 
-    template <class T>
-    LinearContainer<T>& Tensor<T>::getData(){
-        return tensor_;
+    template<class T>
+    T* Tensor<T>::getData(){
+        return tensor_.data();
+    }
+
+    template<class T>
+    const T *Tensor<T>::getData() const {
+        return tensor_.data();
     }
 
     // Secure version will need to check for correct tensorItems size
@@ -591,6 +596,12 @@ namespace gema {
         tensor_ = std::move(newTensor);
     }
 
+    template <class T>
+    template <binary_operation_on_items<T> I>
+    void Tensor<T>::collapseDimension(const uint64_t dimensionIndex, const I& binaryOperation){
+
+    }
+
 
 
 
@@ -677,194 +688,195 @@ namespace gema {
     // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
     // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
 
-    template <class T>
-    constexpr inline auto& force_dereference(T& pointer){//bad
+    // template <class T>
+    // constexpr inline auto& force_dereference(T& pointer){//bad
 
-        if constexpr (std::is_pointer_v<T>){
-            return *pointer;
-        } else if constexpr (
-            std::is_same_v<T, std::unique_ptr<typename T::element_type>> || 
-            std::is_same_v<T, std::shared_ptr<typename T::element_type>>)
-        {
-            return *pointer;
-        } else{
-            return pointer;
-        }
-    }
+    //     if constexpr (std::is_pointer_v<T>){
+    //         return *pointer;
+    //     } else if constexpr (
+    //         std::is_same_v<T, std::unique_ptr<typename T::element_type>> || 
+    //         std::is_same_v<T, std::shared_ptr<typename T::element_type>>)
+    //     {
+    //         return *pointer;
+    //     } else{
+    //         return pointer;
+    //     }
+    // }
 
-    // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
-    // Artihmetic binary is an binary operation on two arithmetic types (or ones with overloaded operators acting like 
-    // arithmetic).
-    #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
-    /**/\
-            return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
-                    return tensorItem OP_SYMBOL tensor2Item;\
-            });\
-        }\
-    /**/
+    // // ARITHMETIC BINARY GENERIC MACRO ----------------------------------------------------------------------------------------
+    // // Artihmetic binary is an binary operation on two arithmetic types (or ones with overloaded operators acting like 
+    // // arithmetic).
+    // #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     inline auto Tensor<T>::operator OP_SYMBOL(const Tensor<T>& tensor2) const\
+    //     requires requires (T a, T b) {a OP_SYMBOL b;}{\
+    // /**/\
+    //         return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
+    //                 return tensorItem OP_SYMBOL tensor2Item;\
+    //         });\
+    //     }\
+    // /**/
 
-    #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
-    /**/\
-        template<class T>\
-        inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value)\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
-    /**/\
-            return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
-                return item OP_SYMBOL value;\
-            });\
-        }\
-    /**/
+    // #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+    // /**/\
+    //     template<class T>\
+    //     inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value)\
+    //     requires requires (T a, T b) {a OP_SYMBOL b;}{\
+    // /**/\
+    //         return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
+    //             return item OP_SYMBOL value;\
+    //         });\
+    //     }\
+    // /**/
 
-    #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
-    /**/\
-        template<class T>\
-        inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor)\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
-    /**/\
-            /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
-            /* it is not guaranteed to be so on every type and operation!*/\
-            return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
-                return value OP_SYMBOL item;\
-            });\
-        }\
-    /**/
+    // #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
+    // /**/\
+    //     template<class T>\
+    //     inline auto operator OP_SYMBOL(const T& value, const Tensor<T>& tensor)\
+    //     requires requires (T a, T b) {a OP_SYMBOL b;}{\
+    // /**/\
+    //         /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
+    //         /* it is not guaranteed to be so on every type and operation!*/\
+    //         return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){\
+    //             return value OP_SYMBOL item;\
+    //         });\
+    //     }\
+    // /**/
 
-    #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
-    /**/\
-        template <class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2)\
-        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
-    /**/\
-            apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
-                tensorItem OP_SYMBOL##= tensor2Item;\
-            });\
-        }\
-    /**/
+    // #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
+    // /**/\
+    //     template <class T>\
+    //     void Tensor<T>::operator OP_SYMBOL##=(const Tensor<T>& tensor2)\
+    //     requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
+    // /**/\
+    //         apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
+    //             tensorItem OP_SYMBOL##= tensor2Item;\
+    //         });\
+    //     }\
+    // /**/
 
-    #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
-    /**/\
-        template<class T>\
-        void Tensor<T>::operator OP_SYMBOL##=(const T& value)\
-        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
-    /**/\
-            forEach([&value](T& item){\
-                item OP_SYMBOL##= value;\
-            });\
-        }\
-    /**/
+    // #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
+    // /**/\
+    //     template<class T>\
+    //     void Tensor<T>::operator OP_SYMBOL##=(const T& value)\
+    //     requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
+    // /**/\
+    //         forEach([&value](T& item){\
+    //             item OP_SYMBOL##= value;\
+    //         });\
+    //     }\
+    // /**/
 
-    #define ARITHMETIC_BINARY(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
+    // #define ARITHMETIC_BINARY(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
 
-    ARITHMETIC_BINARY(+)
-    ARITHMETIC_BINARY(-)
-    ARITHMETIC_BINARY(*)
-    ARITHMETIC_BINARY(/)
-    ARITHMETIC_BINARY(|)
-    ARITHMETIC_BINARY(&)
-    ARITHMETIC_BINARY(^)
+    // ARITHMETIC_BINARY(+)
+    // ARITHMETIC_BINARY(-)
+    // ARITHMETIC_BINARY(*)
+    // ARITHMETIC_BINARY(/)
+    // ARITHMETIC_BINARY(|)
+    // ARITHMETIC_BINARY(&)
+    // ARITHMETIC_BINARY(^)
+    // ARITHMETIC_BINARY(%)
 
-    // Some logical overloads for binary operations are not making sense for logical operators
-    #define LOGICAL_BINARY(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)
+    // // Some logical overloads for binary operations are not making sense for logical operators
+    // #define LOGICAL_BINARY(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)
 
-    LOGICAL_BINARY(&&)
-    LOGICAL_BINARY(||)
+    // LOGICAL_BINARY(&&)
+    // LOGICAL_BINARY(||)
 
-    // Some bitwise overloads for binary operations are not making sense for bitshift
-    #define BITSHIFTLIKE(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
-        ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
+    // // Some bitwise overloads for binary operations are not making sense for bitshift
+    // #define BITSHIFTLIKE(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
+    //     ARITHMETIC_BINARY_ToeV(OP_SYMBOL)
 
-    BITSHIFTLIKE(<<)
-    BITSHIFTLIKE(>>)
+    // BITSHIFTLIKE(<<)
+    // BITSHIFTLIKE(>>)
 
-    #undef ARITHMETIC_BINARY_ToTrT // Macros no longer needed
-    #undef ARITHMETIC_BINARY_ToVrT
-    #undef ARITHMETIC_BINARY_VoTrT
-    #undef ARITHMETIC_BINARY_ToeT
-    #undef ARITHMETIC_BINARY_ToeV
+    // #undef ARITHMETIC_BINARY_ToTrT // Macros no longer needed
+    // #undef ARITHMETIC_BINARY_ToVrT
+    // #undef ARITHMETIC_BINARY_VoTrT
+    // #undef ARITHMETIC_BINARY_ToeT
+    // #undef ARITHMETIC_BINARY_ToeV
 
-    #undef BITSHIFTLIKE
-    #undef LOGICAL_BINARY
+    // #undef BITSHIFTLIKE
+    // #undef LOGICAL_BINARY
 
-    #undef ARITHMETIC_BINARY
+    // #undef ARITHMETIC_BINARY
 
     // Needed specialization for % because it is not normally supported for floating types
 
-    template <class T>
-    inline auto Tensor<T>::operator %(const Tensor<T>& tensor2) const{
-        return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
+    // template <class T>
+    // inline auto Tensor<T>::operator %(const Tensor<T>& tensor2) const{
+    //     return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
             
-            if constexpr(std::is_floating_point_v<T>){
-                return std::fmod(tensorItem, tensor2Item);
-            }else{
-                return tensorItem % tensor2Item;
-            }
-        });
-    }
+    //         if constexpr(std::is_floating_point_v<T>){
+    //             return std::fmod(tensorItem, tensor2Item);
+    //         }else{
+    //             return tensorItem % tensor2Item;
+    //         }
+    //     });
+    // }
 
-    template<class T>
-    inline auto operator %(const Tensor<T>& tensor, const T& value){
-        return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
-            //return item OP_SYMBOL value;
-            if constexpr(std::is_floating_point_v<T>){
-                return std::fmod(item, value);
-            }else{
-                return item % value;
-            }
-        });
-    }
+    // template<class T>
+    // inline auto operator %(const Tensor<T>& tensor, const T& value){
+    //     return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
+    //         //return item OP_SYMBOL value;
+    //         if constexpr(std::is_floating_point_v<T>){
+    //             return std::fmod(item, value);
+    //         }else{
+    //             return item % value;
+    //         }
+    //     });
+    // }
 
-    template<class T>
-    inline auto operator %(const T& value, const Tensor<T>& tensor){
-        /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */
-        /* it is not guaranteed to be so on every type and operation!*/
-        return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
-            //return value OP_SYMBOL item;
-            if constexpr(std::is_floating_point_v<T>){
-                return std::fmod(value, item);
-            }else{
-                return value % item;
-            }
-        });
-    }
+    // template<class T>
+    // inline auto operator %(const T& value, const Tensor<T>& tensor){
+    //     /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */
+    //     /* it is not guaranteed to be so on every type and operation!*/
+    //     return Tensor<T>::forEachAndReturn(tensor, [&value](const T& item){
+    //         //return value OP_SYMBOL item;
+    //         if constexpr(std::is_floating_point_v<T>){
+    //             return std::fmod(value, item);
+    //         }else{
+    //             return value % item;
+    //         }
+    //     });
+    // }
 
-    template <class T>
-    void Tensor<T>::operator %=(const Tensor<T>& tensor2){
-        apply(tensor2, [](T& tensorItem, const T& tensor2Item){
-            //tensorItem %= tensor2Item;
-            if constexpr(std::is_floating_point_v<T>){
-                tensorItem = std::fmod(tensorItem, tensor2Item);
-            }else{
-                tensorItem %= tensor2Item;
-            }
-        });
-    }
+    // template <class T>
+    // void Tensor<T>::operator %=(const Tensor<T>& tensor2){
+    //     apply(tensor2, [](T& tensorItem, const T& tensor2Item){
+    //         //tensorItem %= tensor2Item;
+    //         if constexpr(std::is_floating_point_v<T>){
+    //             tensorItem = std::fmod(tensorItem, tensor2Item);
+    //         }else{
+    //             tensorItem %= tensor2Item;
+    //         }
+    //     });
+    // }
 
-    template<class T>
-    void Tensor<T>::operator %=(const T& value){
-        forEach([&value](T& item){
-            //item %= value;
-            if constexpr(std::is_floating_point_v<T>){
-                item = std::fmod(item, value);
-            }else{
-                item %= value;
-            }
-        });
-    }
+    // template<class T>
+    // void Tensor<T>::operator %=(const T& value){
+    //     forEach([&value](T& item){
+    //         //item %= value;
+    //         if constexpr(std::is_floating_point_v<T>){
+    //             item = std::fmod(item, value);
+    //         }else{
+    //             item %= value;
+    //         }
+    //     });
+    // }
 
 
     // UNARY OPERATION GENERIC MACRO ------------------------------------------------------------------------------------------
@@ -936,24 +948,23 @@ namespace gema {
 
     template <class T>
     template <apply_and_return_callable<T> C>
-    inline auto Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const{
+    auto Tensor<T>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const {
 
         //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
         return Tensor<T>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_and_return_callable<T> C>
-    auto gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation) // static
-    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
+    template <typename A, typename B, apply_and_return_callable<T> C>
+    /*static*/ auto gema::Tensor<T>::applyAndReturn(const A& operand1, const B& operand2, C&& operation)
+    requires(tensor_or_t_or_bothtensor<A, B, T>){
         
         using opReturnType = decltype(operation(std::declval<T>(), std::declval<T>()));
         const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensorOperand->getDimensionSizes());
 
-        LinearContainer<opReturnType>& resultTensorData = resultTensor.getData();
+        opReturnType* resultTensorData = resultTensor.getData();
 
-        // TODO: find a way to deal with bool or maybe get rid of it
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
 
@@ -971,58 +982,74 @@ namespace gema {
 
     template <class T>
     template <apply_callable<T> C>
-    inline void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation){
+    void Tensor<T>::apply(const Tensor<T>& tensor2, C&& operation){
 
         Tensor<T>::apply(*this, tensor2, std::forward<C>(operation));
     }
 
     template <class T>
-    template <is_tensor_or_t<T> A, is_tensor_or_t<T> B, apply_callable<T> C> 
-    void Tensor<T>::apply(A& operand1, const B& operand2, C&& operation) // static
-    requires(std::is_same_v<A, Tensor<T>> || std::is_same_v<B, Tensor<T>>){
+    template <apply_callable<T> C>
+    /*static*/ void Tensor<T>::apply(Tensor<T>& operand1, const Tensor<T>& operand2, C&& operation){
 
-        const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
-        //auto& tensorOperandData = tensorOperand->getData();
-
-        //#pragma GCC ivdep
-        for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
-
-            if constexpr (std::is_same_v<A, B>){
-                T lhs = static_cast<T>(operand1.tensor_[i]);
-                const T rhs = static_cast<T>(operand2.tensor_[i]);
-                operation(lhs, rhs);
-                operand1.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(lhs);
-                //operation(operand1.tensor_[i], operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<A, T>){
-                const T rhs = static_cast<T>(operand2.tensor_[i]);
-                operation(operand1, rhs);
-                operand2.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(rhs);
-                //operation(operand1, operand2.tensor_[i]);
-            }else if constexpr (std::is_same_v<B, T>){
-                T lhs = static_cast<T>(operand1.tensor_[i]);
-                operation(lhs, operand2);
-                operand1.tensor_[i] = static_cast</*typename tensor_storage_type<T>::type*/T>(lhs);
-                //operation(operand1.tensor_[i], operand2);
-            }
+        for(uint64_t i = 0; i < operand1.tensor_.size(); ++i){
+            operation(operand1.tensor_[i], operand2.tensor_[i]);
         }
-        
     }
 
     template <class T>
+    template <apply_callable<T> C>
+    /*static*/ void Tensor<T>::apply(Tensor<T>& operand1, const T& operand2, C&& operation){
+        
+        for(uint64_t i = 0; i < operand1.tensor_.size(); ++i){
+            operation(operand1.tensor_[i], operand2);
+        }
+    }
+
+    template <class T>
+    template <apply_reverse_callable<T> C>
+    /*static*/ void Tensor<T>::apply(const T& operand1, Tensor<T>& operand2, C&& operation){
+        
+        for(uint64_t i = 0; i < operand2.tensor_.size(); ++i){
+            operation(operand1, operand2.tensor_[i]);
+        }
+    }
+
+    // template <class T>
+    // template <typename A, typename B, apply_callable<T> C> 
+    // void Tensor<T>::apply(A& operand1, B& operand2, C&& operation) // static
+    // requires(tensor_or_t_or_bothtensor<A, B, T>){
+
+    //     const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
+
+    //     //#pragma GCC ivdep
+    //     for(uint64_t i = 0; i < tensorOperand->tensor_.size(); ++i){
+
+    //         if constexpr (std::is_same_v<A, B>){
+    //             operation(operand1.tensor_[i], operand2.tensor_[i]);
+    //         }else if constexpr (std::is_same_v<A, T>){
+    //             operation(operand1, operand2.tensor_[i]);
+    //         }else if constexpr (std::is_same_v<B, T>){
+    //             operation(operand1.tensor_[i], operand2);
+    //         }
+    //     }
+        
+    // }
+
+    template <class T>
     template <foreach_and_return_callable<T> C>
-    inline auto Tensor<T>::forEachAndReturn(C&& operation) const{
+    auto Tensor<T>::forEachAndReturn(C&& operation) const {
 
         return Tensor<T>::forEachAndReturn(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_and_return_callable<T> C>
-    auto Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation) // static
+    /*static*/ auto Tensor<T>::forEachAndReturn(const Tensor<T>& tensor, C&& operation)
     {
         using opReturnType = decltype(operation(std::declval<T>()));
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
 
-        LinearContainer<opReturnType>& resultTensorData = resultTensor.getData();
+        opReturnType* resultTensorData = resultTensor.getData();
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
@@ -1034,14 +1061,14 @@ namespace gema {
 
     template <class T>
     template <foreach_callable<T> C>
-    inline void Tensor<T>::forEach(C&& operation){
+    void Tensor<T>::forEach(C&& operation){
 
         Tensor<T>::forEach(*this, std::forward<C>(operation));
     }
 
     template <class T>
     template <foreach_callable<T> C>
-    void Tensor<T>::forEach(Tensor<T>& tensor, C&& operation){ // static
+    /*static*/ void Tensor<T>::forEach(Tensor<T>& tensor, C&& operation){
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
