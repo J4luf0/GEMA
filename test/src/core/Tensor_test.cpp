@@ -397,14 +397,14 @@ TEST(tensor_test, fillWith_002){
     EXPECT_EQ(*tensor, *expected);
 }
 
-TEST(tensor_test, transposition_001){
+TEST(tensor_test, transpositionAndReturn_001){
 
     const std::vector<uint64_t> dimensionSizes{2, 3};
 
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
     tensor->setData({0, 5, -1, 100, -2, -16});
 
-    Tensor<int> result(tensor->transposition());
+    Tensor<int> result(tensor->transpositionAndReturn());
     
     const std::vector<uint64_t> expectedDimensionSizes{3, 2};
     auto expected = std::make_unique<Tensor<int>>(expectedDimensionSizes);
@@ -414,20 +414,52 @@ TEST(tensor_test, transposition_001){
     EXPECT_EQ(result, *expected);
 }
 
-TEST(tensor_test, transposition_002){
+TEST(tensor_test, transpositionAndReturn_002){
 
     const std::vector<uint64_t> dimensionSizes{1, 2};
     auto tensor = std::make_unique<Tensor<int>>(dimensionSizes);
 
     tensor->setData({0, 5});
 
-    Tensor<int> result(tensor->transposition());
+    Tensor<int> result(tensor->transpositionAndReturn());
     
     const std::vector<uint64_t> expectedDimensionSizes{2, 1};
     auto expected = std::make_unique<Tensor<int>>(expectedDimensionSizes);
     expected->setData({0, 5});
 
     EXPECT_EQ(result, *expected);
+}
+
+TEST(tensor_test, transposition_001){
+
+    const std::vector<uint64_t> dimensionSizes{2, 3};
+
+    auto tensor = Tensor<int>(dimensionSizes);
+    tensor.setData({0, 5, -1, 100, -2, -16});
+
+    tensor.transposition();
+    
+    const std::vector<uint64_t> expectedDimensionSizes{3, 2};
+    auto expected = Tensor<int>(expectedDimensionSizes);
+    expected.setData({0, 100, 5, -2, -1, -16});
+
+    EXPECT_EQ(tensor, expected);
+}
+
+TEST(tensor_test, transposition_002){
+
+    const std::vector<uint64_t> dimensionSizes{1, 2};
+    auto tensor = Tensor<int>(dimensionSizes);
+
+    tensor.setData({0, 5});
+
+    tensor.transposition();
+    
+    const std::vector<uint64_t> expectedDimensionSizes{2, 1};
+    auto expected = Tensor<int>(expectedDimensionSizes);
+    expected.setData({0, 5});
+
+    EXPECT_EQ(tensor, expected);
 }
 
 TEST(tensor_test, resize_001){

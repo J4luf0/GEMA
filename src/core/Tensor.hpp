@@ -321,9 +321,17 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @param dim1 first dimension to swap, default value is 0.
      * @param dim2 second dimension to swap, default value is 1.
      * 
-     * @return A pointer to new allocated tensor, that got two dimensions transposed.
+     * @return A tensor that got two dimensions transposed.
     */
-    Tensor<T> transposition(const int dim1 = 0, const int dim2 = 1) const;
+    Tensor<T> transpositionAndReturn(const int dim1 = 0, const int dim2 = 1) const;
+
+    /** -----------------------------------------------------------------------------------------------------------------------
+     * @brief Swaps two dimensions in a tensor.
+     * 
+     * @param dim1 first dimension to swap, default value is 0.
+     * @param dim2 second dimension to swap, default value is 1.
+    */
+    void transposition(const int dim1 = 0, const int dim2 = 1);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Resizes tensor. Items coordinates are preserved if those coordinates are valid. If items coordinates are not

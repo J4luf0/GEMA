@@ -391,7 +391,9 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T> Tensor<T>::transposition(const int dim1, const int dim2) const{
+    Tensor<T> Tensor<T>::transpositionAndReturn(const int dim1, const int dim2) const {
+
+        if(dim1 == dim2) return Tensor<T>(dimensionSizes_);
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
@@ -408,11 +410,51 @@ namespace gema {
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
 
-        // Looping thru elements in tensor and swapping the desired coordinates
+        // Looping through elements in tensor and swapping the desired coordinates
         for(uint64_t i = 0; i < tensor_.size(); ++i){
             
-            // Switching the two coordinated corresponding to the two dimensions we want to switch
-            original = getCoords(i);
+            // The swap of two desired coordinates
+            switched = original;
+            switched[dim1] = original[dim2];
+            switched[dim2] = original[dim1];
+
+            // Works until now, check the getIndex function if it actually works properly
+            tensorTransposed.tensor_[tensorTransposed.getIndex(switched)] = std::move(tensor_[i]);
+
+            //std::cout << original[0] << " " << original[1] << std::endl;
+            Tensor<T>::incrementCoords(original, dimensionSizes_);
+        }
+
+        return tensorTransposed;
+    }
+
+    template <class T>
+    void Tensor<T>::transposition(const int dim1, const int dim2){
+
+        if(dim1 == dim2) return;
+
+        // Copying the dimensionSizes
+        // Change assigment to just construction of correct size
+        std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+
+        // Swapping the dimension sizes
+        const uint64_t temporaryDimensionSize1 = dimensionSizes_[dim1];
+        dimensionSizes_[dim1] = dimensionSizes_[dim2];
+        dimensionSizes_[dim2] = temporaryDimensionSize1;
+
+        const uint64_t itemCount = updateDimensionJump();
+        
+        // Initializing the new data
+        LinearContainer<T> newTensorData(itemCount);
+
+        std::vector<uint64_t> original, switched;
+        original.resize(dimensionSizes_.size());
+        switched.resize(dimensionSizes_.size());
+
+        // Looping through elements in tensor and swapping the desired coordinates
+        for(uint64_t i = 0; i < itemCount; ++i){
+            
+            //if (original[dim1] == original[dim2]) [[unlikely]] continue;
 
             // The swap of two desired coordinates
             switched = original;
@@ -420,10 +462,12 @@ namespace gema {
             switched[dim2] = original[dim1];
 
             // Works until now, check the getIndex function if it actually works properly
-            tensorTransposed.tensor_[tensorTransposed.getIndex(switched)] = tensor_[getIndex(original)];
+            newTensorData[getIndex(switched)] = std::move(tensor_[i]);
+
+            Tensor<T>::incrementCoords(original, oldDimensionSizes);
         }
 
-        return tensorTransposed;
+        tensor_ = std::move(newTensorData);
     }
 
     template <class T>

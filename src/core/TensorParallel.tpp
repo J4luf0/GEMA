@@ -49,8 +49,26 @@ namespace gema{
         return *this;
     }
 
+    template <class T>
+    void TensorParallel<T>::resize(const std::vector<uint64_t>& newDimensionSizes){
 
-    
+    }
+
+    template <class T>
+    void TensorParallel<T>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex){
+
+    }
+
+    template <class T>
+    void TensorParallel<T>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
+
+    }
+
+    template <class T>
+    void TensorParallel<T>::removeDimension(const uint64_t removedDimensionIndex){
+
+    }
+
     template <class T>
     template <apply_and_return_callable_parallel<T> C>
     auto TensorParallel<T>::applyAndReturn(const TensorParallel<T>& tensor2, C&& operation) const {

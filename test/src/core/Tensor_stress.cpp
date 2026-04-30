@@ -231,3 +231,23 @@ TEST(tensor_stress_test, getItem_002_control){
         Tensor<int>::incrementCoords(currentCoords, dimensionSizes);
     }
 }
+
+
+
+
+constexpr uint64_t transpositionMultiplier = 256 * 256 * 16 * globalMultiplier;
+
+TEST(tensor_stress_test, transposition_001){
+
+    const std::vector<uint64_t> dimensionSizes{256, 256, 256};
+    const uint64_t numberOfDimensions = dimensionSizes.size();
+    const uint64_t loopCount = transpositionMultiplier;
+
+    Tensor<int> tensor = Tensor<int>(dimensionSizes);
+
+    uint64_t i = 0;
+    for(; i < loopCount; i++){
+        
+        //tensor.transposition();
+    }
+}
