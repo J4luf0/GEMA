@@ -1,4 +1,5 @@
 #include <cstring>
+#include <iterator>
 
 #include "MemoryBackend.hpp"
 
@@ -17,22 +18,24 @@ namespace gema {
     }
 
     template <class T, size_t Alignment>
-    MemoryBackend<T, Alignment>::MemoryBackend(MemoryBackend<T, Alignment>&& memoryBackend) noexcept{
+    MemoryBackend<T, Alignment>::MemoryBackend(MemoryBackend<T, Alignment>&& memoryBackend) noexcept {
 
     }
 
     template <class T, size_t Alignment>
-    MemoryBackend<T, Alignment>& MemoryBackend<T, Alignment>::operator=(const MemoryBackend<T, Alignment>& memoryBackend){
+    MemoryBackend<T, Alignment>&
+    MemoryBackend<T, Alignment>::operator=(const MemoryBackend<T, Alignment>& memoryBackend) {
         return *this;
     }
 
     template <class T, size_t Alignment>
-    MemoryBackend<T, Alignment>& MemoryBackend<T, Alignment>::operator=(MemoryBackend<T, Alignment>&& memoryBackend) noexcept{
+    MemoryBackend<T, Alignment>& 
+    MemoryBackend<T, Alignment>::operator=(MemoryBackend<T, Alignment>&& memoryBackend) noexcept {
         return *this;
     }
 
     template <class T, size_t Alignment>
-    T* MemoryBackend<T, Alignment>::allocate(size_t n){
+    T* MemoryBackend<T, Alignment>::allocate(size_t n) const {
 
         if(n == 0) return nullptr;
 
@@ -43,58 +46,58 @@ namespace gema {
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::deallocate(T* pos, size_t n){
+    void MemoryBackend<T, Alignment>::deallocate(T* pos, size_t n) const {
 
         ::operator delete(pos, std::align_val_t{Alignment});
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::construct_at(T* pos, const T& value){
+    void MemoryBackend<T, Alignment>::construct_at(T* pos, const T& value) const {
         std::construct_at(pos, value);
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::destroy_at(T* pos){
+    void MemoryBackend<T, Alignment>::destroy_at(T* pos) const {
         std::destroy_at(pos);
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::destroy(T* first, T* last){
+    void MemoryBackend<T, Alignment>::destroy(T* first, T* last) const {
         std::destroy(first, last);
     }
 
     template <class T, size_t Alignment>
-    T* MemoryBackend<T, Alignment>::uninitialized_copy(const T* first, const T* last, T* dest){
+    T* MemoryBackend<T, Alignment>::uninitialized_copy(const T* first, const T* last, T* dest) const {
         return std::uninitialized_copy(first, last, dest);
     }
 
     template <class T, size_t Alignment>
-    T* MemoryBackend<T, Alignment>::uninitialized_move(T* first, T* last, T* dest){
+    T* MemoryBackend<T, Alignment>::uninitialized_move(T* first, T* last, T* dest) const {
         return std::uninitialized_move(first, last, dest);
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::uninitialized_default_construct(T* first, T* last){
+    void MemoryBackend<T, Alignment>::uninitialized_default_construct(T* first, T* last) const {
         std::uninitialized_default_construct(first, last);
     }
 
     template <class T, size_t Alignment>
-    T* MemoryBackend<T, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value){
+    T* MemoryBackend<T, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value) const {
         return std::uninitialized_fill_n(dest, count, value);
     }
 
     template <class T, size_t Alignment>
-    void MemoryBackend<T, Alignment>::copy(T* dest, const T* src, size_t count){
+    void MemoryBackend<T, Alignment>::copy(T* dest, const T* src, size_t count) const {
         std::memcpy(dest, src, count);
     }
 
     template <class T, size_t Alignment>
-    T* MemoryBackend<T, Alignment>::memory_set(T* dest, size_t ch, size_t count){
+    T* MemoryBackend<T, Alignment>::memory_set(T* dest, size_t ch, size_t count) const {
         return static_cast<T*>(std::memset(dest, ch, count));
     }
 
     template <class T, size_t Alignment>
-    int MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count){
+    int MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count) const {
         return std::memcmp(a, b, count);
     }
 }

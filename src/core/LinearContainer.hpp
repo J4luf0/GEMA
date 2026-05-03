@@ -16,6 +16,7 @@ class LinearContainer{
 
 public:
 
+    using value_type = T;
     using iterator = T*;
     using const_iterator = const T*;
     using reverse_iterator = std::reverse_iterator<iterator>;
@@ -42,6 +43,9 @@ public:
     explicit LinearContainer(size_t n) requires std::default_initializable<IMemoryBackend>;
     LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
     LinearContainer(std::initializer_list<T> init) requires std::default_initializable<IMemoryBackend>;
+    //LinearContainer(const std::vector<T>& init) requires std::default_initializable<IMemoryBackend>;
+    //LinearContainer(std::span<const T> s) requires std::default_initializable<IMemoryBackend>;
+    //LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend);
 
     LinearContainer(const LinearContainer& other);
     LinearContainer(LinearContainer&& other) noexcept;
@@ -49,15 +53,21 @@ public:
     LinearContainer& operator=(const LinearContainer& other);
     LinearContainer& operator=(LinearContainer&& other) noexcept;
 
+    operator std::span<T>();
+    operator std::span<const T>() const;
+
     ~LinearContainer();
 
     void reserve(size_t n);
     void resize(size_t n);
     void clear();
 
-    void push_back(const T &value);
+    void push_back(const T& value);
     void pop_back();
-    void swap(LinearContainer &other) noexcept;
+    void swap(LinearContainer& other) noexcept;
+    iterator insert(iterator pos, const T& value);
+    iterator erase(iterator pos);
+    
 
     void fill(const T &value);
 
@@ -99,7 +109,7 @@ public:
 private:
 
     void push_back_slow(const T &value);
-    void fastFill(T *dst, size_t count, const T &value);
+    void fastFill(T* dst, size_t count, const T &value);
 };
 
 } // end gema

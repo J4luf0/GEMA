@@ -42,6 +42,37 @@ namespace gema{
         end_ = begin_ + initSize;
     }
 
+    // template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    // LinearContainer<T, IMemoryBackend>::LinearContainer(const std::vector<T>& init)
+    // requires std::default_initializable<IMemoryBackend> {
+
+    //     size_t initSize = init.size();
+    //     reserve(initSize);
+
+    //     memoryBackend_.uninitialized_copy(init.data(), init.data() + init.size(), begin_);
+
+    //     end_ = begin_ + initSize;
+    // }
+
+    // template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    // LinearContainer<T, IMemoryBackend>::LinearContainer(std::span<const T> s)
+    // requires std::default_initializable<IMemoryBackend>{
+
+    //     size_t spanSize = s.size();
+    //     reserve(spanSize);
+
+    //     memoryBackend_.uninitialized_copy(s.data(), s.data() + spanSize, begin_);
+    //     end_ = begin_ + spanSize;
+    // }
+
+    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    // LinearContainer<T, IMemoryBackend>::LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend)
+    // : memoryBackend_(memoryBackend){
+    //     reserve(s.size());
+    //     memoryBackend_.uninitialized_copy(s.data(), s.data() + s.size(), begin_);
+    //     end_ = begin_ + s.size();
+    // }
+
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
     LinearContainer<T, IMemoryBackend>::LinearContainer(const LinearContainer<T, IMemoryBackend>& other) 
     : memoryBackend_(other.memoryBackend_){
@@ -98,9 +129,19 @@ namespace gema{
         return *this;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<T, IMemoryBackend>::~LinearContainer() {
-        clear();
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::operator std::span<T>(){
+        return std::span<T>(begin_, end_);
+    }
+
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::operator std::span<const T>() const{
+        return std::span<const T>(begin_, end_);
+    }
+
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::~LinearContainer(){
+        
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
@@ -202,6 +243,72 @@ namespace gema{
         std::swap(begin_, other.begin_);
         std::swap(end_, other.end_);
         std::swap(capEnd_, other.capEnd_);
+    }
+
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    typename LinearContainer<T, IMemoryBackend>::iterator 
+    LinearContainer<T, IMemoryBackend>::insert(iterator pos, const T& value){
+
+        size_t index = pos - begin_;
+        size_t oldSize = size();
+
+        // reallocation pokud potřeba
+        if(end_ == capEnd_){
+            size_t newCap = capacity() ? (capacity() * 2) : 8;
+
+            T* newData = memoryBackend_.allocate(newCap);
+
+            // přesun před insert
+            memoryBackend_.uninitialized_move(begin_, begin_ + index, newData);
+
+            // vložení nového prvku
+            memoryBackend_.construct_at(newData + index, value);
+
+            // přesun zbytku
+            memoryBackend_.uninitialized_move(begin_ + index, end_, newData + index + 1);
+
+            // cleanup
+            memoryBackend_.destroy(begin_, end_);
+            memoryBackend_.deallocate(begin_, capacity());
+
+            begin_ = newData;
+            end_   = newData + oldSize + 1;
+            capEnd_= newData + newCap;
+        }
+        else{
+            // posun doprava (od konce)
+            memoryBackend_.construct_at(end_, *(end_ - 1));
+
+            for(size_t i = oldSize - 1; i > index; --i){
+                begin_[i] = std::move(begin_[i - 1]);
+            }
+
+            begin_[index] = value;
+            ++end_;
+        }
+
+        return begin_ + index;
+    }
+
+    template<class T, MemoryBackendConcept<T> IMemoryBackend>
+    typename LinearContainer<T, IMemoryBackend>::iterator LinearContainer<T, IMemoryBackend>::erase(iterator pos){
+
+        size_t index = pos - begin_;
+
+        // znič prvek
+        memoryBackend_.destroy_at(begin_ + index);
+
+        // posuň doleva
+        for(size_t i = index; i < size() - 1; ++i){
+            begin_[i] = std::move(begin_[i + 1]);
+        }
+
+        --end_;
+
+        // znič poslední (duplicitní)
+        memoryBackend_.destroy_at(end_);
+
+        return begin_ + index;
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>

@@ -196,13 +196,12 @@ namespace gema {
     // PUBLIC METHODS: --------------------------------------------------------------------------------------------------------
 
     template <class T>
-    Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes) {
-    
+    Tensor<T>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes) : dimensionSizes_(newTensorDimensionSizes){
         update();
     }
 
     template <class T>
-    inline Tensor<T>::Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, 
+    inline Tensor<T>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes, 
     const LinearContainer<T>& newTensorData) : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
 
         // Check actual capacity of dimensions to tensorData
@@ -224,6 +223,7 @@ namespace gema {
     Tensor<T>::Tensor(const Tensor<T>* otherTensor){
         tensor_.resize(otherTensor->tensor_.size());
         dimensionSizes_ = otherTensor->dimensionSizes_;
+        dimensionJumps_ = otherTensor->dimensionJumps_;
     }
 
     template <class T>
@@ -232,7 +232,7 @@ namespace gema {
     }
 
     template <class T>
-    const std::vector<uint64_t>& Tensor<T>::getDimensionSizes() const{
+    const LinearContainer<uint64_t>& Tensor<T>::getDimensionSizes() const{
         return dimensionSizes_;
     }
 
@@ -247,13 +247,13 @@ namespace gema {
     }
 
     template <class T>
-    T& Tensor<T>::getItem(const std::vector<uint64_t>& coordinates){
+    T& Tensor<T>::getItem(const LinearContainer<uint64_t>& coordinates){
 
         return tensor_[getIndex(coordinates)];
     }
 
     template <class T>
-    void Tensor<T>::setItem(const T& value, const std::vector<uint64_t>& coordinates){
+    void Tensor<T>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
 
         int itemIndex = getIndex(coordinates);
         tensor_[itemIndex] = value;
@@ -301,12 +301,13 @@ namespace gema {
     }
 
     template <class T>
-    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords) const{
+    bool Tensor<T>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const{
         return Tensor<T>::isValidCoordinates(coords, dimensionSizes_);
     }
 
     template <class T>
-    bool Tensor<T>::isValidCoordinates(const std::vector<uint64_t>& coords, const std::vector<uint64_t>& dimensionSizes){
+    /*static*/ bool Tensor<T>::isValidCoordinates(const LinearContainer<uint64_t>& coords, 
+    const LinearContainer<uint64_t>& dimensionSizes){
 
         if(dimensionSizes.size() != coords.size()) return false;
 
@@ -397,7 +398,7 @@ namespace gema {
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
-        std::vector<uint64_t> transposedDimensionSizes = dimensionSizes_; 
+        LinearContainer<uint64_t> transposedDimensionSizes = dimensionSizes_; 
 
         // Swapping the dimension sizes
         transposedDimensionSizes[dim1] = dimensionSizes_[dim2]; 
@@ -406,7 +407,7 @@ namespace gema {
         // Initializing the new tensor
         Tensor<T> tensorTransposed = Tensor<T>(transposedDimensionSizes);
 
-        std::vector<uint64_t> original, switched;
+        LinearContainer<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
 
@@ -435,7 +436,7 @@ namespace gema {
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
-        std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
+        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
 
         // Swapping the dimension sizes
         const uint64_t temporaryDimensionSize1 = dimensionSizes_[dim1];
@@ -447,7 +448,7 @@ namespace gema {
         // Initializing the new data
         LinearContainer<T> newTensorData(itemCount);
 
-        std::vector<uint64_t> original, switched;
+        LinearContainer<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
 
@@ -471,17 +472,18 @@ namespace gema {
     }
 
     template <class T>
-    void Tensor<T>::resize(const std::vector<uint64_t>& newDimensionSizes){
+    void Tensor<T>::resize(const LinearContainer<uint64_t>& newDimensionSizes){
 
-        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
-        dimensionSizes_ = newDimensionSizes;
+        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
+        dimensionSizes_ = LinearContainer(newDimensionSizes);
         const uint64_t newItemCount = updateDimensionJump();
 
         // New allocation because it is likely anyway, even if tensor_.resize() would be used
         // Because even change of 1 to any dimension size likely means multiplicative increase/decrease in item count
         LinearContainer<T> newTensor(newItemCount);
 
-        std::vector<uint64_t> currentCoordsSource(oldDimensionSizes.size(), 0);
+        LinearContainer<uint64_t> currentCoordsSource(oldDimensionSizes.size());
+        currentCoordsSource.fill(0);
 
         for(uint64_t i = 0; i < tensor_.size(); i++){
 
@@ -531,7 +533,7 @@ namespace gema {
     template<class T>
     void Tensor<T>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex) {
 
-        std::vector<uint64_t> newDimensionSizes = dimensionSizes_;
+        LinearContainer<uint64_t> newDimensionSizes = dimensionSizes_;
         newDimensionSizes[dimensionIndex] = newDimensionSize;
         resize(newDimensionSizes);
 
@@ -561,8 +563,8 @@ namespace gema {
     template <class T>
     void Tensor<T>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
 
-        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
-        const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
+        const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
 
         dimensionSizes_.insert(dimensionSizes_.begin() + putBefore, newDimensionSize);
 
@@ -602,8 +604,8 @@ namespace gema {
     template <class T>
     void Tensor<T>::removeDimension(const uint64_t removedDimensionIndex){
 
-        const std::vector<uint64_t> oldDimensionSizes = dimensionSizes_;
-        const std::vector<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
+        const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
 
         dimensionSizes_.erase(dimensionSizes_.begin() + removedDimensionIndex);
 
@@ -1126,7 +1128,7 @@ namespace gema {
 
     
     template <class T>
-    bool Tensor<T>::incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes){
+    bool Tensor<T>::incrementCoords(std::span<uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
 
         uint64_t lastCoordIndex = coordinates.size() - 1;
 
@@ -1161,9 +1163,9 @@ namespace gema {
     // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 
     template <class T>
-    std::vector<uint64_t> Tensor<T>::getCoords(uint64_t itemIndex) const{
+    LinearContainer<uint64_t> Tensor<T>::getCoords(uint64_t itemIndex) const{
 
-        std::vector<uint64_t> coordinates(dimensionSizes_.size());
+        LinearContainer<uint64_t> coordinates(dimensionSizes_.size());
 
         // uint64_t divisor = tensor_.size();
         
@@ -1186,7 +1188,7 @@ namespace gema {
     }
 
     template <class T>
-    uint64_t Tensor<T>::getIndex(const std::vector<uint64_t>& coordinates) const{
+    uint64_t Tensor<T>::getIndex(const LinearContainer<uint64_t>& coordinates) const{
         
     //     uint64_t itemIndex = 0;
     //     //uint64_t dimensionProduct = 1;
@@ -1208,9 +1210,14 @@ namespace gema {
     }
 
     template <class T>
-    std::vector<uint64_t> Tensor<T>::littleGetCoords(int itemIndex) const{
+    LinearContainer<T> Tensor<T>::transposition_(const int dim1, const int dim2){
+        return LinearContainer<T>();
+    }
 
-        std::vector<uint64_t> coordinates;
+    template <class T>
+    LinearContainer<uint64_t> Tensor<T>::littleGetCoords(int itemIndex) const{
+
+        LinearContainer<uint64_t> coordinates;
         coordinates.resize(dimensionSizes_.size());
         uint64_t divisor = tensor_.size();
         
@@ -1225,7 +1232,7 @@ namespace gema {
     }
 
     template <class T>
-    int Tensor<T>::littleGetIndex(const std::vector<uint64_t>& coordinates) const{
+    int Tensor<T>::littleGetIndex(const LinearContainer<uint64_t>& coordinates) const{
         
         int itemIndex = 0;
         int dimensionProduct = 1;

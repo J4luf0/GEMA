@@ -29,11 +29,13 @@ class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel
 
     sycl::queue* queue_ = &queueGlobal_;
 
+    constexpr static sycl::usm::alloc usmKind_ = sycl::usm::alloc::device;
+
     public:
 
-    TensorParallel(const std::vector<uint64_t>& newTensorDimensionSizes);
+    TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes);
 
-    TensorParallel(const std::vector<uint64_t>&, const LinearContainer<T>&) = delete;
+    TensorParallel(const LinearContainer<uint64_t>&, const LinearContainer<T>&) = delete;
 
     TensorParallel(const TensorParallel<T>& otherTensor);
 
@@ -47,7 +49,11 @@ class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel
     
     TensorParallel<T>& operator=(TensorParallel<T>&& otherTensor) noexcept;
 
-    void resize(const std::vector<uint64_t>& newDimensionSizes);
+    TensorParallel<T> transpositionAndReturn(const int dim1 = 0, const int dim2 = 1) const;
+
+    void transposition(const int dim1 = 0, const int dim2 = 1);
+
+    void resize(const LinearContainer<uint64_t>& newDimensionSizes);
 
     void resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex);
     

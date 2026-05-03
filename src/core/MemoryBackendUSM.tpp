@@ -24,20 +24,20 @@ namespace gema {
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     MemoryBackendUSM<T, Kind, Alignment>& MemoryBackendUSM<T, Kind, Alignment>::operator=(
-    const MemoryBackendUSM<T, Kind, Alignment>& otherBackend){
+    const MemoryBackendUSM<T, Kind, Alignment>& otherBackend) {
         queue_ = otherBackend.queue_;
         return *this;
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     MemoryBackendUSM<T, Kind, Alignment>& MemoryBackendUSM<T, Kind, Alignment>::operator=(
-    MemoryBackendUSM<T, Kind, Alignment>&& otherBackend) noexcept{
+    MemoryBackendUSM<T, Kind, Alignment>&& otherBackend) noexcept {
         queue_ = std::move(otherBackend.queue_);
         return *this;
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T *MemoryBackendUSM<T, Kind, Alignment>::allocate(size_t n){
+    T *MemoryBackendUSM<T, Kind, Alignment>::allocate(size_t n) const {
 
         if(n == 0) return nullptr;
 
@@ -47,13 +47,13 @@ namespace gema {
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::deallocate(T* pos, size_t n){
+    void MemoryBackendUSM<T, Kind, Alignment>::deallocate(T* pos, size_t n) const {
 
         sycl::free(pos, *queue_);
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::construct_at(T* pos, const T& value){
+    void MemoryBackendUSM<T, Kind, Alignment>::construct_at(T* pos, const T& value) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
             queue_->submit([&](sycl::handler& h){
@@ -67,7 +67,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::destroy_at(T* pos){
+    void MemoryBackendUSM<T, Kind, Alignment>::destroy_at(T* pos) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
             queue_->submit([&](sycl::handler& h){
@@ -81,7 +81,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::destroy(T* first, T* last){
+    void MemoryBackendUSM<T, Kind, Alignment>::destroy(T* first, T* last) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
             size_t n = last - first;
@@ -94,7 +94,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T* MemoryBackendUSM<T, Kind, Alignment>::uninitialized_copy(const T* first, const T* last, T* dest){
+    T* MemoryBackendUSM<T, Kind, Alignment>::uninitialized_copy(const T* first, const T* last, T* dest) const {
 
         size_t n = last - first;
 
@@ -115,7 +115,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T* MemoryBackendUSM<T, Kind, Alignment>::uninitialized_move(T* first, T* last, T* dest){
+    T* MemoryBackendUSM<T, Kind, Alignment>::uninitialized_move(T* first, T* last, T* dest) const {
 
         size_t n = last - first;
 
@@ -136,7 +136,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::uninitialized_default_construct(T* first, T* last){
+    void MemoryBackendUSM<T, Kind, Alignment>::uninitialized_default_construct(T* first, T* last) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 
@@ -152,7 +152,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T *MemoryBackendUSM<T, Kind, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value){
+    T *MemoryBackendUSM<T, Kind, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 
@@ -169,7 +169,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    void MemoryBackendUSM<T, Kind, Alignment>::copy(T* dest, const T* src, size_t count){
+    void MemoryBackendUSM<T, Kind, Alignment>::copy(T* dest, const T* src, size_t count) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 
@@ -188,7 +188,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T* MemoryBackendUSM<T, Kind, Alignment>::memory_set(T* dest, size_t ch, size_t count){
+    T* MemoryBackendUSM<T, Kind, Alignment>::memory_set(T* dest, size_t ch, size_t count) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 
@@ -203,7 +203,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    int MemoryBackendUSM<T, Kind, Alignment>::compare(const T* a, const T* b, size_t count){
+    int MemoryBackendUSM<T, Kind, Alignment>::compare(const T* a, const T* b, size_t count) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 

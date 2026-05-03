@@ -97,11 +97,11 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
     /// The tensor data itself, represented by vector containing all the items.
     LinearContainer<T> tensor_;
     /// Size od every tensor dimension.
-    std::vector<uint64_t> dimensionSizes_;
+    LinearContainer<uint64_t> dimensionSizes_;
 
     /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
     /// dimension on flattened data. Used for optimization, shall not be leaked outside.
-    std::vector<uint64_t> dimensionJumps_;
+    LinearContainer<uint64_t> dimensionJumps_;
     //std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
 
 
@@ -127,7 +127,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      *
      * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
     */
-    Tensor(const std::vector<uint64_t>& newTensorDimensionSizes);
+    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, then fills the tensor with given data. Following safety rules of this class, this function
@@ -137,7 +137,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
      * @param tensorItems one dimensional vector of items to be added by order.
      */
-    Tensor(const std::vector<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData);
+    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object.
@@ -174,7 +174,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Vector containing one int per dimension with value of its size.
     */
-    const std::vector<uint64_t>& getDimensionSizes() const;
+    const LinearContainer<uint64_t>& getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Gets the number of dimensions of a tensor.
@@ -198,7 +198,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Item on the provided coordinates.
     */
-    T& getItem(const std::vector<uint64_t>& coordinates);
+    T& getItem(const LinearContainer<uint64_t>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one value into tensor onto the desired coordinates.
@@ -206,7 +206,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @param value a value of generic type that will be stored in the tensor.
      * @param coordinates a vector of coordinates to place the value to.
     */
-    void setItem(const T& value, const std::vector<uint64_t>& coordinates);
+    void setItem(const T& value, const LinearContainer<uint64_t>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Exposes tensor data as pointer to array.
@@ -250,7 +250,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Bool @b true if coordinates are valid, @b false otherwise.
      */
-    bool isValidCoordinates(const std::vector<uint64_t>& coords) const;
+    bool isValidCoordinates(const LinearContainer<uint64_t>& coords) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Checks if given coordinates is valid to tensor of given dimension sizes.
@@ -260,7 +260,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Bool @b true if coordinates are valid, @b false otherwise.
      */
-    static bool isValidCoordinates(const std::vector<uint64_t> &coords, const std::vector<uint64_t>& dimensionSizes);
+    static bool isValidCoordinates(const LinearContainer<uint64_t>& coords, const LinearContainer<uint64_t>& dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.
@@ -312,8 +312,8 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * to the last item.
      * @param otherFromCoordsInclusive starting inclusive coordinates of other tensors.
      */
-    void copyOver(const Tensor<T>& otherTensor, const std::vector<uint64_t>& thisFromCoordsInclusive, 
-    const std::vector<uint64_t>& thisToCoordsExclusive, const std::vector<uint64_t>& otherFromCoordsInclusive);
+    void copyOver(const Tensor<T>& otherTensor, std::span<const uint64_t> thisFromCoordsInclusive, 
+    std::span<const uint64_t> thisToCoordsExclusive, std::span<const uint64_t> sourceFromCoordsInclusive);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
@@ -339,7 +339,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @param newDimensionSizes vector filled with new sizes of dimensions. Number of dimensions should not change.
      */
-    void resize(const std::vector<uint64_t>& newDimensionSizes);
+    void resize(const LinearContainer<uint64_t>& newDimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Resizes tensor. Items coordinates are preserved if those coordinates are valid. If items coordinates are not
@@ -1140,13 +1140,13 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Is @b true if given coordinate looped over to start, otherwise @b false.
      */
-    static bool incrementCoords(std::vector<uint64_t>& coordinates, const std::vector<uint64_t>& dimensionSizes);
+    static bool incrementCoords(std::span<uint64_t> coordinates, std::span<const uint64_t> dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * 
      */
-    static std::vector<std::vector<uint64_t>> coordsInRange(const std::vector<uint64_t>& coordsFromInclusive, 
-    const std::vector<uint64_t>& coordsToExclusive, const std::vector<uint64_t>& dimensionSizes);
+    static std::vector<std::vector<uint64_t>> coordsInRange(std::span<const uint64_t> coordsFromInclusive, 
+    std::span<const uint64_t> coordsToExclusive, std::span<const uint64_t> dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.
@@ -1164,7 +1164,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Coordinates of the item in the tensor.
     */
-    std::vector<uint64_t> getCoords(uint64_t itemIndex) const;
+    LinearContainer<uint64_t> getCoords(uint64_t itemIndex) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Get items index in a tensor, this is inverse method of "getCoords".
@@ -1173,7 +1173,9 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return Index of one item in the tensor.
     */
-    uint64_t getIndex(const std::vector<uint64_t>& coordinates) const;
+    uint64_t getIndex(const LinearContainer<uint64_t>& coordinates) const;
+
+    LinearContainer<T> transposition_(const int dim1 = 0, const int dim2 = 1);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Calculates coordinates from items index in tensor, this
@@ -1185,7 +1187,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @note Not in use.
      */
-    std::vector<uint64_t> littleGetCoords(int itemIndex) const;
+    LinearContainer<uint64_t> littleGetCoords(int itemIndex) const;
     
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Get items index number in tensor, this is inverse method
@@ -1197,7 +1199,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @note Not in use.
      */
-    int littleGetIndex(const std::vector<uint64_t>& coordinates) const;
+    int littleGetIndex(const LinearContainer<uint64_t>& coordinates) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates the number of items in a tensor based on dimension sizes and resizes tensor to that number.
