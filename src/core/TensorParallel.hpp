@@ -3,7 +3,7 @@
 
 #include <sycl/sycl.hpp>
 
-#include "TensorConcepts.hpp"
+#include "TensorConcept.hpp"
 #include "Tensor.hpp"
 
 namespace gema{
@@ -23,7 +23,7 @@ concept tensor_or_t_or_bothtensor_parallel =
 
 
 template<class T>
-class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel<T>, T>{
+class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel, T>{
 
     inline static sycl::queue queueGlobal_{sycl::property::queue::in_order{}};
 
@@ -49,9 +49,9 @@ class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel
     
     TensorParallel<T>& operator=(TensorParallel<T>&& otherTensor) noexcept;
 
-    TensorParallel<T> transpositionAndReturn(const int dim1 = 0, const int dim2 = 1) const;
+    TensorParallel<T> transpositionAndReturn(const uint64_t dim1 = 0, const uint64_t dim2 = 1) const;
 
-    void transposition(const int dim1 = 0, const int dim2 = 1);
+    void transposition(const uint64_t dim1 = 0, const uint64_t dim2 = 1);
 
     void resize(const LinearContainer<uint64_t>& newDimensionSizes);
 

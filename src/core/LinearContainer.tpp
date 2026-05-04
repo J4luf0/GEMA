@@ -42,6 +42,19 @@ namespace gema{
         end_ = begin_ + initSize;
     }
 
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    LinearContainer<T, IMemoryBackend>::LinearContainer
+    (const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend)
+    : memoryBackend_(memoryBackend){
+
+        size_t otherSize = other.size();
+        reserve(otherSize);
+
+        memoryBackend_.uninitialized_copy(other.begin(), other.end(), begin_);
+
+        end_ = begin_ + otherSize;
+    }
+
     // template<class T, MemoryBackendConcept<T> IMemoryBackend>
     // LinearContainer<T, IMemoryBackend>::LinearContainer(const std::vector<T>& init)
     // requires std::default_initializable<IMemoryBackend> {
@@ -98,7 +111,8 @@ namespace gema{
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=(const LinearContainer<T, IMemoryBackend>& other) {
+    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=
+    (const LinearContainer<T, IMemoryBackend>& other) {
 
         if(this == &other) return *this;
         
@@ -123,7 +137,8 @@ namespace gema{
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=(LinearContainer<T, IMemoryBackend>&& other) noexcept {
+    LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=
+    (LinearContainer<T, IMemoryBackend>&& other) noexcept {
         swap(other);
         memoryBackend_ = std::move(other.memoryBackend_);
         return *this;

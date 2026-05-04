@@ -1,11 +1,13 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
+#include "TensorConcept.hpp"
 #include "Tensor.hpp"
 
 namespace gema{
 
-template<class T, TensorType<T> ITensor = Tensor<T>>
+template<class T, template <typename> class ITensor = Tensor>
+requires TensorConcept<ITensor, T>
 class Matrix{
 
     private:

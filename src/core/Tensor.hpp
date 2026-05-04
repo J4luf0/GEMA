@@ -2,7 +2,7 @@
 #define TENSOR_HPP
 
 #include "AbstractOperation.hpp"
-#include "TensorConcepts.hpp"
+#include "TensorConcept.hpp"
 #include "LinearContainer.hpp"
 
 namespace gema{
@@ -27,6 +27,16 @@ concept tensor_or_t_or_bothtensor =
     (std::is_same_v<std::remove_cvref_t<A>, Tensor<T>> && std::is_same_v<std::remove_cvref_t<B>, Tensor<T>>) ||
     (std::is_same_v<std::remove_cvref_t<A>, Tensor<T>> && std::is_same_v<std::remove_cvref_t<B>, T>) ||
     (std::is_same_v<std::remove_cvref_t<A>, T> && std::is_same_v<std::remove_cvref_t<B>, Tensor<T>>);
+
+template <class C>
+concept coordinate_t = requires(C&& r) {
+    std::span<const uint64_t>{std::forward<C>(r)};
+};
+
+
+
+//std::is_same_v<std::remove_cvref_t<T>, LinearContainer<uint64_t>> ||
+//                       std::is_same_v<std::remove_cvref_t<T>, std::span<const uint64_t>>;
 
 // Checks for bool(const T&, const T&) invocable signature.
 template <typename C, class T>
@@ -89,8 +99,8 @@ template <class T> using OrderCallable = int(const T&, const T&);
  * 
  * @tparam Type of data that is stored in the tensor.
  */
-template<class T> 
-class Tensor : public AbstractOperation<Tensor<T>, T> {
+template<class T>
+class Tensor : public AbstractOperation<Tensor, T> {
 
     protected:
 
@@ -323,7 +333,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * 
      * @return A tensor that got two dimensions transposed.
     */
-    Tensor<T> transpositionAndReturn(const int dim1 = 0, const int dim2 = 1) const;
+    Tensor<T> transpositionAndReturn(const uint64_t dim1 = 0, const uint64_t dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
@@ -331,7 +341,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @param dim1 first dimension to swap, default value is 0.
      * @param dim2 second dimension to swap, default value is 1.
     */
-    void transposition(const int dim1 = 0, const int dim2 = 1);
+    void transposition(const uint64_t dim1 = 0, const uint64_t dim2 = 1);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Resizes tensor. Items coordinates are preserved if those coordinates are valid. If items coordinates are not
@@ -1132,8 +1142,9 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Takes given coordinates as reference and changes it to next coordinates in ascending order. If given coordinates
-     * are of the last item, it will loop over to coordinates of first item. Useful for in order traversal and TERRIBLE for 
-     * accesing far (random) items. Shall not be used for jumps bigger than ~(10 * number of dimensions) at a time.
+     * are of the last item, it will loop over to coordinates of first item and return true. Useful for in order traversal but 
+     * should not be used for accesing far random items, especially when item index can be used to do the same thing as this
+     * method. Shall not be used for jumps bigger than ~(10 * number of dimensions) at a time.
      * 
      * @param coordinates coordinates to be changed into coordinates of next item.
      * @param dimensionSizes used as upper exclusive limits for how coordinate values can be high.
@@ -1155,7 +1166,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
 
 
 
-    private:
+    protected:
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates coordinates from items index in a tensor, this is inverse method of "getIndex" method.
@@ -1165,6 +1176,7 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @return Coordinates of the item in the tensor.
     */
     LinearContainer<uint64_t> getCoords(uint64_t itemIndex) const;
+    static void getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Get items index in a tensor, this is inverse method of "getCoords".
@@ -1174,8 +1186,10 @@ class Tensor : public AbstractOperation<Tensor<T>, T> {
      * @return Index of one item in the tensor.
     */
     uint64_t getIndex(const LinearContainer<uint64_t>& coordinates) const;
+    uint64_t getIndex(std::span<const uint64_t> coordinates) const;
+    static uint64_t getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes);
 
-    LinearContainer<T> transposition_(const int dim1 = 0, const int dim2 = 1);
+    LinearContainer<T> transposition_(const int dim1 = 0, const int dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Little endian implementation, thus not used by default. Calculates coordinates from items index in tensor, this

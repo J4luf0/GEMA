@@ -43,15 +43,16 @@ public:
     explicit LinearContainer(size_t n) requires std::default_initializable<IMemoryBackend>;
     LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
     LinearContainer(std::initializer_list<T> init) requires std::default_initializable<IMemoryBackend>;
+    LinearContainer(const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend);
     //LinearContainer(const std::vector<T>& init) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(std::span<const T> s) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend);
 
-    LinearContainer(const LinearContainer& other);
-    LinearContainer(LinearContainer&& other) noexcept;
+    LinearContainer(const LinearContainer<T, IMemoryBackend>& other);
+    LinearContainer(LinearContainer<T, IMemoryBackend>&& other) noexcept;
 
-    LinearContainer& operator=(const LinearContainer& other);
-    LinearContainer& operator=(LinearContainer&& other) noexcept;
+    LinearContainer<T, IMemoryBackend>& operator=(const LinearContainer<T, IMemoryBackend>& other);
+    LinearContainer<T, IMemoryBackend>& operator=(LinearContainer<T, IMemoryBackend>&& other) noexcept;
 
     operator std::span<T>();
     operator std::span<const T>() const;
@@ -64,7 +65,7 @@ public:
 
     void push_back(const T& value);
     void pop_back();
-    void swap(LinearContainer& other) noexcept;
+    void swap(LinearContainer<T, IMemoryBackend>& other) noexcept;
     iterator insert(iterator pos, const T& value);
     iterator erase(iterator pos);
     
@@ -75,8 +76,8 @@ public:
     template<class I> void assign(I first, I last);
     void assign(std::initializer_list<T> ilist);
 
-    bool operator==(const LinearContainer &other) const;
-    auto operator<=>(const LinearContainer &other) const;
+    bool operator==(const LinearContainer<T, IMemoryBackend>& other) const;
+    auto operator<=>(const LinearContainer<T, IMemoryBackend>& other) const;
 
     T& operator[](size_t i);
     const T& operator[](size_t i) const;

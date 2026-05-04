@@ -1,5 +1,5 @@
 #include "Matrix.hpp"
 
-namespace gema{
+namespace gema {
 
 }

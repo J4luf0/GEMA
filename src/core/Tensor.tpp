@@ -392,7 +392,7 @@ namespace gema {
     }
 
     template <class T>
-    Tensor<T> Tensor<T>::transpositionAndReturn(const int dim1, const int dim2) const {
+    Tensor<T> Tensor<T>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
         if(dim1 == dim2) return Tensor<T>(dimensionSizes_);
 
@@ -430,7 +430,7 @@ namespace gema {
     }
 
     template <class T>
-    void Tensor<T>::transposition(const int dim1, const int dim2){
+    void Tensor<T>::transposition(const uint64_t dim1, const uint64_t dim2){
 
         if(dim1 == dim2) return;
 
@@ -1188,7 +1188,25 @@ namespace gema {
     }
 
     template <class T>
-    uint64_t Tensor<T>::getIndex(const LinearContainer<uint64_t>& coordinates) const{
+    /*static*/ void Tensor<T>::getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer){
+
+        uint64_t dimensionJump = 1;
+
+        for (size_t i = 0; i < dimensionSizes.size(); ++i) {
+            uint64_t coord = itemIndex / dimensionJump;
+            coordsBuffer[i] = coord;
+            itemIndex -= coord * dimensionJump;
+            dimensionJump *= dimensionSizes[i];
+        }
+    }
+
+    template <class T>
+    uint64_t Tensor<T>::getIndex(const LinearContainer<uint64_t>& coordinates) const {
+        return getIndex(std::span<const uint64_t>{coordinates});
+    }
+
+    template <class T>
+    uint64_t Tensor<T>::getIndex(std::span<const uint64_t> coordinates) const {
         
     //     uint64_t itemIndex = 0;
     //     //uint64_t dimensionProduct = 1;
@@ -1199,18 +1217,23 @@ namespace gema {
     //         //dimensionProduct *= dimensionSizes_[i];
     //    }
 
+        return Tensor<T>::getIndex(coordinates, dimensionSizes_);
+    }
+
+    template <class T>
+    /*static*/ uint64_t Tensor<T>::getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
 
         uint64_t itemIndex = 0;
-        const uint64_t dimensionCount = dimensionSizes_.size();
+        const uint64_t dimensionCount = dimensionSizes.size();
         for (size_t i = 0; i < dimensionCount; ++i){
-            itemIndex = itemIndex * dimensionSizes_[i] + coordinates[i];
+            itemIndex = itemIndex * dimensionSizes[i] + coordinates[i];
         }
 
         return itemIndex;
     }
 
     template <class T>
-    LinearContainer<T> Tensor<T>::transposition_(const int dim1, const int dim2){
+    LinearContainer<T> Tensor<T>::transposition_(const int dim1, const int dim2) const {
         return LinearContainer<T>();
     }
 
