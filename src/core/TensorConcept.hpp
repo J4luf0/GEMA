@@ -105,6 +105,10 @@ concept TensorConcept = requires(
     { otherTensor = tensor } -> std::same_as<Candidate<T>&>;
     { otherTensor = std::move(tensor) } -> std::same_as<Candidate<T>&>;
 
+    { ctensor.getDimensionSizes() } -> std::same_as<const LinearContainer<uint64_t>&>;
+    { ctensor.getNumberOfDimensions() } -> std::same_as<uint64_t>;
+    { ctensor.getNumberOfItems() } -> std::same_as<uint64_t>;
+
     { tensor.getItem(coordsInput) } -> std::same_as<T&>;
     { tensor.setItem(itemInput, coordsInput) } -> std::same_as<void>;
     { tensor.getData() } -> std::convertible_to<T*>;
