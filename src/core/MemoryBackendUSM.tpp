@@ -55,42 +55,59 @@ namespace gema {
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::construct_at(T* pos, const T& value) const {
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
-            queue_->submit([&](sycl::handler& h){
-                h.single_task([=](){
-                    new (pos) T(value);
-                });
-            }).wait();
-        } else {
-            std::construct_at(pos, value);
-        }
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                new (pos) T(value);
+            });
+        }).wait();
+
+        // if constexpr (Kind == sycl::usm::alloc::device) {
+        //     queue_->submit([&](sycl::handler& h){
+        //         h.single_task([=](){
+        //             new (pos) T(value);
+        //         });
+        //     }).wait();
+        // } else {
+        //     std::construct_at(pos, value);
+        // }
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::destroy_at(T* pos) const {
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
-            queue_->submit([&](sycl::handler& h){
-                h.single_task([=](){
-                    pos->~T();
-                });
-            }).wait();
-        } else {
-            std::destroy_at(pos);
-        }
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                pos->~T();
+            });
+        }).wait();
+
+        // if constexpr (Kind == sycl::usm::alloc::device) {
+        //     queue_->submit([&](sycl::handler& h){
+        //         h.single_task([=](){
+        //             pos->~T();
+        //         });
+        //     }).wait();
+        // } else {
+        //     std::destroy_at(pos);
+        // }
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::destroy(T* first, T* last) const {
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
-            size_t n = last - first;
-            queue_->parallel_for(n, [=](auto i){
-                (first + i)->~T();
-            }).wait();
-        } else {
-            std::destroy(first, last);
-        }
+        size_t n = last - first;
+        queue_->parallel_for(n, [=](auto i){
+            (first + i)->~T();
+        }).wait();
+
+        // if constexpr (Kind == sycl::usm::alloc::device) {
+        //     size_t n = last - first;
+        //     queue_->parallel_for(n, [=](auto i){
+        //         (first + i)->~T();
+        //     }).wait();
+        // } else {
+        //     std::destroy(first, last);
+        // }
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
@@ -171,33 +188,37 @@ namespace gema {
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::copy(T* dest, const T* src, size_t count) const {
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
+        queue_->memcpy(dest, src, count * sizeof(T)).wait();
 
-            queue_->memcpy(dest, src, count * sizeof(T)).wait();
+        // if constexpr (Kind == sycl::usm::alloc::device) {
 
-        } else {
+        //     queue_->memcpy(dest, src, count * sizeof(T)).wait();
 
-            if constexpr(std::is_trivially_copyable_v<T>) {
-                std::memcpy(dest, src, count * sizeof(T));
-            } else {
-                for(size_t i = 0; i < count; ++i){
-                    dest[i] = src[i];
-                }
-            }
-        }
+        // } else {
+
+        //     if constexpr(std::is_trivially_copyable_v<T>) {
+        //         std::memcpy(dest, src, count * sizeof(T));
+        //     } else {
+        //         for(size_t i = 0; i < count; ++i){
+        //             dest[i] = src[i];
+        //         }
+        //     }
+        // }
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     T* MemoryBackendUSM<T, Kind, Alignment>::memory_set(T* dest, size_t ch, size_t count) const {
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
+        queue_->memset(dest, ch, count * sizeof(T)).wait();
 
-            queue_->memset(dest, ch, count * sizeof(T)).wait();
+        // if constexpr (Kind == sycl::usm::alloc::device) {
 
-        } else {
+        //     queue_->memset(dest, ch, count * sizeof(T)).wait();
 
-            std::memset(dest, ch, count * sizeof(T));
-        }
+        // } else {
+
+        //     std::memset(dest, ch, count * sizeof(T));
+        // }
 
         return dest;
     }
@@ -227,6 +248,12 @@ namespace gema {
                 return 0;
             }
         }
+    }
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    void MemoryBackendUSM<T, Kind, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
+
+        queue_->memcpy(dest, src, count * sizeof(T)).wait();
     }
 }
 

@@ -42,9 +42,24 @@ namespace gema{
         end_ = begin_ + initSize;
     }
 
+    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    // LinearContainer<T, IMemoryBackend>::LinearContainer
+    // (const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend)
+    // : memoryBackend_(memoryBackend){
+
+    //     size_t otherSize = other.size();
+    //     reserve(otherSize);
+
+    //     memoryBackend_.uninitialized_copy(other.begin(), other.end(), begin_);
+
+    //     end_ = begin_ + otherSize;
+    // }
+
+    
     template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <MemoryBackendConcept<T> IOtherMemoryBackend>
     LinearContainer<T, IMemoryBackend>::LinearContainer
-    (const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend)
+    (const LinearContainer<T, IOtherMemoryBackend>& other, const IMemoryBackend& memoryBackend)
     : memoryBackend_(memoryBackend){
 
         size_t otherSize = other.size();
@@ -140,7 +155,8 @@ namespace gema{
     LinearContainer<T, IMemoryBackend>& LinearContainer<T, IMemoryBackend>::operator=
     (LinearContainer<T, IMemoryBackend>&& other) noexcept {
         swap(other);
-        memoryBackend_ = std::move(other.memoryBackend_);
+        std::swap(memoryBackend_, other.memoryBackend_);
+        //memoryBackend_ = std::move(other.memoryBackend_);
         return *this;
     }
 
@@ -355,9 +371,10 @@ namespace gema{
         end_ = begin_ + count;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    template<class I>
-    void LinearContainer<T, IMemoryBackend>::assign(I first, I last){
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class I>
+    void LinearContainer<T, IMemoryBackend>::assign(I first, I last)
+    {
 
         size_t count = static_cast<size_t>(std::distance(first, last));
 

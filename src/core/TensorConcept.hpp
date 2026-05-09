@@ -10,7 +10,7 @@
 namespace gema {
 
 // Forward declaration for the concepts.
-template<class T>
+template<class T, MemoryBackendConcept<T> IMemoryBackend = MemoryBackend<T>>
 class Tensor;
 
 
@@ -96,6 +96,9 @@ concept TensorConcept = requires(
     const T& itemInput,
     const Coords& coordsInput
 ) {
+
+    requires std::same_as<typename Candidate<T>::value_type, T>;
+    requires MemoryBackendConcept<typename Candidate<T>::memory_backend, T>;
 
     requires std::constructible_from<Candidate<T>, const Coords&>;
     requires std::copy_constructible<Candidate<T>>;

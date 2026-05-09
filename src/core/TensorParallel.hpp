@@ -3,12 +3,14 @@
 
 #include <sycl/sycl.hpp>
 
+#include "MemoryBackendConcept.hpp"
+#include "MemoryBackendUSM.hpp"
 #include "TensorConcept.hpp"
 #include "Tensor.hpp"
 
 namespace gema{
 
-template<class T>
+template<class T>//, MemoryBackendConcept<T> IMemoryBackend = MemoryBackendUSM<T, sycl::usm::alloc::device>
 class TensorParallel;
 
 // Concept that checks if type X is of type T or TensorParallel<T>. Useful for operator overloads.
@@ -23,15 +25,26 @@ concept tensor_or_t_or_bothtensor_parallel =
 
 
 template<class T>
-class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel, T>{
+class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParallel<T>>{
+
+    
 
     inline static sycl::queue queueGlobal_{sycl::property::queue::in_order{}};
 
-    sycl::queue* queue_ = &queueGlobal_;
-
     constexpr static sycl::usm::alloc usmKind_ = sycl::usm::alloc::device;
 
+    sycl::queue* queue_ = &queueGlobal_;
+
+    Tensor<T, MemoryBackendUSM<T, sycl::usm::alloc::device>> tensor_;
+
     public:
+
+    template<typename U>
+    using type = TensorParallel<U>;
+
+    using value_type = T;
+    using memory_backend = MemoryBackendUSM<T, sycl::usm::alloc::device>;
+
 
     TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes);
 
@@ -48,6 +61,28 @@ class TensorParallel : public Tensor<T>, public AbstractOperation<TensorParallel
     TensorParallel<T>& operator=(const TensorParallel<T>& otherTensor);
     
     TensorParallel<T>& operator=(TensorParallel<T>&& otherTensor) noexcept;
+
+
+
+    const LinearContainer<uint64_t>& getDimensionSizes() const;
+
+    uint64_t getNumberOfDimensions() const;
+
+    uint64_t getNumberOfItems() const;
+
+
+
+    T& getItem(const LinearContainer<uint64_t>& coordinates);
+
+    void setItem(const T& value, const LinearContainer<uint64_t>& coordinates);
+
+    T* getData();
+    const T* getData() const;
+
+    Tensor<T>& setData(const LinearContainer<T>& tensorItems);
+
+
+
 
     TensorParallel<T> transpositionAndReturn(const uint64_t dim1 = 0, const uint64_t dim2 = 1) const;
 

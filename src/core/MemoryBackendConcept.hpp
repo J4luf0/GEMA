@@ -15,6 +15,11 @@ concept MemoryBackendConcept = requires(B b, const B cb, T* p, const T* cp, T va
     requires std::copy_constructible<B>;
     requires std::move_constructible<B>;
 
+    // TYPE
+
+    typename B::template type<T>;
+    requires std::same_as<typename B::value_type, T>;
+
     // ALLOCATION
 
     { cb.allocate(n) } -> std::same_as<T*>;

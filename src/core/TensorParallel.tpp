@@ -9,51 +9,68 @@ namespace gema{
    
     
     template <class T>
-    TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes){
-        this->tensor_ = LinearContainer<T>(MemoryBackendUSM<T, usmKind_>(queue_));
-        this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmKind_>(queue_));
-        this->update();
+    TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes)
+    : tensor_(newTensorDimensionSizes, MemoryBackendUSM<T, usmKind_>(queue_)){
+        // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmKind_>(queue_));
+        // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmKind_>(queue_));
+        // this->update();
     }
 
     template <class T>
-    TensorParallel<T>::TensorParallel(const TensorParallel<T>& otherTensor){
-        *this = otherTensor;
-    }
-
-    template <class T>
-    TensorParallel<T>::TensorParallel(TensorParallel<T>&& otherTensor) noexcept {
-        *this = std::move(otherTensor);
-    }
-
-    template <class T>
-    TensorParallel<T>::TensorParallel(const TensorParallel<T>* otherTensor){
+    TensorParallel<T>::TensorParallel(const TensorParallel<T>& otherTensor)
+    : tensor_(otherTensor){
         queue_ = otherTensor->queue_;
+    }
 
-        this->tensor_ = LinearContainer<T>(otherTensor->tensor_.size(), MemoryBackendUSM<T, usmKind_>(queue_));
-        this->dimensionSizes_ = 
-            LinearContainer<uint64_t>(otherTensor->dimensionSizes_, MemoryBackendUSM<uint64_t, usmKind_>(queue_));
-        this->dimensionJumps_ = 
-            LinearContainer<uint64_t>(otherTensor->dimensionJumps_, MemoryBackendUSM<uint64_t, usmKind_>(queue_));
+    template <class T>
+    TensorParallel<T>::TensorParallel(TensorParallel<T>&& otherTensor) noexcept 
+    : tensor_(std::move(otherTensor)){
+        queue_ = std::move(otherTensor->queue_);
+    }
+
+    template <class T>
+    TensorParallel<T>::TensorParallel(const TensorParallel<T>* otherTensor)
+    : tensor_(otherTensor){
+        queue_ = otherTensor->queue_;
     }
 
     template <class T>
     TensorParallel<T>::TensorParallel(){
-        this->tensor_ = LinearContainer<T>(MemoryBackendUSM<T, usmKind_>(queue_));
-        this->dimensionSizes_ = LinearContainer<uint64_t>(MemoryBackendUSM<uint64_t, usmKind_>(queue_));
+        
     }
 
     template <class T>
     TensorParallel<T>& TensorParallel<T>::operator=(const TensorParallel<T>& otherTensor){
-        Tensor<T>::operator=(otherTensor);
+        tensor_ = otherTensor;
         queue_ = otherTensor.queue_;
         return *this;
     }
 
     template <class T>
     TensorParallel<T>& TensorParallel<T>::operator=(TensorParallel<T>&& otherTensor) noexcept {
-        Tensor<T>::operator=(std::move(otherTensor));
+        tensor_ = std::move(otherTensor);
         queue_ = std::move(otherTensor.queue_);
         return *this;
+    }
+
+    template <class T>
+    const LinearContainer<uint64_t>& TensorParallel<T>::getDimensionSizes() const {
+        tensor_.getDimensionSizes();
+    }
+
+    template <class T>
+    uint64_t TensorParallel<T>::getNumberOfDimensions() const {
+        return tensor_.getNumberOfDimensions();
+    }
+
+    template <class T>
+    uint64_t TensorParallel<T>::getNumberOfItems() const {
+        return tensor_.getNumberOfItems();
+    }
+
+    template <class T>
+    T &TensorParallel<T>::getItem(const LinearContainer<uint64_t>& coordinates){
+         return tensor_.getItem(coordinates);
     }
 
     // template <class T>
@@ -108,51 +125,51 @@ namespace gema{
     //     return tensorTransposed;
     // }
 
-    template <class T>
-    void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
+    // template <class T>
+    // void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
 
-        if(dim1 == dim2) return;
+    //     if(dim1 == dim2) return;
 
-        // Copying the dimensionSizes
-        // Change assigment to just construction of correct size
-        const LinearContainer<uint64_t> oldDimensionSizes = this->dimensionSizes_;
-        std::span<const uint64_t> oldDimensionSizesView = oldDimensionSizes;
+    //     // Copying the dimensionSizes
+    //     // Change assigment to just construction of correct size
+    //     const LinearContainer<uint64_t> oldDimensionSizes = this->dimensionSizes_;
+    //     std::span<const uint64_t> oldDimensionSizesView = oldDimensionSizes;
 
-        // Swapping the dimension sizes
-        const uint64_t temporaryDimensionSize1 = this->dimensionSizes_[dim1];
-        this->dimensionSizes_[dim1] = this->dimensionSizes_[dim2];
-        this->dimensionSizes_[dim2] = temporaryDimensionSize1;
+    //     // Swapping the dimension sizes
+    //     const uint64_t temporaryDimensionSize1 = this->dimensionSizes_[dim1];
+    //     this->dimensionSizes_[dim1] = this->dimensionSizes_[dim2];
+    //     this->dimensionSizes_[dim2] = temporaryDimensionSize1;
 
-        const uint64_t itemCount = this->updateDimensionJump();
-        const uint64_t dimensionCount = this->dimensionSizes_.size();
+    //     const uint64_t itemCount = this->updateDimensionJump();
+    //     const uint64_t dimensionCount = this->dimensionSizes_.size();
         
-        // Initializing the new data
-        LinearContainer<T> newData(itemCount, MemoryBackendUSM<T, usmKind_>(queue_));
+    //     // Initializing the new data
+    //     LinearContainer<T> newData(itemCount, MemoryBackendUSM<T, usmKind_>(queue_));
 
-        T* oldDataRaw = this->tensor_.data();
-        T* newDataRaw = newData.data();
+    //     T* oldDataRaw = this->tensor_.data();
+    //     T* newDataRaw = newData.data();
 
-        uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmKind_);
+    //     uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmKind_);
 
-        queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
+    //     queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
 
-            size_t i = idx[0];
+    //         size_t i = idx[0];
 
-            uint64_t* coords = coordsBuffer + i * dimensionCount;
-            Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
+    //         uint64_t* coords = coordsBuffer + i * dimensionCount;
+    //         Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
 
-            uint64_t temporaryCoord1 = coords[dim1];
-            coords[dim1] = coords[dim2];
-            coords[dim2] = temporaryCoord1;
+    //         uint64_t temporaryCoord1 = coords[dim1];
+    //         coords[dim1] = coords[dim2];
+    //         coords[dim2] = temporaryCoord1;
 
-            std::span<const uint64_t> coordsView{coords, dimensionCount};
+    //         std::span<const uint64_t> coordsView{coords, dimensionCount};
 
-            newDataRaw[Tensor<T>::getIndex(coordsView)] = std::move(oldDataRaw[i]);
+    //         newDataRaw[Tensor<T>::getIndex(coordsView)] = std::move(oldDataRaw[i]);
 
-        }).wait();
+    //     }).wait();
 
-        this->tensor_ = std::move(newData);
-    }
+    //     this->tensor_ = std::move(newData);
+    // }
 
     template <class T>
     void TensorParallel<T>::resize(const LinearContainer<uint64_t>& newDimensionSizes){

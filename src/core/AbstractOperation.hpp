@@ -4,17 +4,22 @@
 namespace gema {
 
     
-template<template <typename> class Derived, typename T>
+//template<template <typename, typename> class Derived, typename T, typename IMemoryBackend>
+template<typename Derived>
 class AbstractOperation {
+
+    template<typename U> using T = typename U::value_type;
+    template<typename U> using IMemoryBackend = typename U::memory_backend;
 
     public:
 
     #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     /**/\
-        friend auto operator OP_SYMBOL(const Derived<T>& tensor1, const Derived<T>& tensor2)\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
+        template<typename D = Derived>\
+        friend auto operator OP_SYMBOL(const Derived& tensor1, const Derived& tensor2)\
+        requires requires (T<D> a, T<D> b) {a OP_SYMBOL b;}{\
     /**/\
-            return tensor1.applyAndReturn(tensor1, tensor2, [](const T& tensorItem, const T& tensor2Item){\
+            return tensor1.applyAndReturn(tensor1, tensor2, [](const T<D>& tensorItem, const T<D>& tensor2Item){\
                     return tensorItem OP_SYMBOL tensor2Item;\
             });\
         }\
@@ -22,10 +27,11 @@ class AbstractOperation {
 
     #define ARITHMETIC_BINARY_ToVrT(OP_SYMBOL)\
     /**/\
-        inline friend auto operator OP_SYMBOL(const Derived<T>& tensor, const T& value)\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
+        template<typename D = Derived>\
+        inline friend auto operator OP_SYMBOL(const Derived& tensor, const T<D>& value)\
+        requires requires (T<D> a, T<D> b) {a OP_SYMBOL b;}{\
     /**/\
-            return Derived<T>::forEachAndReturn(tensor, [&value](const T& item){\
+            return Derived::forEachAndReturn(tensor, [&value](const T<D>& item){\
                 return item OP_SYMBOL value;\
             });\
         }\
@@ -33,12 +39,13 @@ class AbstractOperation {
 
     #define ARITHMETIC_BINARY_VoTrT(OP_SYMBOL)\
     /**/\
-        inline friend auto operator OP_SYMBOL(const T& value, const Derived<T>& tensor)\
-        requires requires (T a, T b) {a OP_SYMBOL b;}{\
+        template<typename D = Derived>\
+        inline friend auto operator OP_SYMBOL(const T<D>& value, const Derived& tensor)\
+        requires requires (T<D> a, T<D> b) {a OP_SYMBOL b;}{\
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
-            return Derived<T>::forEachAndReturn(tensor, [&value](const T& item){\
+            return Derived::forEachAndReturn(tensor, [&value](const T<D>& item){\
                 return value OP_SYMBOL item;\
             });\
         }\
@@ -46,10 +53,11 @@ class AbstractOperation {
 
     #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
     /**/\
-        friend void operator OP_SYMBOL##=(Derived<T>& tensor1, const Derived<T>& tensor2)\
-        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
+        template<typename D = Derived>\
+        friend void operator OP_SYMBOL##=(Derived& tensor1, const Derived& tensor2)\
+        requires requires (T<D> a, T<D> b) {a OP_SYMBOL##= b;}{\
     /**/\
-            tensor1.apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
+            tensor1.apply(tensor2, [](T<D>& tensorItem, const T<D>& tensor2Item){\
                 tensorItem OP_SYMBOL##= tensor2Item;\
             });\
         }\
@@ -57,10 +65,11 @@ class AbstractOperation {
 
     #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
     /**/\
-        friend void operator OP_SYMBOL##=(Derived<T>& tensor, const T& value)\
-        requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
+        template<typename D = Derived>\
+        friend void operator OP_SYMBOL##=(Derived& tensor, const T<D>& value)\
+        requires requires (T<D> a, T<D> b) {a OP_SYMBOL##= b;}{\
     /**/\
-            tensor.forEach([&value](T& item){\
+            tensor.forEach([&value](T<D>& item){\
                 item OP_SYMBOL##= value;\
             });\
         }\
@@ -249,8 +258,8 @@ class AbstractOperation {
 
     protected:
 
-    const Derived<T>& self() const {
-        return static_cast<const Derived<T>&>(*this);
+    const Derived& self() const {
+        return static_cast<const Derived&>(*this);
     }
 
 };

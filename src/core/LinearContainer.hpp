@@ -43,10 +43,14 @@ public:
     explicit LinearContainer(size_t n) requires std::default_initializable<IMemoryBackend>;
     LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
     LinearContainer(std::initializer_list<T> init) requires std::default_initializable<IMemoryBackend>;
-    LinearContainer(const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend);
+    //LinearContainer(const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend);
     //LinearContainer(const std::vector<T>& init) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(std::span<const T> s) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend);
+
+    
+    template<MemoryBackendConcept<T> IOtherMemoryBackend>
+    LinearContainer(const LinearContainer<T, IOtherMemoryBackend>& other, const IMemoryBackend& memoryBackend);
 
     LinearContainer(const LinearContainer<T, IMemoryBackend>& other);
     LinearContainer(LinearContainer<T, IMemoryBackend>&& other) noexcept;

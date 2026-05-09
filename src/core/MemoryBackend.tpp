@@ -100,6 +100,11 @@ namespace gema {
     int MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count) const {
         return std::memcmp(a, b, count);
     }
+
+    template <class T, size_t Alignment>
+    void MemoryBackend<T, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
+        std::memcpy(dest, src, count);
+    }
 }
 
 #undef T_ALLOC_ALIGN

@@ -15,6 +15,10 @@ class MemoryBackend {
 
     public:
 
+    template<typename U>
+    using type = MemoryBackend<U>;
+    using value_type = T;
+
     MemoryBackend();
 
     MemoryBackend(const MemoryBackend<T, Alignment>& memoryBackend);
@@ -39,6 +43,8 @@ class MemoryBackend {
     void copy(T* dest, const T* src, size_t count) const;
     T* memory_set(T* dest, size_t ch, size_t count ) const;
     int compare(const T* a, const T* b, size_t count) const;
+
+    void copy_to_host(T* dest, const T* src, size_t count) const;
 };
 
 }

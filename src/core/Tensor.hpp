@@ -4,6 +4,8 @@
 #include "AbstractOperation.hpp"
 #include "TensorConcept.hpp"
 #include "LinearContainer.hpp"
+#include "MemoryBackendConcept.hpp"
+#include "MemoryBackend.hpp"
 
 namespace gema{
 
@@ -99,8 +101,8 @@ template <class T> using OrderCallable = int(const T&, const T&);
  * 
  * @tparam Type of data that is stored in the tensor.
  */
-template<class T>
-class Tensor : public AbstractOperation<Tensor, T> {
+template<class T, MemoryBackendConcept<T> IMemoryBackend>
+class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
 
     protected:
 
@@ -130,6 +132,12 @@ class Tensor : public AbstractOperation<Tensor, T> {
 
     public:
 
+    template<typename U, typename MB>
+    using type = Tensor<U, MB>;
+
+    using value_type = T;
+    using memory_backend = IMemoryBackend;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, calculates number of items and then allocates them on tensor, then sets functional
      * attributes values yet the default lambda itself is decided at compile time. The result is empty tensor, with defined 
@@ -138,6 +146,13 @@ class Tensor : public AbstractOperation<Tensor, T> {
      * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
     */
     Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes);
+
+    template<MemoryBackendConcept<T> MetadataMemoryBackend>
+    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes, const IMemoryBackend& memoryBackend, 
+    const MetadataMemoryBackend& metadataBackend);
+
+    template<MemoryBackendConcept<T> MetadataMemoryBackend>
+    Tensor(const IMemoryBackend& memoryBackend, const MetadataMemoryBackend& metadataBackend);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, then fills the tensor with given data. Following safety rules of this class, this function
@@ -294,7 +309,8 @@ class Tensor : public AbstractOperation<Tensor, T> {
      * 
      * @return Output stream.
      */
-    template<typename U> friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
+    template<typename U, MemoryBackendConcept<U> MB> 
+    friend std::ostream& operator<<(std::ostream& os, const Tensor<U, MB>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Parses std::string specifying the tensor dimension sizes and values. Inverse to "toString".
