@@ -43,6 +43,9 @@ concept MemoryBackendConcept = requires(B b, const B cb, T* p, const T* cp, T va
     { cb.copy(p, cp, n) } -> std::same_as<void>;
     { cb.memory_set(p, ch, n) } -> std::same_as<T*>;
     { cb.compare(cp, cp, n) } -> std::same_as<int>;
+
+    { cb.copy_to_host(p, cp, n) } -> std::same_as<void>;
+    { cb.copy_from_host(p, cp, n) } -> std::same_as<void>;
 };
 
 }

@@ -161,8 +161,8 @@ namespace gema {
 
     // STATIC PRIVATE DEFAULT VALUES: -----------------------------------------------------------------------------------------
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    inline std::function<EqualsCallable<T>> Tensor<T, IMemoryBackend>::defaultEquals_ = [] (const T& a, const T& b) {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    inline std::function<EqualsCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultEquals_ = [] (const T& a, const T& b) {
         
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
@@ -172,8 +172,8 @@ namespace gema {
         }
     };
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    inline std::function<OrderCallable<T>> Tensor<T, IMemoryBackend>::defaultOrder_ = [] (const T& a, const T& b) {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    inline std::function<OrderCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultOrder_ = [] (const T& a, const T& b) {
 
         if constexpr (std::is_floating_point<T>::value) {
             T epsilon = std::numeric_limits<T>::epsilon();
@@ -198,28 +198,27 @@ namespace gema {
 
     // PUBLIC METHODS: --------------------------------------------------------------------------------------------------------
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes) 
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes) 
     : dimensionSizes_(newTensorDimensionSizes){
         update();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    template <MemoryBackendConcept<T> MetadataMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes,
-    const IMemoryBackend& memoryBackend, const MetadataMemoryBackend& metadataBackend)
-    : tensor_(memoryBackend), dimensionSizes_(newTensorDimensionSizes){ 
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes,
+    const DataMB& memoryBackend, const MetadataMB& metadataBackend)
+    : tensor_(memoryBackend), dimensionSizes_(newTensorDimensionSizes, metadataBackend), dimensionJumps_(metadataBackend){ 
         update();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    template <MemoryBackendConcept<T> MetadataMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(const IMemoryBackend& memoryBackend, const MetadataMemoryBackend& metadataBackend){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const DataMB& memoryBackend, const MetadataMB& metadataBackend)
+    : tensor_(memoryBackend), dimensionSizes_(metadataBackend), dimensionJumps_(metadataBackend){
         
     }
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // Tensor<T, IMemoryBackend>::Tensor
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // Tensor<T, DataMB, MetadataMB>::Tensor
     // (const LinearContainer<uint64_t, IMemoryBackend>& newTensorDimensionSizes, const IMemoryBackend& memoryBackend){
 
     //     tensor_ = LinearContainer<T, IMemoryBackend>(memoryBackend);
@@ -229,9 +228,9 @@ namespace gema {
     //     update();
     // }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    inline Tensor<T, IMemoryBackend>::Tensor
-    (const LinearContainer<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData) 
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    inline Tensor<T, DataMB, MetadataMB>::Tensor
+    (const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const LinearContainer<T, DataMB>& newTensorData) 
     : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
 
         // Check actual capacity of dimensions to tensorData
@@ -239,113 +238,113 @@ namespace gema {
         update();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(const Tensor<T>& otherTensor){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T>& otherTensor){
         *this = otherTensor;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(Tensor<T>&& otherTensor) noexcept{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(Tensor<T>&& otherTensor) noexcept{
         *this = std::move(otherTensor);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(const Tensor<T>* otherTensor){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T>* otherTensor){
         tensor_.resize(otherTensor->tensor_.size());
         dimensionSizes_ = otherTensor->dimensionSizes_;
         dimensionJumps_ = otherTensor->dimensionJumps_;
     }
 
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // Tensor<T, IMemoryBackend>::Tensor(const IMemoryBackend &memoryBackend){
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // Tensor<T, DataMB, MetadataMB>::Tensor(const IMemoryBackend &memoryBackend){
 
     //     tensor_ = LinearContainer<T>(memoryBackend);
     //     dimensionSizes_ = LinearContainer<uint64_t>(memoryBackend);
     //     dimensionJumps_ = LinearContainer<uint64_t>(memoryBackend);
     // }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::Tensor(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::Tensor(){
 
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    const LinearContainer<uint64_t>& Tensor<T, IMemoryBackend>::getDimensionSizes() const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    const LinearContainer<uint64_t>& Tensor<T, DataMB, MetadataMB>::getDimensionSizes() const{
         return dimensionSizes_;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::getNumberOfDimensions() const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::getNumberOfDimensions() const{
         return dimensionSizes_.size();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::getNumberOfItems() const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::getNumberOfItems() const{
         return tensor_.size();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    T& Tensor<T, IMemoryBackend>::getItem(const LinearContainer<uint64_t>& coordinates){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    T& Tensor<T, DataMB, MetadataMB>::getItem(const LinearContainer<uint64_t>& coordinates){
 
         return tensor_[getIndex(coordinates)];
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
 
         int itemIndex = getIndex(coordinates);
         tensor_[itemIndex] = value;
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    T* Tensor<T, IMemoryBackend>::getData(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    T* Tensor<T, DataMB, MetadataMB>::getData(){
         return tensor_.data();
     }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    const T* Tensor<T, IMemoryBackend>::getData() const {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    const T* Tensor<T, DataMB, MetadataMB>::getData() const {
         return tensor_.data();
     }
 
     // Secure version will need to check for correct tensorItems size
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T>& Tensor<T, IMemoryBackend>::setData(const LinearContainer<T>& tensorItems){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T>& Tensor<T, DataMB, MetadataMB>::setData(const LinearContainer<T>& tensorItems){
         tensor_ = tensorItems;
         return *this;
     }
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // void Tensor<T, IMemoryBackend>::setEquals(const std::function<EqualsCallable<T>>& equals){
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::setEquals(const std::function<EqualsCallable<T>>& equals){
         
     //     userEquals_ = equals;
     //     equals_ = &userEquals_;
     // }
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // void Tensor<T, IMemoryBackend>::setOrder(const std::function<OrderCallable<T>>& order){
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::setOrder(const std::function<OrderCallable<T>>& order){
 
     //     userOrder_ = order;
     //     order_ = &userOrder_;
     // }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::setTensorOutput(const std::function<void(const T&)>& tensorOutput){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::setTensorOutput(const std::function<void(const T&)>& tensorOutput){
         this->tensorOutput_ = tensorOutput;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput){
         this->itemOutput_ = itemOutput;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    bool Tensor<T, IMemoryBackend>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const{
-        return Tensor<T, IMemoryBackend>::isValidCoordinates(coords, dimensionSizes_);
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const{
+        return Tensor<T, DataMB, MetadataMB>::isValidCoordinates(coords, dimensionSizes_);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    /*static*/ bool Tensor<T, IMemoryBackend>::isValidCoordinates(const LinearContainer<uint64_t>& coords, 
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    /*static*/ bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(const LinearContainer<uint64_t>& coords, 
     const LinearContainer<uint64_t>& dimensionSizes){
 
         if(dimensionSizes.size() != coords.size()) return false;
@@ -357,13 +356,13 @@ namespace gema {
         return true;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    bool Tensor<T, IMemoryBackend>::isEquilateral() const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    bool Tensor<T, DataMB, MetadataMB>::isEquilateral() const{
         return std::adjacent_find(dimensionSizes_.begin(), dimensionSizes_.end(), std::not_equal_to<int>()) == dimensionSizes_.end();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    std::string Tensor<T, IMemoryBackend>::toString() const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    std::string Tensor<T, DataMB, MetadataMB>::toString() const{
 
         std::vector<std::string> openingBrackets(tensor_.size());
         std::fill(openingBrackets.begin(), openingBrackets.end(), "");
@@ -405,8 +404,8 @@ namespace gema {
         return os << tensor.toString();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem){
         
         uint64_t i;
         for(i = 0; tensorString[i] == '{'; ++i){}
@@ -414,8 +413,8 @@ namespace gema {
 
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::fillWith(const T& value){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::fillWith(const T& value){
 
         // could use assign method on everything thus dodging the specialization but std::fill is probably faster
         //tensor_.assign(tensor_.size(), value);
@@ -430,8 +429,8 @@ namespace gema {
         tensor_.fill(value);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T> Tensor<T, IMemoryBackend>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T> Tensor<T, DataMB, MetadataMB>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
         if(dim1 == dim2) return Tensor<T>(dimensionSizes_);
 
@@ -462,14 +461,14 @@ namespace gema {
             tensorTransposed.tensor_[tensorTransposed.getIndex(switched)] = std::move(tensor_[i]);
 
             //std::cout << original[0] << " " << original[1] << std::endl;
-            Tensor<T, IMemoryBackend>::incrementCoords(original, dimensionSizes_);
+            Tensor<T, DataMB, MetadataMB>::incrementCoords(original, dimensionSizes_);
         }
 
         return tensorTransposed;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::transposition(const uint64_t dim1, const uint64_t dim2){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::transposition(const uint64_t dim1, const uint64_t dim2){
 
         if(dim1 == dim2) return;
 
@@ -504,14 +503,14 @@ namespace gema {
             // Works until now, check the getIndex function if it actually works properly
             newTensorData[getIndex(switched)] = std::move(tensor_[i]);
 
-            Tensor<T, IMemoryBackend>::incrementCoords(original, oldDimensionSizes);
+            Tensor<T, DataMB, MetadataMB>::incrementCoords(original, oldDimensionSizes);
         }
 
         tensor_ = std::move(newTensorData);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::resize(const LinearContainer<uint64_t>& newDimensionSizes){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::resize(const LinearContainer<uint64_t>& newDimensionSizes){
 
         const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
         dimensionSizes_ = LinearContainer(newDimensionSizes);
@@ -538,7 +537,7 @@ namespace gema {
     }
 
     // template<class T>
-    // void Tensor<T, IMemoryBackend>::resize(uint64_t newSize, uint64_t dim) {
+    // void Tensor<T, DataMB, MetadataMB>::resize(uint64_t newSize, uint64_t dim) {
     //     auto oldSizes = dimensionSizes_;
     //     dimensionSizes_[dim] = newSize;
     //     uint64_t newCount = updateDimensionJump();
@@ -569,8 +568,8 @@ namespace gema {
     //     tensor_ = std::move(newTensor);
     // }
 
-    template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex) {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::resize(const uint64_t newDimensionSize, const uint64_t dimensionIndex) {
 
         LinearContainer<uint64_t> newDimensionSizes = dimensionSizes_;
         newDimensionSizes[dimensionIndex] = newDimensionSize;
@@ -599,8 +598,8 @@ namespace gema {
         // tensor_ = std::move(newTensor);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
 
         const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
         const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
@@ -640,8 +639,8 @@ namespace gema {
         tensor_ = std::move(newTensor);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::removeDimension(const uint64_t removedDimensionIndex){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::removeDimension(const uint64_t removedDimensionIndex){
 
         const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
         const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
@@ -681,16 +680,16 @@ namespace gema {
         tensor_ = std::move(newTensor);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <binary_operation_on_items<T> I>
-    void Tensor<T, IMemoryBackend>::collapseDimension(const uint64_t dimensionIndex, const I &binaryOperation)
+    void Tensor<T, DataMB, MetadataMB>::collapseDimension(const uint64_t dimensionIndex, const I &binaryOperation)
     {
     }
 
     // SPECIAL OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
     // Does not need macros.
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T>& Tensor<T, IMemoryBackend>::operator=(const Tensor<T>& otherTensor){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator=(const Tensor<T>& otherTensor){
         
         this->tensor_ = otherTensor.tensor_;
         this->dimensionSizes_ = otherTensor.dimensionSizes_;
@@ -711,8 +710,8 @@ namespace gema {
         return *this;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T>& Tensor<T, IMemoryBackend>::operator=(Tensor<T>&& otherTensor) noexcept{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator=(Tensor<T>&& otherTensor) noexcept{
         
         tensor_ = std::move(otherTensor.tensor_);
         dimensionSizes_ = std::move(otherTensor.dimensionSizes_);
@@ -722,8 +721,8 @@ namespace gema {
     }
 
     // Do not simplify
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    bool Tensor<T, IMemoryBackend>::operator==(const Tensor<T>& otherTensor) const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    bool Tensor<T, DataMB, MetadataMB>::operator==(const Tensor<T>& otherTensor) const{
 
         // Values should be compared first, as tensors of same dimensions are more likely to be compared
         //return (this->tensor_ == otherTensor.tensor_) && (this->dimensionSizes_ == otherTensor.dimensionSizes_);
@@ -747,8 +746,8 @@ namespace gema {
         }) && (this->dimensionSizes_ == otherTensor.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    bool Tensor<T, IMemoryBackend>::operator!=(const Tensor<T>& otherTensor) const
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    bool Tensor<T, DataMB, MetadataMB>::operator!=(const Tensor<T>& otherTensor) const
     {
         return !(*this == otherTensor);
     }
@@ -770,7 +769,7 @@ namespace gema {
     // ToTrT means Tensor performing Operation with Tensor Resulting in new Tensor (Tensor operation Tensor = Tensor).
     // ToeV means Tensor performing Operation with Value in place (Tensor oepration= Value).
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     // constexpr inline auto& force_dereference(T& pointer){//bad
 
     //     if constexpr (std::is_pointer_v<T>){
@@ -790,8 +789,8 @@ namespace gema {
     // // arithmetic).
     // #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     // /**/\
-    //     template <class T, MemoryBackendConcept<T> IMemoryBackend>\
-    //     inline auto Tensor<T, IMemoryBackend>::operator OP_SYMBOL(const Tensor<T>& tensor2) const\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     inline auto Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(const Tensor<T>& tensor2) const\
     //     requires requires (T a, T b) {a OP_SYMBOL b;}{\
     // /**/\
     //         return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){\
@@ -806,7 +805,7 @@ namespace gema {
     //     inline auto operator OP_SYMBOL(const Tensor<T>& tensor, const T& value)\
     //     requires requires (T a, T b) {a OP_SYMBOL b;}{\
     // /**/\
-    //         return Tensor<T, IMemoryBackend>::forEachAndReturn(tensor, [&value](const T& item){\
+    //         return Tensor<T, DataMB, MetadataMB>::forEachAndReturn(tensor, [&value](const T& item){\
     //             return item OP_SYMBOL value;\
     //         });\
     //     }\
@@ -820,7 +819,7 @@ namespace gema {
     // /**/\
     //         /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
     //         /* it is not guaranteed to be so on every type and operation!*/\
-    //         return Tensor<T, IMemoryBackend>::forEachAndReturn(tensor, [&value](const T& item){\
+    //         return Tensor<T, DataMB, MetadataMB>::forEachAndReturn(tensor, [&value](const T& item){\
     //             return value OP_SYMBOL item;\
     //         });\
     //     }\
@@ -828,8 +827,8 @@ namespace gema {
 
     // #define ARITHMETIC_BINARY_ToeT(OP_SYMBOL)\
     // /**/\
-    //     template <class T, MemoryBackendConcept<T> IMemoryBackend>\
-    //     void Tensor<T, IMemoryBackend>::operator OP_SYMBOL##=(const Tensor<T>& tensor2)\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     void Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL##=(const Tensor<T>& tensor2)\
     //     requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
     // /**/\
     //         apply(tensor2, [](T& tensorItem, const T& tensor2Item){\
@@ -841,7 +840,7 @@ namespace gema {
     // #define ARITHMETIC_BINARY_ToeV(OP_SYMBOL)\
     // /**/\
     //     template<class T>\
-    //     void Tensor<T, IMemoryBackend>::operator OP_SYMBOL##=(const T& value)\
+    //     void Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL##=(const T& value)\
     //     requires requires (T a, T b) {a OP_SYMBOL##= b;}{\
     // /**/\
     //         forEach([&value](T& item){\
@@ -898,8 +897,8 @@ namespace gema {
 
     // Needed specialization for % because it is not normally supported for floating types
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // inline auto Tensor<T, IMemoryBackend>::operator %(const Tensor<T>& tensor2) const{
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // inline auto Tensor<T, DataMB, MetadataMB>::operator %(const Tensor<T>& tensor2) const{
     //     return applyAndReturn(*this, tensor2, [](const T& tensorItem, const T& tensor2Item){
             
     //         if constexpr(std::is_floating_point_v<T>){
@@ -912,7 +911,7 @@ namespace gema {
 
     // template<class T>
     // inline auto operator %(const Tensor<T>& tensor, const T& value){
-    //     return Tensor<T, IMemoryBackend>::forEachAndReturn(tensor, [&value](const T& item){
+    //     return Tensor<T, DataMB, MetadataMB>::forEachAndReturn(tensor, [&value](const T& item){
     //         //return item OP_SYMBOL value;
     //         if constexpr(std::is_floating_point_v<T>){
     //             return std::fmod(item, value);
@@ -926,7 +925,7 @@ namespace gema {
     // inline auto operator %(const T& value, const Tensor<T>& tensor){
     //     /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */
     //     /* it is not guaranteed to be so on every type and operation!*/
-    //     return Tensor<T, IMemoryBackend>::forEachAndReturn(tensor, [&value](const T& item){
+    //     return Tensor<T, DataMB, MetadataMB>::forEachAndReturn(tensor, [&value](const T& item){
     //         //return value OP_SYMBOL item;
     //         if constexpr(std::is_floating_point_v<T>){
     //             return std::fmod(value, item);
@@ -936,8 +935,8 @@ namespace gema {
     //     });
     // }
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // void Tensor<T, IMemoryBackend>::operator %=(const Tensor<T>& tensor2){
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::operator %=(const Tensor<T>& tensor2){
     //     apply(tensor2, [](T& tensorItem, const T& tensor2Item){
     //         //tensorItem %= tensor2Item;
     //         if constexpr(std::is_floating_point_v<T>){
@@ -949,7 +948,7 @@ namespace gema {
     // }
 
     // template<class T>
-    // void Tensor<T, IMemoryBackend>::operator %=(const T& value){
+    // void Tensor<T, DataMB, MetadataMB>::operator %=(const T& value){
     //     forEach([&value](T& item){
     //         //item %= value;
     //         if constexpr(std::is_floating_point_v<T>){
@@ -964,8 +963,8 @@ namespace gema {
     // UNARY OPERATION GENERIC MACRO ------------------------------------------------------------------------------------------
 
     #define UNARY_OPERATION(OP_SYMBOL)\
-        template <class T, MemoryBackendConcept<T> IMemoryBackend>\
-        auto Tensor<T, IMemoryBackend>::operator OP_SYMBOL() const\
+        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+        auto Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL() const\
         requires requires (T a) {OP_SYMBOL a;}{\
     /**/\
             return forEachAndReturn([](const T& item){\
@@ -981,30 +980,30 @@ namespace gema {
 
     #undef UNARY_OPERATION
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::complementInPlace(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::complementInPlace(){
         forEach([](T& item){
             item = ~item;
         });
     }
     
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::plusInPlace(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::plusInPlace(){
         forEach([](T& item){
             item = +item;
         });
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::oppositeInPlace(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::oppositeInPlace(){
         forEach([](T& item){
             item = -item;
         });
     }
 
     #define PREFIX_POSTFIX(OP_SYMBOL)\
-        template <class T, MemoryBackendConcept<T> IMemoryBackend>\
-        Tensor<T>& Tensor<T, IMemoryBackend>::operator OP_SYMBOL(){\
+        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+        Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(){\
     /**/\
             forEach([](T& item){\
                 OP_SYMBOL item;\
@@ -1013,8 +1012,8 @@ namespace gema {
             return *this;\
         }\
     /**/\
-        template <class T, MemoryBackendConcept<T> IMemoryBackend>\
-        Tensor<T> Tensor<T, IMemoryBackend>::operator OP_SYMBOL(int) const{\
+        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+        Tensor<T> Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(int) const{\
             Tensor<T> temporary(*this);\
             operator++();\
             return temporary;\
@@ -1028,17 +1027,17 @@ namespace gema {
 
 
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <apply_and_return_callable<T> C>
-    auto Tensor<T, IMemoryBackend>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const {
+    auto Tensor<T, DataMB, MetadataMB>::applyAndReturn(const Tensor<T>& tensor2, C&& operation) const {
 
         //std::transform(tensor_.begin(), tensor_.end(), tensor2.tensor_.begin(), resultTensor->tensor_.begin(), operation);
-        return Tensor<T, IMemoryBackend>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
+        return Tensor<T, DataMB, MetadataMB>::applyAndReturn(*this, tensor2, std::forward<C>(operation));
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <typename A, typename B, apply_and_return_callable<T> C>
-    /*static*/ auto gema::Tensor<T, IMemoryBackend>::applyAndReturn(const A& operand1, const B& operand2, C&& operation)
+    /*static*/ auto gema::Tensor<T, DataMB, MetadataMB>::applyAndReturn(const A& operand1, const B& operand2, C&& operation)
     requires(tensor_or_t_or_bothtensor<A, B, T>){
         
         using opReturnType = decltype(operation(std::declval<T>(), std::declval<T>()));
@@ -1062,43 +1061,43 @@ namespace gema {
         return resultTensor;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <apply_callable<T> C>
-    void Tensor<T, IMemoryBackend>::apply(const Tensor<T>& tensor2, C&& operation){
+    void Tensor<T, DataMB, MetadataMB>::apply(const Tensor<T>& tensor2, C&& operation){
 
-        Tensor<T, IMemoryBackend>::apply(*this, tensor2, std::forward<C>(operation));
+        Tensor<T, DataMB, MetadataMB>::apply(*this, tensor2, std::forward<C>(operation));
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <apply_callable<T> C>
-    /*static*/ void Tensor<T, IMemoryBackend>::apply(Tensor<T>& operand1, const Tensor<T>& operand2, C&& operation){
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::apply(Tensor<T>& operand1, const Tensor<T>& operand2, C&& operation){
 
         for(uint64_t i = 0; i < operand1.tensor_.size(); ++i){
             operation(operand1.tensor_[i], operand2.tensor_[i]);
         }
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <apply_callable<T> C>
-    /*static*/ void Tensor<T, IMemoryBackend>::apply(Tensor<T>& operand1, const T& operand2, C&& operation){
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::apply(Tensor<T>& operand1, const T& operand2, C&& operation){
         
         for(uint64_t i = 0; i < operand1.tensor_.size(); ++i){
             operation(operand1.tensor_[i], operand2);
         }
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <apply_reverse_callable<T> C>
-    /*static*/ void Tensor<T, IMemoryBackend>::apply(const T& operand1, Tensor<T>& operand2, C&& operation){
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::apply(const T& operand1, Tensor<T>& operand2, C&& operation){
         
         for(uint64_t i = 0; i < operand2.tensor_.size(); ++i){
             operation(operand1, operand2.tensor_[i]);
         }
     }
 
-    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     // template <typename A, typename B, apply_callable<T> C> 
-    // void Tensor<T, IMemoryBackend>::apply(A& operand1, B& operand2, C&& operation) // static
+    // void Tensor<T, DataMB, MetadataMB>::apply(A& operand1, B& operand2, C&& operation) // static
     // requires(tensor_or_t_or_bothtensor<A, B, T>){
 
     //     const Tensor<T>* tensorOperand = type_pick<Tensor<T>>(operand1, operand2);
@@ -1117,16 +1116,16 @@ namespace gema {
         
     // }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <foreach_and_return_callable<T> C>
-    auto Tensor<T, IMemoryBackend>::forEachAndReturn(C&& operation) const {
+    auto Tensor<T, DataMB, MetadataMB>::forEachAndReturn(C&& operation) const {
 
-        return Tensor<T, IMemoryBackend>::forEachAndReturn(*this, std::forward<C>(operation));
+        return Tensor<T, DataMB, MetadataMB>::forEachAndReturn(*this, std::forward<C>(operation));
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <foreach_and_return_callable<T> C>
-    /*static*/ auto Tensor<T, IMemoryBackend>::forEachAndReturn(const Tensor<T>& tensor, C&& operation)
+    /*static*/ auto Tensor<T, DataMB, MetadataMB>::forEachAndReturn(const Tensor<T>& tensor, C&& operation)
     {
         using opReturnType = decltype(operation(std::declval<T>()));
         Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes()); 
@@ -1141,16 +1140,16 @@ namespace gema {
         return resultTensor;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <foreach_callable<T> C>
-    void Tensor<T, IMemoryBackend>::forEach(C&& operation){
+    void Tensor<T, DataMB, MetadataMB>::forEach(C&& operation){
 
-        Tensor<T, IMemoryBackend>::forEach(*this, std::forward<C>(operation));
+        Tensor<T, DataMB, MetadataMB>::forEach(*this, std::forward<C>(operation));
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     template <foreach_callable<T> C>
-    /*static*/ void Tensor<T, IMemoryBackend>::forEach(Tensor<T>& tensor, C&& operation){
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::forEach(Tensor<T>& tensor, C&& operation){
 
         //#pragma GCC ivdep
         for(uint64_t i = 0; i < tensor.tensor_.size(); ++i){
@@ -1163,8 +1162,8 @@ namespace gema {
     }
 
     
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    bool Tensor<T, IMemoryBackend>::incrementCoords(std::span<uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    bool Tensor<T, DataMB, MetadataMB>::incrementCoords(std::span<uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
 
         uint64_t lastCoordIndex = coordinates.size() - 1;
 
@@ -1188,8 +1187,8 @@ namespace gema {
         return false;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    Tensor<T, IMemoryBackend>::~Tensor()
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::~Tensor()
     {
         //
     }
@@ -1198,8 +1197,8 @@ namespace gema {
 
     // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<uint64_t> Tensor<T, IMemoryBackend>::getCoords(uint64_t itemIndex) const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    LinearContainer<uint64_t> Tensor<T, DataMB, MetadataMB>::getCoords(uint64_t itemIndex) const{
 
         LinearContainer<uint64_t> coordinates(dimensionSizes_.size());
 
@@ -1223,8 +1222,8 @@ namespace gema {
         return coordinates;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    /*static*/ void Tensor<T, IMemoryBackend>::getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer){
 
         uint64_t dimensionJump = 1;
 
@@ -1236,13 +1235,13 @@ namespace gema {
         }
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::getIndex(const LinearContainer<uint64_t>& coordinates) const {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(const LinearContainer<uint64_t>& coordinates) const {
         return getIndex(std::span<const uint64_t>{coordinates});
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::getIndex(std::span<const uint64_t> coordinates) const {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(std::span<const uint64_t> coordinates) const {
         
     //     uint64_t itemIndex = 0;
     //     //uint64_t dimensionProduct = 1;
@@ -1253,11 +1252,11 @@ namespace gema {
     //         //dimensionProduct *= dimensionSizes_[i];
     //    }
 
-        return Tensor<T, IMemoryBackend>::getIndex(coordinates, dimensionSizes_);
+        return Tensor<T, DataMB, MetadataMB>::getIndex(coordinates, dimensionSizes_);
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    /*static*/ uint64_t Tensor<T, IMemoryBackend>::getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    /*static*/ uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
 
         uint64_t itemIndex = 0;
         const uint64_t dimensionCount = dimensionSizes.size();
@@ -1268,13 +1267,13 @@ namespace gema {
         return itemIndex;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<T> Tensor<T, IMemoryBackend>::transposition_(const int dim1, const int dim2) const {
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    LinearContainer<T> Tensor<T, DataMB, MetadataMB>::transposition_(const int dim1, const int dim2) const {
         return LinearContainer<T>();
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<uint64_t> Tensor<T, IMemoryBackend>::littleGetCoords(int itemIndex) const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    LinearContainer<uint64_t> Tensor<T, DataMB, MetadataMB>::littleGetCoords(int itemIndex) const{
 
         LinearContainer<uint64_t> coordinates;
         coordinates.resize(dimensionSizes_.size());
@@ -1290,8 +1289,8 @@ namespace gema {
         return coordinates;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    int Tensor<T, IMemoryBackend>::littleGetIndex(const LinearContainer<uint64_t>& coordinates) const{
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    int Tensor<T, DataMB, MetadataMB>::littleGetIndex(const LinearContainer<uint64_t>& coordinates) const{
         
         int itemIndex = 0;
         int dimensionProduct = 1;
@@ -1305,8 +1304,8 @@ namespace gema {
         return itemIndex;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::updateNumberOfItems(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::updateNumberOfItems(){
 
         const uint64_t itemCount = 
             std::accumulate(dimensionSizes_.begin(), dimensionSizes_.end(), uint64_t{1}, std::multiplies<uint64_t>());
@@ -1315,8 +1314,8 @@ namespace gema {
         return itemCount;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    uint64_t Tensor<T, IMemoryBackend>::updateDimensionJump(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::updateDimensionJump(){
 
         const uint64_t dimensionCount = dimensionSizes_.size();
         if(dimensionJumps_.size() != dimensionCount){
@@ -1332,26 +1331,26 @@ namespace gema {
         return jump;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::update(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::update(){
         tensor_.resize(updateDimensionJump());
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    inline bool Tensor<T, IMemoryBackend>::compareItems(const T& a, const T& b) const requires(!std::is_floating_point<T>::value){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    inline bool Tensor<T, DataMB, MetadataMB>::compareItems(const T& a, const T& b) const requires(!std::is_floating_point<T>::value){
         
         return a == b;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    inline bool Tensor<T, IMemoryBackend>::compareItems(const T a, const T b) const requires(std::is_floating_point<T>::value){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    inline bool Tensor<T, DataMB, MetadataMB>::compareItems(const T a, const T b) const requires(std::is_floating_point<T>::value){
         
         T veightedEpsilon = std::numeric_limits<T>::epsilon();
         return std::fabs(a - b) < veightedEpsilon;
     }
 
-    template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    void Tensor<T, IMemoryBackend>::defaultFunctions(){
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    void Tensor<T, DataMB, MetadataMB>::defaultFunctions(){
 
         //equals_ = &defaultEquals_;
 

@@ -8,7 +8,7 @@
 namespace gema {
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(const sycl::queue* queue_){
+    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(sycl::queue* queue_){
         this->queue_ = queue_;
     }
 
@@ -37,13 +37,13 @@ namespace gema {
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T *MemoryBackendUSM<T, Kind, Alignment>::allocate(size_t n) const {
+    T* MemoryBackendUSM<T, Kind, Alignment>::allocate(size_t n) const {
 
         if(n == 0) return nullptr;
 
         std::size_t bytes = n * sizeof(T);
 
-        return sycl::aligned_alloc(Alignment, bytes, *queue_, Kind);
+        return sycl::aligned_alloc<T>(Alignment, bytes, *queue_, Kind);
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
@@ -169,7 +169,7 @@ namespace gema {
     }
     
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    T *MemoryBackendUSM<T, Kind, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value) const {
+    T* MemoryBackendUSM<T, Kind, Alignment>::uninitialized_fill_n(T* dest, size_t count, const T& value) const {
 
         if constexpr (Kind == sycl::usm::alloc::device) {
 
@@ -252,7 +252,11 @@ namespace gema {
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
+        queue_->memcpy(dest, src, count * sizeof(T)).wait();
+    }
 
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    void MemoryBackendUSM<T, Kind, Alignment>::copy_from_host(T* dest, const T* src, size_t count) const {
         queue_->memcpy(dest, src, count * sizeof(T)).wait();
     }
 }

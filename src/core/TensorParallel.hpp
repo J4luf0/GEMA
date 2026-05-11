@@ -31,11 +31,12 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     inline static sycl::queue queueGlobal_{sycl::property::queue::in_order{}};
 
-    constexpr static sycl::usm::alloc usmKind_ = sycl::usm::alloc::device;
+    constexpr static sycl::usm::alloc usmDataKind_ = sycl::usm::alloc::device;
+    constexpr static sycl::usm::alloc usmMetadataKind_ = sycl::usm::alloc::shared;
 
     sycl::queue* queue_ = &queueGlobal_;
 
-    Tensor<T, MemoryBackendUSM<T, sycl::usm::alloc::device>> tensor_;
+    Tensor<T, MemoryBackendUSM<T, usmDataKind_>, MemoryBackendUSM<uint64_t, usmMetadataKind_>> tensor_;
 
     public:
 

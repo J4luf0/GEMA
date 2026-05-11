@@ -101,19 +101,19 @@ template <class T> using OrderCallable = int(const T&, const T&);
  * 
  * @tparam Type of data that is stored in the tensor.
  */
-template<class T, MemoryBackendConcept<T> IMemoryBackend>
-class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
+template<class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
 
     protected:
 
     /// The tensor data itself, represented by vector containing all the items.
-    LinearContainer<T> tensor_;
+    LinearContainer<T, DataMB> tensor_;
     /// Size od every tensor dimension.
-    LinearContainer<uint64_t> dimensionSizes_;
+    LinearContainer<uint64_t, MetadataMB> dimensionSizes_;
 
     /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
     /// dimension on flattened data. Used for optimization, shall not be leaked outside.
-    LinearContainer<uint64_t> dimensionJumps_;
+    LinearContainer<uint64_t, MetadataMB> dimensionJumps_;
     //std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
 
 
@@ -132,11 +132,12 @@ class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
 
     public:
 
-    template<typename U, typename MB>
-    using type = Tensor<U, MB>;
+    template<typename U, typename DMB, typename MDMB>
+    using type = Tensor<U, DMB, MDMB>;
 
     using value_type = T;
-    using memory_backend = IMemoryBackend;
+    using data_backend = DataMB;
+    using metadata_backend = MetadataMB;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, calculates number of items and then allocates them on tensor, then sets functional
@@ -147,12 +148,10 @@ class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
     */
     Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes);
 
-    template<MemoryBackendConcept<T> MetadataMemoryBackend>
-    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes, const IMemoryBackend& memoryBackend, 
-    const MetadataMemoryBackend& metadataBackend);
+    Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const DataMB& memoryBackend, 
+    const MetadataMB& metadataBackend);
 
-    template<MemoryBackendConcept<T> MetadataMemoryBackend>
-    Tensor(const IMemoryBackend& memoryBackend, const MetadataMemoryBackend& metadataBackend);
+    Tensor(const DataMB& memoryBackend, const MetadataMB& metadataBackend);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, then fills the tensor with given data. Following safety rules of this class, this function
@@ -162,7 +161,7 @@ class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
      * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
      * @param tensorItems one dimensional vector of items to be added by order.
      */
-    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes, const LinearContainer<T>& newTensorData);
+    Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const LinearContainer<T, DataMB>& newTensorData);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object.
@@ -309,8 +308,8 @@ class Tensor : public AbstractOperation<Tensor<T, IMemoryBackend>> {
      * 
      * @return Output stream.
      */
-    template<typename U, MemoryBackendConcept<U> MB> 
-    friend std::ostream& operator<<(std::ostream& os, const Tensor<U, MB>& tensor);
+    template<typename U, MemoryBackendConcept<U> DMB, MemoryBackendConcept<uint64_t> MDMB> 
+    friend std::ostream& operator<<(std::ostream& os, const Tensor<U, DMB, MDMB>& tensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Parses std::string specifying the tensor dimension sizes and values. Inverse to "toString".

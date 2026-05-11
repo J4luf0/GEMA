@@ -70,6 +70,17 @@ namespace gema{
         end_ = begin_ + otherSize;
     }
 
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    template <MemoryBackendConcept<T> DestBackend>
+    LinearContainer<T, DestBackend> LinearContainer<T, IMemoryBackend>::copyToBackend(const DestBackend& destBackend) const {
+
+        LinearContainer<T, DestBackend> destContainer(size(), destBackend);
+
+        MemoryBackend<T>::copy_to_backend(destContainer.data(), destBackend, data(), memoryBackend_, size());
+        
+        return destContainer;
+    }
+
     // template<class T, MemoryBackendConcept<T> IMemoryBackend>
     // LinearContainer<T, IMemoryBackend>::LinearContainer(const std::vector<T>& init)
     // requires std::default_initializable<IMemoryBackend> {
@@ -114,13 +125,13 @@ namespace gema{
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    LinearContainer<T, IMemoryBackend>::LinearContainer(LinearContainer<T, IMemoryBackend>&& other) noexcept {
+    LinearContainer<T, IMemoryBackend>::LinearContainer(LinearContainer<T, IMemoryBackend>&& other) noexcept 
+    : memoryBackend_(std::move(other.memoryBackend_)){
         //swap(other);
 
         begin_  = other.begin_;
         end_    = other.end_;
         capEnd_ = other.capEnd_;
-        memoryBackend_ = std::move(other.memoryBackend_);
 
         other.begin_ = other.end_ = other.capEnd_ = nullptr;
     }

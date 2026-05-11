@@ -10,9 +10,13 @@ namespace gema{
     
     template <class T>
     TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes)
-    : tensor_(newTensorDimensionSizes, MemoryBackendUSM<T, usmKind_>(queue_)){
-        // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmKind_>(queue_));
-        // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmKind_>(queue_));
+    : tensor_(
+        newTensorDimensionSizes.copyToBackend(MemoryBackendUSM<uint64_t, usmMetadataKind_>(queue_)),
+        MemoryBackendUSM<T, usmDataKind_>(queue_), 
+        MemoryBackendUSM<uint64_t, usmMetadataKind_>(queue_)
+    ){
+        // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmDataKind_>(queue_));
+        // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmDataKind_>(queue_));
         // this->update();
     }
 
@@ -95,14 +99,14 @@ namespace gema{
 
     //     const uint64_t dimensionCount = this->dimensionSizes_.size();
 
-    //     const T* rawOldDimensionSizes = sycl::malloc(dimensionCount, *queue_, usmKind_);
+    //     const T* rawOldDimensionSizes = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
     //     queue_->memcpy(rawOldDimensionSizes, this->dimensionSizes_.data(), sizeof(uint64_t) * dimensionCount);
 
     //     const T* rawData = this->tensor_.getData();
     //     T* rawTransposedData = tensorTransposed.getData();
 
-    //     T* originalCoords = sycl::malloc(dimensionCount, *queue_, usmKind_);
-    //     T* switchedCoords = sycl::malloc(dimensionCount, *queue_, usmKind_);
+    //     T* originalCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
+    //     T* switchedCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
 
     //     queue_->parallel_for(this->tensor_.size(), [=](sycl::id<1> idx){
 
@@ -144,12 +148,12 @@ namespace gema{
     //     const uint64_t dimensionCount = this->dimensionSizes_.size();
         
     //     // Initializing the new data
-    //     LinearContainer<T> newData(itemCount, MemoryBackendUSM<T, usmKind_>(queue_));
+    //     LinearContainer<T> newData(itemCount, MemoryBackendUSM<T, usmDataKind_>(queue_));
 
     //     T* oldDataRaw = this->tensor_.data();
     //     T* newDataRaw = newData.data();
 
-    //     uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmKind_);
+    //     uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmDataKind_);
 
     //     queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
 

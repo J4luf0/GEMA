@@ -101,9 +101,35 @@ namespace gema {
         return std::memcmp(a, b, count);
     }
 
+
+
     template <class T, size_t Alignment>
     void MemoryBackend<T, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
         std::memcpy(dest, src, count);
+    }
+
+    template <class T, size_t Alignment>
+    void MemoryBackend<T, Alignment>::copy_from_host(T* dest, const T* src, size_t count) const {
+        std::memcpy(dest, src, count);
+    }
+
+    template <class T, size_t Alignment>
+    template <MemoryBackendConcept<T> DestBackend, MemoryBackendConcept<T> SrcBackend>
+    void MemoryBackend<T, Alignment>::copy_to_backend(
+        T* dest, const DestBackend& destBackend, const T* src, const SrcBackend& srcBackend, const uint64_t n
+    ){
+        
+        if constexpr(std::is_same_v<DestBackend, MemoryBackend<T>>){
+            srcBackend.copy_to_host(dest, src, n);
+        }else if constexpr(std::is_same_v<SrcBackend, MemoryBackend<T>>){
+            srcBackend.copy_from_host(dest, src, n);
+        }else{
+            MemoryBackend<T> hostBackend;
+            T* host = hostBackend.allocate(n);
+            srcBackend.copy_to_host(host, src, n);
+            destBackend.copy_from_host(dest, host, n);
+            hostBackend.deallocate(host, n);
+        }
     }
 }
 

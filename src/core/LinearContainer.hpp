@@ -63,6 +63,13 @@ public:
 
     ~LinearContainer();
 
+    template <MemoryBackendConcept<T> DestBackend>
+    LinearContainer<T, DestBackend> copyToBackend(const DestBackend& destBackend) const;
+
+    //LinearContainer<T, MemoryBackend<T>> copyToHost() requires (!std::is_same_v<IMemoryBackend, MemoryBackend<T>>);
+    //LinearContainer<T, MemoryBackend<T>> copyFromHost() requires (!std::is_same_v<IMemoryBackend, MemoryBackend<T>>);
+
+
     void reserve(size_t n);
     void resize(size_t n);
     void clear();

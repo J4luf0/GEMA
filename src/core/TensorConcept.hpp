@@ -10,7 +10,8 @@
 namespace gema {
 
 // Forward declaration for the concepts.
-template<class T, MemoryBackendConcept<T> IMemoryBackend = MemoryBackend<T>>
+template<class T, MemoryBackendConcept<T> DataMB = MemoryBackend<T>, 
+MemoryBackendConcept<uint64_t> MetadataMB = MemoryBackend<uint64_t>>
 class Tensor;
 
 

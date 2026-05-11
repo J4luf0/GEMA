@@ -14,7 +14,7 @@ class MemoryBackendUSM : public MemoryBackend<T, Alignment> {
 
     private:
 
-    const sycl::queue* queue_ = nullptr;
+    sycl::queue* queue_ = nullptr;
 
     public:
 
@@ -22,7 +22,7 @@ class MemoryBackendUSM : public MemoryBackend<T, Alignment> {
     using type = MemoryBackendUSM<U, Kind>;
     using value_type = T;
 
-    MemoryBackendUSM(const sycl::queue* queue_);
+    MemoryBackendUSM(sycl::queue* queue_);
     MemoryBackendUSM(const MemoryBackendUSM<T, Kind, Alignment>& memoryBackend);
     MemoryBackendUSM(MemoryBackendUSM<T, Kind, Alignment>&& memoryBackend) noexcept;
     MemoryBackendUSM() = delete;
@@ -47,6 +47,7 @@ class MemoryBackendUSM : public MemoryBackend<T, Alignment> {
     int compare(const T* a, const T* b, size_t count) const;
 
     void copy_to_host(T* dest, const T* src, size_t count) const;
+    void copy_from_host(T* dest, const T* src, size_t count) const;
 };
 
 }

@@ -8,6 +8,8 @@
 #include <new>
 #include <type_traits>
 
+#include "MemoryBackendConcept.hpp"
+
 namespace gema {
 
 template<class T, size_t Alignment = 64>
@@ -45,6 +47,14 @@ class MemoryBackend {
     int compare(const T* a, const T* b, size_t count) const;
 
     void copy_to_host(T* dest, const T* src, size_t count) const;
+    void copy_from_host(T* dest, const T* src, size_t count) const;
+
+    // Methods out of concept
+
+    template <MemoryBackendConcept<T> DestBackend, MemoryBackendConcept<T> SrcBackend>
+    static void copy_to_backend(
+        T* dest, const DestBackend& destBackend, const T* src, const SrcBackend& srcBackend, const uint64_t n
+    );
 };
 
 }
