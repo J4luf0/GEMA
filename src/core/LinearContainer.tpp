@@ -413,9 +413,9 @@ namespace gema{
         size_t n = size();
         if(n != other.size()) return false;
 
-        if constexpr(std::is_trivially_copyable_v<T>){
+        if constexpr(std::is_trivially_copyable_v<T> && std::has_unique_object_representations_v<T>){
             //return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
-            return memoryBackend_.compare(begin_, other.begin_, n * sizeof(T)) == 0;
+            return memoryBackend_.compare(begin_, other.begin_, n) == 0;
         }
 
         for(size_t i = 0; i < n; ++i){
@@ -551,7 +551,7 @@ namespace gema{
 
             if(value == T{}){
                 //std::memset(dest, 0, count * sizeof(T));
-                memoryBackend_.memory_set(dest, 0, count * sizeof(T));
+                memoryBackend_.memory_set(dest, 0, count);
                 return;
             }
 

@@ -11,9 +11,9 @@ namespace gema{
     template <class T>
     TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes)
     : tensor_(
-        newTensorDimensionSizes.copyToBackend(MemoryBackendUSM<uint64_t, usmMetadataKind_>(queue_)),
-        MemoryBackendUSM<T, usmDataKind_>(queue_), 
-        MemoryBackendUSM<uint64_t, usmMetadataKind_>(queue_)
+        newTensorDimensionSizes.copyToBackend(MetadataBackend(queue_)),
+        DataBackend(queue_), 
+        MetadataBackend(queue_)
     ){
         // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmDataKind_>(queue_));
         // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmDataKind_>(queue_));
@@ -94,7 +94,7 @@ namespace gema{
 
     template <class T>
     TensorParallel<T>& TensorParallel<T>::setData(const LinearContainer<T>& tensorItems){
-        return setData(tensorItems.copyToBackend(MemoryBackendUSM<T, usmDataKind_>(queue_)));
+        return setData(tensorItems.copyToBackend(DataBackend(queue_)));
     }
 
     template <class T>
@@ -116,6 +116,11 @@ namespace gema{
     }
 
     template <class T>
+    std::string TensorParallel<T>::toString() const {
+        return tensor_.toString();
+    }
+
+    template <class T>
     bool TensorParallel<T>::operator==(const TensorParallel<T>& otherTensor) const {
         return tensor_ == otherTensor;
     }
@@ -125,103 +130,108 @@ namespace gema{
         return tensor_ != otherTensor;
     }
 
-    // template <class T>
-    // TensorParallel<T> TensorParallel<T>::transpositionAndReturn(const int dim1, const int dim2) const {
+    template <class T>
+    TensorParallel<T> TensorParallel<T>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
-    //     if(dim1 == dim2) return TensorParallel<T>(this->dimensionSizes_);
+        return tensor_.transpositionAndReturn(dim1, dim2);
 
-    //     // Copying the dimensionSizes
-    //     // Change assigment to just construction of correct size
-    //     std::vector<uint64_t> transposedDimensionSizes = this->dimensionSizes_; 
+        // if(dim1 == dim2) return TensorParallel<T>(this->dimensionSizes_);
 
-    //     // Swapping the dimension sizes
-    //     transposedDimensionSizes[dim1] = this->dimensionSizes_[dim2]; 
-    //     transposedDimensionSizes[dim2] = this->dimensionSizes_[dim1];
+        // // Copying the dimensionSizes
+        // // Change assigment to just construction of correct size
+        // std::vector<uint64_t> transposedDimensionSizes = this->dimensionSizes_; 
+
+        // // Swapping the dimension sizes
+        // transposedDimensionSizes[dim1] = this->dimensionSizes_[dim2]; 
+        // transposedDimensionSizes[dim2] = this->dimensionSizes_[dim1];
         
-    //     // Initializing the new tensor
-    //     TensorParallel<T> tensorTransposed = TensorParallel<T>(transposedDimensionSizes);
+        // // Initializing the new tensor
+        // TensorParallel<T> tensorTransposed = TensorParallel<T>(transposedDimensionSizes);
 
-    //     // std::vector<uint64_t> original, switched;
-    //     // original.resize(dimensionSizes_.size());
-    //     // switched.resize(dimensionSizes_.size());
+        // // std::vector<uint64_t> original, switched;
+        // // original.resize(dimensionSizes_.size());
+        // // switched.resize(dimensionSizes_.size());
 
-    //     const uint64_t dimensionCount = this->dimensionSizes_.size();
+        // const uint64_t dimensionCount = this->dimensionSizes_.size();
 
-    //     const T* rawOldDimensionSizes = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
-    //     queue_->memcpy(rawOldDimensionSizes, this->dimensionSizes_.data(), sizeof(uint64_t) * dimensionCount);
+        // const T* rawOldDimensionSizes = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
+        // queue_->memcpy(rawOldDimensionSizes, this->dimensionSizes_.data(), sizeof(uint64_t) * dimensionCount);
 
-    //     const T* rawData = this->tensor_.getData();
-    //     T* rawTransposedData = tensorTransposed.getData();
+        // const T* rawData = this->tensor_.getData();
+        // T* rawTransposedData = tensorTransposed.getData();
 
-    //     T* originalCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
-    //     T* switchedCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
+        // T* originalCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
+        // T* switchedCoords = sycl::malloc(dimensionCount, *queue_, usmDataKind_);
 
-    //     queue_->parallel_for(this->tensor_.size(), [=](sycl::id<1> idx){
+        // queue_->parallel_for(this->tensor_.size(), [=](sycl::id<1> idx){
 
-    //         size_t i = idx[0];
+        //     size_t i = idx[0];
 
-    //         // The swap of two desired coordinates
-    //         for(uint64_t j = 0; j < dimensionCount; j++){
-    //             switchedCoords[j] = originalCoords[j];
-    //         }
+        //     // The swap of two desired coordinates
+        //     for(uint64_t j = 0; j < dimensionCount; j++){
+        //         switchedCoords[j] = originalCoords[j];
+        //     }
             
-    //         switchedCoords[dim1] = originalCoords[dim2];
-    //         switchedCoords[dim2] = originalCoords[dim1];
+        //     switchedCoords[dim1] = originalCoords[dim2];
+        //     switchedCoords[dim2] = originalCoords[dim1];
 
-    //         rawTransposedData[tensorTransposed.getIndex(switchedCoords)] = std::move(rawData[i]);
+        //     rawTransposedData[tensorTransposed.getIndex(switchedCoords)] = std::move(rawData[i]);
 
-    //         Tensor<T>::incrementCoords(switchedCoords, rawOldDimensionSizes);
+        //     Tensor<T>::incrementCoords(switchedCoords, rawOldDimensionSizes);
 
-    //     }).wait();
+        // }).wait();
 
-    //     return tensorTransposed;
-    // }
+        // return tensorTransposed;
+    }
 
-    // template <class T>
-    // void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
+    template <class T>
+    void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
 
-    //     if(dim1 == dim2) return;
+        tensor_.transposition(dim1, dim2);
 
-    //     // Copying the dimensionSizes
-    //     // Change assigment to just construction of correct size
-    //     const LinearContainer<uint64_t> oldDimensionSizes = this->dimensionSizes_;
-    //     std::span<const uint64_t> oldDimensionSizesView = oldDimensionSizes;
+        // if(dim1 == dim2) return;
 
-    //     // Swapping the dimension sizes
-    //     const uint64_t temporaryDimensionSize1 = this->dimensionSizes_[dim1];
-    //     this->dimensionSizes_[dim1] = this->dimensionSizes_[dim2];
-    //     this->dimensionSizes_[dim2] = temporaryDimensionSize1;
+        // // Copying the dimensionSizes
+        // // Change assigment to just construction of correct size
+        // const MetadataContainer oldDimensionSizes = tensor_.dimensionSizes_;
 
-    //     const uint64_t itemCount = this->updateDimensionJump();
-    //     const uint64_t dimensionCount = this->dimensionSizes_.size();
+        // // Swapping the dimension sizes
+        // const uint64_t temporaryDimensionSize1 = tensor_.dimensionSizes_[dim1];
+        // tensor_.dimensionSizes_[dim1] = tensor_.dimensionSizes_[dim2];
+        // tensor_.dimensionSizes_[dim2] = temporaryDimensionSize1;
+
+        // const uint64_t itemCount = tensor_.updateInnerState();
+        // const uint64_t dimensionCount = tensor_.getNumberOfDimensions();
         
-    //     // Initializing the new data
-    //     LinearContainer<T> newData(itemCount, MemoryBackendUSM<T, usmDataKind_>(queue_));
+        // // Initializing the new data
+        // DataContainer newData(itemCount, DataBackend(queue_));
 
-    //     T* oldDataRaw = this->tensor_.data();
-    //     T* newDataRaw = newData.data();
+        // T* oldDataRaw = tensor_.data();
+        // T* newDataRaw = newData.data();
 
-    //     uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmDataKind_);
 
-    //     queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
 
-    //         size_t i = idx[0];
+        // uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmDataKind_);
 
-    //         uint64_t* coords = coordsBuffer + i * dimensionCount;
-    //         Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
+        // queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
 
-    //         uint64_t temporaryCoord1 = coords[dim1];
-    //         coords[dim1] = coords[dim2];
-    //         coords[dim2] = temporaryCoord1;
+        //     size_t i = idx[0];
 
-    //         std::span<const uint64_t> coordsView{coords, dimensionCount};
+        //     uint64_t* coords = coordsBuffer + i * dimensionCount;
+        //     Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
 
-    //         newDataRaw[Tensor<T>::getIndex(coordsView)] = std::move(oldDataRaw[i]);
+        //     uint64_t temporaryCoord1 = coords[dim1];
+        //     coords[dim1] = coords[dim2];
+        //     coords[dim2] = temporaryCoord1;
 
-    //     }).wait();
+        //     std::span<const uint64_t> coordsView{coords, dimensionCount};
 
-    //     this->tensor_ = std::move(newData);
-    // }
+        //     newDataRaw[Tensor<T>::getIndex(coordsView)] = std::move(oldDataRaw[i]);
+
+        // }).wait();
+
+        // this->tensor_ = std::move(newData);
+    }
 
     template <class T>
     void TensorParallel<T>::resize(const LinearContainer<uint64_t>& newDimensionSizes){
@@ -344,12 +354,12 @@ namespace gema{
     template <foreach_and_return_callable_parallel<T> C>
     /*static*/ auto TensorParallel<T>::forEachAndReturn(const TensorParallel<T>& tensor, C&& operation){
 
-        const T* operandRaw = tensor.tensor_.data();
+        const T* operandRaw = tensor.getData();
         sycl::queue* queue = tensor.queue_;
 
         using opReturnType = decltype(operation(std::declval<T>()));
-        Tensor<opReturnType> resultTensor = Tensor<opReturnType>(tensor.getDimensionSizes());
-        T* resultRawData = resultTensor.getData();
+        TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(tensor.getDimensionSizes());
+        opReturnType* resultRawData = resultTensor.getData();
 
         queue->parallel_for(tensor.tensor_.size(), [=](sycl::id<1> idx){
             size_t i = idx[0];

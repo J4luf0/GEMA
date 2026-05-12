@@ -8,7 +8,8 @@ TEST(acpp_test, device_001){
 
     //std::cout << "PATH=" << std::getenv("PATH") << "\n";
 
-    std::cout << "Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl;
+    std::cout << "Device: " << q.get_device().get_info<sycl::info::device::name>() << std::endl
+              << "USM has gpu: " << q.get_device().has(hipsycl::sycl::aspect::gpu) << std::endl;
 
     sycl::queue q2{sycl::gpu_selector{}};
 }

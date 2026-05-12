@@ -239,17 +239,17 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T>& otherTensor){
+    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T, DataMB, MetadataMB>& otherTensor){
         *this = otherTensor;
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(Tensor<T>&& otherTensor) noexcept{
+    Tensor<T, DataMB, MetadataMB>::Tensor(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept{
         *this = std::move(otherTensor);
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T>* otherTensor){
+    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T, DataMB, MetadataMB>* otherTensor){
         tensor_.resize(otherTensor->tensor_.size());
         dimensionSizes_ = otherTensor->dimensionSizes_;
         dimensionJumps_ = otherTensor->dimensionJumps_;
@@ -689,7 +689,7 @@ namespace gema {
     // SPECIAL OPERATOR OVERLOADS ---------------------------------------------------------------------------------------------
     // Does not need macros.
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator=(const Tensor<T>& otherTensor){
+    Tensor<T, DataMB, MetadataMB>& Tensor<T, DataMB, MetadataMB>::operator=(const Tensor<T, DataMB, MetadataMB>& otherTensor){
         
         this->tensor_ = otherTensor.tensor_;
         this->dimensionSizes_ = otherTensor.dimensionSizes_;
@@ -711,7 +711,7 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator=(Tensor<T>&& otherTensor) noexcept{
+    Tensor<T, DataMB, MetadataMB>& Tensor<T, DataMB, MetadataMB>::operator=(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept{
         
         tensor_ = std::move(otherTensor.tensor_);
         dimensionSizes_ = std::move(otherTensor.dimensionSizes_);
@@ -722,7 +722,7 @@ namespace gema {
 
     // Do not simplify
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    bool Tensor<T, DataMB, MetadataMB>::operator==(const Tensor<T>& otherTensor) const{
+    bool Tensor<T, DataMB, MetadataMB>::operator==(const Tensor<T, DataMB, MetadataMB>& otherTensor) const{
 
         // Values should be compared first, as tensors of same dimensions are more likely to be compared
         //return (this->tensor_ == otherTensor.tensor_) && (this->dimensionSizes_ == otherTensor.dimensionSizes_);
@@ -738,16 +738,20 @@ namespace gema {
             return compareItems(a, b);
         });*/
 
-        // This is the implementation similar to std::vector::oprator== workings, but with possibility of custom comparison function
-        return std::equal(this->tensor_.begin(), this->tensor_.end(), otherTensor.tensor_.begin(), [this](const auto& a, const auto& b){
 
-            return (*equals_)(a, b); //was: compareItems
 
-        }) && (this->dimensionSizes_ == otherTensor.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
+        // This is the implementation similar to std::vector::operator== workings, but with possibility of custom comparison function
+        // return std::equal(this->tensor_.begin(), this->tensor_.end(), otherTensor.tensor_.begin(), [this](const auto& a, const auto& b){
+
+        //     return (*equals_)(a, b); //was: compareItems
+
+        // }) && (this->dimensionSizes_ == otherTensor.dimensionSizes_); // Could be also: !(this->tensor_.size() - tensor2.tensor_.size())
+    
+        return (dimensionSizes_ == otherTensor.dimensionSizes_) && (tensor_ == otherTensor.tensor_);
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    bool Tensor<T, DataMB, MetadataMB>::operator!=(const Tensor<T>& otherTensor) const
+    bool Tensor<T, DataMB, MetadataMB>::operator!=(const Tensor<T, DataMB, MetadataMB>& otherTensor) const
     {
         return !(*this == otherTensor);
     }
@@ -1206,6 +1210,11 @@ namespace gema {
         // }
 
         return false;
+    }
+
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    uint64_t Tensor<T, DataMB, MetadataMB>::updateInnerState(){
+        return updateDimensionJump();
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>

@@ -168,14 +168,14 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @param otherTensor Tensor to be copied.
      */
-    Tensor(const Tensor<T>& otherTensor);
+    Tensor(const Tensor<T, DataMB, MetadataMB>& otherTensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Move constructor, makes the object the same as the parameter object.
      * 
      * @param otherTensor Tensor to be moved.
      */
-    Tensor(Tensor<T>&& otherTensor) noexcept;
+    Tensor(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Similar use to copy constructor but it does not copy values. Instead it creates tensor of the same dimension size
@@ -183,7 +183,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @param otherTensor Tensor whose dimension sizes and item count is copied.
      */
-    Tensor(const Tensor<T>* otherTensor);
+    Tensor(const Tensor<T, DataMB, MetadataMB>* otherTensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Empty constructor so it can be declared without being initalized - trying to do something with
@@ -412,7 +412,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Reference to this tensor after the copying.
      */
-    Tensor<T>& operator=(const Tensor<T>& otherTensor);
+    Tensor<T, DataMB, MetadataMB>& operator=(const Tensor<T, DataMB, MetadataMB>& otherTensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Moves other tensor to this tensor.
@@ -421,7 +421,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Reference to this tensor after the copying.
      */
-    Tensor<T>& operator=(Tensor<T>&& otherTensor) noexcept;
+    Tensor<T, DataMB, MetadataMB>& operator=(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal.
@@ -430,7 +430,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Boolean @b true if the tensors are the same and @b false in not.
      */
-    bool operator==(const Tensor<T>& otherTensor) const;
+    bool operator==(const Tensor<T, DataMB, MetadataMB>& otherTensor) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Compares two tensors, checks if all items are equal and if the dimension sizes are equal. Then returns bool
@@ -440,7 +440,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Boolean @b false if the tensors are the same and @b true in not.
      */
-    bool operator!=(const Tensor<T>& otherTensor) const;
+    bool operator!=(const Tensor<T, DataMB, MetadataMB>& otherTensor) const;
 
 
 
@@ -1173,6 +1173,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      */
     static std::vector<std::vector<uint64_t>> coordsInRange(std::span<const uint64_t> coordsFromInclusive, 
     std::span<const uint64_t> coordsToExclusive, std::span<const uint64_t> dimensionSizes);
+
+    uint64_t updateInnerState();
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Virtual destructor.

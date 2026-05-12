@@ -34,6 +34,12 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     constexpr static sycl::usm::alloc usmDataKind_ = sycl::usm::alloc::device;
     constexpr static sycl::usm::alloc usmMetadataKind_ = sycl::usm::alloc::shared;
 
+    using DataBackend = MemoryBackendUSM<T, usmDataKind_>;
+    using MetadataBackend = MemoryBackendUSM<uint64_t, usmMetadataKind_>;
+
+    using DataContainer = LinearContainer<T, DataBackend>;
+    using MetadataContainer = LinearContainer<uint64_t, MetadataBackend>;
+
     sycl::queue* queue_ = &queueGlobal_;
 
     Tensor<T, MemoryBackendUSM<T, usmDataKind_>, MemoryBackendUSM<uint64_t, usmMetadataKind_>> tensor_;
@@ -89,6 +95,8 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     bool isEquilateral() const;
 
+    std::string toString() const;
+
     bool operator==(const TensorParallel<T>& otherTensor) const;
 
     bool operator!=(const TensorParallel<T>& otherTensor) const;
@@ -108,7 +116,7 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     void removeDimension(const uint64_t removedDimensionIndex);
 
-    
+
 
     template <apply_and_return_callable_parallel<T> C>
     auto applyAndReturn(const TensorParallel<T>& tensor2, C&& operation) const;

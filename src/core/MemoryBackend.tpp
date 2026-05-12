@@ -93,12 +93,12 @@ namespace gema {
 
     template <class T, size_t Alignment>
     T* MemoryBackend<T, Alignment>::memory_set(T* dest, size_t ch, size_t count) const {
-        return static_cast<T*>(std::memset(dest, ch, count));
+        return static_cast<T*>(std::memset(dest, ch, count * sizeof(T)));
     }
 
     template <class T, size_t Alignment>
     int MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count) const {
-        return std::memcmp(a, b, count);
+        return std::memcmp(a, b, count * sizeof(T));
     }
 
 
