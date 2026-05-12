@@ -221,7 +221,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Item on the provided coordinates.
     */
-    T& getItem(const LinearContainer<uint64_t, MetadataMB>& coordinates);
+    T& getItem(span_view<uint64_t> coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one value into tensor onto the desired coordinates.
@@ -229,7 +229,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @param value a value of generic type that will be stored in the tensor.
      * @param coordinates a vector of coordinates to place the value to.
     */
-    void setItem(const T& value, const LinearContainer<uint64_t, MetadataMB>& coordinates);
+    void setItem(const T& value, span_view<uint64_t> coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Exposes tensor data as pointer to array.
@@ -273,7 +273,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Bool @b true if coordinates are valid, @b false otherwise.
      */
-    bool isValidCoordinates(const LinearContainer<uint64_t>& coords) const;
+    bool isValidCoordinates(span_view<uint64_t> coords) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Checks if given coordinates is valid to tensor of given dimension sizes.
@@ -283,7 +283,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Bool @b true if coordinates are valid, @b false otherwise.
      */
-    static bool isValidCoordinates(const LinearContainer<uint64_t>& coords, const LinearContainer<uint64_t>& dimensionSizes);
+    static bool isValidCoordinates(span_view<uint64_t> coords, span_view<uint64_t> dimensionSizes);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates, if all tensor dimensions have the same size.

@@ -82,12 +82,12 @@ namespace gema{
     }
 
     template <class T>
-    T& TensorParallel<T>::getItem(const LinearContainer<uint64_t>& coordinates){
+    T& TensorParallel<T>::getItem(span_view<uint64_t> coordinates){
          return tensor_.getItem(coordinates);
     }
 
     template <class T>
-    void TensorParallel<T>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
+    void TensorParallel<T>::setItem(const T& value, span_view<uint64_t> coordinates){
         tensor_.setItem(value, coordinates);
     }
 
@@ -107,14 +107,14 @@ namespace gema{
     }
 
     template <class T>
-    bool TensorParallel<T>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const {
+    bool TensorParallel<T>::isValidCoordinates(span_view<uint64_t> coords) const {
         return tensor_.isValidCoordinates(coords);
     }
 
     template <class T>
     bool TensorParallel<T>::isValidCoordinates(
-        const LinearContainer<uint64_t>& coords, 
-        const LinearContainer<uint64_t>& dimensionSizes
+        span_view<uint64_t> coords, 
+        span_view<uint64_t> dimensionSizes
     ){
         return Tensor<T>::isValidCoordinates(coords, dimensionSizes);
     }

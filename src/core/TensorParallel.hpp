@@ -79,9 +79,9 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
 
 
-    T& getItem(const LinearContainer<uint64_t>& coordinates);
+    T& getItem(span_view<uint64_t> coordinates);
 
-    void setItem(const T& value, const LinearContainer<uint64_t>& coordinates);
+    void setItem(const T& value, span_view<uint64_t> coordinates);
 
     T* getData();
     const T* getData() const;
@@ -89,9 +89,9 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     TensorParallel<T>& setData(const LinearContainer<T>& tensorItems);
 
 
-    bool isValidCoordinates(const LinearContainer<uint64_t>& coords) const;
+    bool isValidCoordinates(span_view<uint64_t> coords) const;
 
-    static bool isValidCoordinates(const LinearContainer<uint64_t>& coords, const LinearContainer<uint64_t>& dimensionSizes);
+    static bool isValidCoordinates(span_view<uint64_t> coords, span_view<uint64_t> dimensionSizes);
 
     bool isEquilateral() const;
 

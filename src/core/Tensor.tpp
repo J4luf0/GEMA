@@ -285,15 +285,15 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    T& Tensor<T, DataMB, MetadataMB>::getItem(const LinearContainer<uint64_t, MetadataMB>& coordinates){
+    T& Tensor<T, DataMB, MetadataMB>::getItem(span_view<uint64_t> coordinates){
 
         return tensor_[getIndex(coordinates)];
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, const LinearContainer<uint64_t, MetadataMB>& coordinates){
+    void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, span_view<uint64_t> coordinates){
 
-        int itemIndex = getIndex(coordinates);
+        uint64_t itemIndex = getIndex(coordinates);
         tensor_[itemIndex] = value;
     }
 
@@ -339,13 +339,15 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const{
+    bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(span_view<uint64_t> coords) const{
         return Tensor<T, DataMB, MetadataMB>::isValidCoordinates(coords, dimensionSizes_);
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    /*static*/ bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(const LinearContainer<uint64_t>& coords, 
-    const LinearContainer<uint64_t>& dimensionSizes){
+    /*static*/ bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(
+        span_view<uint64_t> coords, 
+        span_view<uint64_t> dimensionSizes
+    ){
 
         if(dimensionSizes.size() != coords.size()) return false;
 
