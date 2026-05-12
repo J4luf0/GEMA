@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28) #default 3.10
 
 project(GEMA)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 # find_program(ACPP_COMPILER NAMES acpp acpp.bat PATHS ENV PATH REQUIRED)

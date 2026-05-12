@@ -47,7 +47,8 @@ namespace gema{
     }
 
     template <class T>
-    TensorParallel<T>::TensorParallel(){
+    TensorParallel<T>::TensorParallel()
+    : tensor_(DataBackend(queue_), MetadataBackend(queue_)){
         
     }
 

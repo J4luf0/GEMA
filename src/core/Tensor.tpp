@@ -270,7 +270,7 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    const LinearContainer<uint64_t>& Tensor<T, DataMB, MetadataMB>::getDimensionSizes() const{
+    const LinearContainer<uint64_t, MetadataMB>& Tensor<T, DataMB, MetadataMB>::getDimensionSizes() const{
         return dimensionSizes_;
     }
 
@@ -285,13 +285,13 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    T& Tensor<T, DataMB, MetadataMB>::getItem(const LinearContainer<uint64_t>& coordinates){
+    T& Tensor<T, DataMB, MetadataMB>::getItem(const LinearContainer<uint64_t, MetadataMB>& coordinates){
 
         return tensor_[getIndex(coordinates)];
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
+    void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, const LinearContainer<uint64_t, MetadataMB>& coordinates){
 
         int itemIndex = getIndex(coordinates);
         tensor_[itemIndex] = value;
@@ -309,7 +309,7 @@ namespace gema {
 
     // Secure version will need to check for correct tensorItems size
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T>& Tensor<T, DataMB, MetadataMB>::setData(const LinearContainer<T>& tensorItems){
+    Tensor<T, DataMB, MetadataMB>& Tensor<T, DataMB, MetadataMB>::setData(const LinearContainer<T, DataMB>& tensorItems){
         tensor_ = tensorItems;
         return *this;
     }
@@ -1228,9 +1228,9 @@ namespace gema {
     // PRIVATE METHODS: -------------------------------------------------------------------------------------------------------
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    LinearContainer<uint64_t> Tensor<T, DataMB, MetadataMB>::getCoords(uint64_t itemIndex) const{
+    LinearContainer<uint64_t, MetadataMB> Tensor<T, DataMB, MetadataMB>::getCoords(uint64_t itemIndex) const{
 
-        LinearContainer<uint64_t> coordinates(dimensionSizes_.size());
+        LinearContainer<uint64_t, MetadataMB> coordinates(dimensionSizes_.size());
 
         // uint64_t divisor = tensor_.size();
         
@@ -1253,7 +1253,11 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    /*static*/ void Tensor<T, DataMB, MetadataMB>::getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer){
+    /*static*/ void Tensor<T, DataMB, MetadataMB>::getCoords(
+        uint64_t itemIndex, 
+        span_view<uint64_t> dimensionSizes, 
+        uint64_t* coordsBuffer
+    ){
 
         uint64_t dimensionJump = 1;
 
@@ -1265,13 +1269,13 @@ namespace gema {
         }
     }
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(const LinearContainer<uint64_t>& coordinates) const {
-        return getIndex(std::span<const uint64_t>{coordinates});
-    }
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(std::initializer_list<uint64_t> coordinates) const {
+    //     return getIndex(std::span<const uint64_t>{coordinates.begin(), coordinates.size()});
+    // }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(std::span<const uint64_t> coordinates) const {
+    uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(span_view<uint64_t> coordinates) const {
         
     //     uint64_t itemIndex = 0;
     //     //uint64_t dimensionProduct = 1;
@@ -1286,7 +1290,10 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    /*static*/ uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes){
+    /*static*/ uint64_t Tensor<T, DataMB, MetadataMB>::getIndex(
+        span_view<uint64_t> coordinates, 
+        span_view<uint64_t> dimensionSizes
+    ){
 
         uint64_t itemIndex = 0;
         const uint64_t dimensionCount = dimensionSizes.size();

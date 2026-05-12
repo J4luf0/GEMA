@@ -9,6 +9,27 @@
 
 namespace gema {
 
+
+template<typename T, std::size_t Extent = std::dynamic_extent>
+class span_view : public std::span<const T, Extent> {
+    using Base = std::span<const T, Extent>;
+
+public:
+    using Base::Base;
+
+    constexpr span_view(std::initializer_list<T> il)
+        requires (Extent == std::dynamic_extent)
+        : Base(il.begin(), il.size())
+    {}
+
+    // constexpr operator std::span<const T, Extent>() const noexcept {
+    //     return static_cast<Base>(*this);
+    // }
+};
+
+
+
+
 // Forward declaration for the concepts.
 template<class T, MemoryBackendConcept<T> DataMB = MemoryBackend<T>, 
 MemoryBackendConcept<uint64_t> MetadataMB = MemoryBackend<uint64_t>>
@@ -56,27 +77,27 @@ concept foreach_and_return_callable = std::is_invocable_v<C, const T&>;
 
 /// Checks for void(T&, const T&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept apply_callable_parallel = apply_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept apply_callable_parallel = apply_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 /// Checks for void(const T&, T&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept apply_reverse_callable_parallel = apply_reverse_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept apply_reverse_callable_parallel = apply_reverse_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 /// Checks for T(const T&, const T&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept apply_and_return_callable_parallel = apply_and_return_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept apply_and_return_callable_parallel = apply_and_return_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 /// Checks for void(T&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept foreach_callable_parallel = foreach_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept foreach_callable_parallel = foreach_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 /// Checks for void(T&, const std::vector<uint64_t>&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept foreach_coord_callable_parallel = foreach_coord_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept foreach_coord_callable_parallel = foreach_coord_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 // Checks for T(const T&) invocable signature and invocable being trivially copyable.
 template <typename C, class T>
-concept foreach_and_return_callable_parallel = foreach_and_return_callable<C, T> && std::is_trivially_copyable_v<C>;
+concept foreach_and_return_callable_parallel = foreach_and_return_callable<C, T> ;//&& std::is_trivially_copyable_v<C>;
 
 
 template <template <typename> class TensorT, class T>

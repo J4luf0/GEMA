@@ -197,7 +197,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Vector containing one int per dimension with value of its size.
     */
-    const LinearContainer<uint64_t>& getDimensionSizes() const;
+    const LinearContainer<uint64_t, MetadataMB>& getDimensionSizes() const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Gets the number of dimensions of a tensor.
@@ -221,7 +221,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Item on the provided coordinates.
     */
-    T& getItem(const LinearContainer<uint64_t>& coordinates);
+    T& getItem(const LinearContainer<uint64_t, MetadataMB>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one value into tensor onto the desired coordinates.
@@ -229,7 +229,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @param value a value of generic type that will be stored in the tensor.
      * @param coordinates a vector of coordinates to place the value to.
     */
-    void setItem(const T& value, const LinearContainer<uint64_t>& coordinates);
+    void setItem(const T& value, const LinearContainer<uint64_t, MetadataMB>& coordinates);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Exposes tensor data as pointer to array.
@@ -250,7 +250,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @note Risky and shows the inner implementation by dodging the coordinate to index calculation, but its much faster
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
-    Tensor<T>& setData(const LinearContainer<T>& tensorItems);
+    Tensor<T, DataMB, MetadataMB>& setData(const LinearContainer<T, DataMB>& tensorItems);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets the output of the tensor through this->showTensor() method.
@@ -1191,8 +1191,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Coordinates of the item in the tensor.
     */
-    LinearContainer<uint64_t> getCoords(uint64_t itemIndex) const;
-    static void getCoords(uint64_t itemIndex, std::span<const uint64_t> dimensionSizes, uint64_t* coordsBuffer);
+    LinearContainer<uint64_t, MetadataMB> getCoords(uint64_t itemIndex) const;
+    static void getCoords(uint64_t itemIndex, span_view<uint64_t> dimensionSizes, uint64_t* coordsBuffer);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Get items index in a tensor, this is inverse method of "getCoords".
@@ -1201,9 +1201,9 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return Index of one item in the tensor.
     */
-    uint64_t getIndex(const LinearContainer<uint64_t>& coordinates) const;
-    uint64_t getIndex(std::span<const uint64_t> coordinates) const;
-    static uint64_t getIndex(std::span<const uint64_t> coordinates, std::span<const uint64_t> dimensionSizes);
+    //uint64_t getIndex(std::initializer_list<uint64_t> coordinates) const;
+    uint64_t getIndex(span_view<uint64_t> coordinates) const;
+    static uint64_t getIndex(span_view<uint64_t> coordinates, span_view<uint64_t> dimensionSizes);
 
     LinearContainer<T> transposition_(const int dim1 = 0, const int dim2 = 1) const;
 
