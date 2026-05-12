@@ -53,9 +53,9 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     using memory_backend = MemoryBackendUSM<T, sycl::usm::alloc::device>;
 
 
-    TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes);
+    TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes);
 
-    TensorParallel(const LinearContainer<uint64_t>&, const LinearContainer<T>&) = delete;
+    TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes, const LinearContainer<T>& newData);// = delete;
 
     TensorParallel(const TensorParallel<T>& otherTensor);
 
@@ -94,6 +94,8 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     static bool isValidCoordinates(const LinearContainer<uint64_t>& coords, const LinearContainer<uint64_t>& dimensionSizes);
 
     bool isEquilateral() const;
+
+    void fillWith(const T& fill);
 
     std::string toString() const;
 

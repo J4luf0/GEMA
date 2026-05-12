@@ -199,15 +199,15 @@ namespace gema {
     // PUBLIC METHODS: --------------------------------------------------------------------------------------------------------
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes) 
-    : dimensionSizes_(newTensorDimensionSizes){
+    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes) 
+    : dimensionSizes_(newDimensionSizes){
         update();
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes,
-    const DataMB& memoryBackend, const MetadataMB& metadataBackend)
-    : tensor_(memoryBackend), dimensionSizes_(newTensorDimensionSizes, metadataBackend), dimensionJumps_(metadataBackend){ 
+    Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes,
+    const DataMB& memoryBackend)
+    : tensor_(memoryBackend), dimensionSizes_(newDimensionSizes), dimensionJumps_(newDimensionSizes.getMemoryBackend()){ 
         update();
     }
 
@@ -230,8 +230,8 @@ namespace gema {
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     inline Tensor<T, DataMB, MetadataMB>::Tensor
-    (const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const LinearContainer<T, DataMB>& newTensorData) 
-    : dimensionSizes_(newTensorDimensionSizes), tensor_(newTensorData){
+    (const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const LinearContainer<T, DataMB>& newData) 
+    : dimensionSizes_(newDimensionSizes), tensor_(newData), dimensionJumps_(newDimensionSizes.getMemoryBackend()){
 
         // Check actual capacity of dimensions to tensorData
 

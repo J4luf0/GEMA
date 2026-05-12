@@ -66,6 +66,8 @@ public:
     template <MemoryBackendConcept<T> DestBackend>
     LinearContainer<T, DestBackend> copyToBackend(const DestBackend& destBackend) const;
 
+    IMemoryBackend getMemoryBackend() const;
+
     //LinearContainer<T, MemoryBackend<T>> copyToHost() requires (!std::is_same_v<IMemoryBackend, MemoryBackend<T>>);
     //LinearContainer<T, MemoryBackend<T>> copyFromHost() requires (!std::is_same_v<IMemoryBackend, MemoryBackend<T>>);
 
@@ -81,7 +83,7 @@ public:
     iterator erase(iterator pos);
     
 
-    void fill(const T &value);
+    void fill(const T& value);
 
     void assign(size_t count, const T& value);
     template<class I> void assign(I first, I last);

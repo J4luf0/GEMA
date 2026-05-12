@@ -144,12 +144,11 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * attributes values yet the default lambda itself is decided at compile time. The result is empty tensor, with defined 
      * dimensions and allocated space.
      *
-     * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
+     * @param newDimensionSizes Vector filled with sizes of dimensions.
     */
-    Tensor(const LinearContainer<uint64_t>& newTensorDimensionSizes);
+    Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes);
 
-    Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const DataMB& memoryBackend, 
-    const MetadataMB& metadataBackend);
+    Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const DataMB& memoryBackend);
 
     Tensor(const DataMB& memoryBackend, const MetadataMB& metadataBackend);
 
@@ -158,10 +157,10 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * does not check for correct size of the data and will forcibly make tensor with given dimension sizes, whether it means
      * to discard data or fill rest of tensor with default values.
      * 
-     * @param newTensorDimensionSizes Vector filled with sizes of dimensions.
-     * @param tensorItems one dimensional vector of items to be added by order.
+     * @param newDimensionSizes Vector filled with sizes of dimensions.
+     * @param newData one dimensional vector of items to be added by order.
      */
-    Tensor(const LinearContainer<uint64_t, MetadataMB>& newTensorDimensionSizes, const LinearContainer<T, DataMB>& newTensorData);
+    Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const LinearContainer<T, DataMB>& newData);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object.

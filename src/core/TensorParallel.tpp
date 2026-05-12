@@ -9,15 +9,23 @@ namespace gema{
    
     
     template <class T>
-    TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newTensorDimensionSizes)
+    TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes)
     : tensor_(
-        newTensorDimensionSizes.copyToBackend(MetadataBackend(queue_)),
-        DataBackend(queue_), 
-        MetadataBackend(queue_)
+        newDimensionSizes.copyToBackend(MetadataBackend(queue_)),
+        DataBackend(queue_)
     ){
         // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmDataKind_>(queue_));
         // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmDataKind_>(queue_));
         // this->update();
+    }
+
+    template <class T>
+    TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes, const LinearContainer<T>& newData)
+    : tensor_(
+        newDimensionSizes.copyToBackend(MetadataBackend(queue_)),
+        newData.copyToBackend(DataBackend(queue_))
+    ){
+
     }
 
     template <class T>
@@ -113,6 +121,11 @@ namespace gema{
     template <class T>
     bool TensorParallel<T>::isEquilateral() const {
         return tensor_.isEquilateral();
+    }
+
+    template <class T>
+    void TensorParallel<T>::fillWith(const T& fill){
+        tensor_.fillWith(fill);
     }
 
     template <class T>
@@ -275,15 +288,15 @@ namespace gema{
         const T* operand2Raw;
 
         if constexpr (std::is_same_v<A, B>){
-            operand1Raw = operand1.tensor_.data();
-            operand2Raw = operand2.tensor_.data();
+            operand1Raw = operand1.getData();
+            operand2Raw = operand2.getData();
         }else if constexpr (std::is_same_v<A, T>){
-            operand2Raw = operand2.tensor_.data();
+            operand2Raw = operand2.getData();
         }else if constexpr (std::is_same_v<B, T>){
-            operand1Raw = operand1.tensor_.data();
+            operand1Raw = operand1.getData();
         }
 
-        queue->parallel_for(tensorOperand->tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(tensorOperand->getNumberOfItems(), [=](sycl::id<1> idx){
 
             size_t i = idx[0];
             if constexpr (std::is_same_v<A, B>){
@@ -312,7 +325,7 @@ namespace gema{
         T* operand1Raw = operand1.getData();
         const T* operand2Raw = operand2.getData();
 
-        queue->parallel_for(operand1->tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand1->getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1Raw[i], operand2Raw[i]);
         }).wait();
@@ -325,7 +338,7 @@ namespace gema{
         const sycl::queue* queue = operand1->queue_;
         T* operand1Raw = operand1.getData();
 
-        queue->parallel_for(operand1->tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand1->getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1Raw[i], operand2);
         }).wait();
@@ -338,7 +351,7 @@ namespace gema{
         const sycl::queue* queue = operand2->queue_;
         T* operand2Raw = operand2.getData();
 
-        queue->parallel_for(operand2->tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand2->getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1, operand2Raw[i]);
         }).wait();
@@ -361,7 +374,7 @@ namespace gema{
         TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(tensor.getDimensionSizes());
         opReturnType* resultRawData = resultTensor.getData();
 
-        queue->parallel_for(tensor.tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(tensor.getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             resultRawData[i] = operation(operandRaw[i]);
         }).wait();

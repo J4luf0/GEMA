@@ -186,6 +186,11 @@ namespace gema{
         
     }
 
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    IMemoryBackend LinearContainer<T, IMemoryBackend>::getMemoryBackend() const {
+        return memoryBackend_;
+    }
+
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
     void LinearContainer<T, IMemoryBackend>::reserve(size_t n) {
 

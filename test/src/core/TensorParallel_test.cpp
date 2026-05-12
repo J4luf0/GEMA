@@ -870,10 +870,10 @@
 
 //     const LinearContainer<uint64_t> dimensionSizes{2, 3};
 
-//     auto tensor = std::make_unique<TensorParallel<int>>(dimensionSizes);
+//     auto tensor = std::make_unique<TensorParallel<short>>(dimensionSizes);
 //     tensor->setData({0, 5, -1, 100, -2, -16});
 
-//     auto tensor2 = std::make_unique<TensorParallel<int>>(dimensionSizes);
+//     auto tensor2 = std::make_unique<TensorParallel<short>>(dimensionSizes);
 //     tensor2->setData({3, -8, -2, -100, -5, 0});
 
 //     auto expected = std::make_unique<TensorParallel<int>>(dimensionSizes);
