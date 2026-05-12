@@ -80,7 +80,18 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     T* getData();
     const T* getData() const;
 
-    Tensor<T>& setData(const LinearContainer<T>& tensorItems);
+    TensorParallel<T>& setData(const LinearContainer<T>& tensorItems);
+
+
+    bool isValidCoordinates(const LinearContainer<uint64_t>& coords) const;
+
+    static bool isValidCoordinates(const LinearContainer<uint64_t>& coords, const LinearContainer<uint64_t>& dimensionSizes);
+
+    bool isEquilateral() const;
+
+    bool operator==(const TensorParallel<T>& otherTensor) const;
+
+    bool operator!=(const TensorParallel<T>& otherTensor) const;
 
 
 
@@ -96,6 +107,8 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     void addDimension(const uint64_t newDimensionSize, const uint64_t putBefore);
 
     void removeDimension(const uint64_t removedDimensionIndex);
+
+    
 
     template <apply_and_return_callable_parallel<T> C>
     auto applyAndReturn(const TensorParallel<T>& tensor2, C&& operation) const;

@@ -73,8 +73,56 @@ namespace gema{
     }
 
     template <class T>
-    T &TensorParallel<T>::getItem(const LinearContainer<uint64_t>& coordinates){
+    T& TensorParallel<T>::getItem(const LinearContainer<uint64_t>& coordinates){
          return tensor_.getItem(coordinates);
+    }
+
+    template <class T>
+    void TensorParallel<T>::setItem(const T& value, const LinearContainer<uint64_t>& coordinates){
+        tensor_.setItem(value, coordinates);
+    }
+
+    template <class T>
+    T* TensorParallel<T>::getData(){
+        return tensor_.getData();
+    }
+
+    template <class T>
+    const T* TensorParallel<T>::getData() const{
+        return tensor_.getData();
+    }
+
+    template <class T>
+    TensorParallel<T>& TensorParallel<T>::setData(const LinearContainer<T>& tensorItems){
+        return setData(tensorItems.copyToBackend(MemoryBackendUSM<T, usmDataKind_>(queue_)));
+    }
+
+    template <class T>
+    bool TensorParallel<T>::isValidCoordinates(const LinearContainer<uint64_t>& coords) const {
+        return tensor_.isValidCoordinates(coords);
+    }
+
+    template <class T>
+    bool TensorParallel<T>::isValidCoordinates(
+        const LinearContainer<uint64_t>& coords, 
+        const LinearContainer<uint64_t>& dimensionSizes
+    ){
+        return Tensor<T>::isValidCoordinates(coords, dimensionSizes);
+    }
+
+    template <class T>
+    bool TensorParallel<T>::isEquilateral() const {
+        return tensor_.isEquilateral();
+    }
+
+    template <class T>
+    bool TensorParallel<T>::operator==(const TensorParallel<T>& otherTensor) const {
+        return tensor_ == otherTensor;
+    }
+
+    template <class T>
+    bool TensorParallel<T>::operator!=(const TensorParallel<T>& otherTensor) const {
+        return tensor_ != otherTensor;
     }
 
     // template <class T>

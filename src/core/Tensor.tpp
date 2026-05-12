@@ -962,68 +962,89 @@ namespace gema {
 
     // UNARY OPERATION GENERIC MACRO ------------------------------------------------------------------------------------------
 
-    #define UNARY_OPERATION(OP_SYMBOL)\
-        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
-        auto Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL() const\
-        requires requires (T a) {OP_SYMBOL a;}{\
-    /**/\
-            return forEachAndReturn([](const T& item){\
-                return OP_SYMBOL item;\
-            });\
-        }\
-    /**/
+    // #define UNARY_OPERATION(OP_SYMBOL)\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     auto Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL() const\
+    //     requires requires (T a) {OP_SYMBOL a;}{\
+    // /**/\
+    //         return forEachAndReturn([](const T& item){\
+    //             return OP_SYMBOL item;\
+    //         });\
+    //     }\
+    // /**/
 
-    UNARY_OPERATION(~)
-    UNARY_OPERATION(!)
-    UNARY_OPERATION(+)
-    UNARY_OPERATION(-)
+    // UNARY_OPERATION(~)
+    // UNARY_OPERATION(!)
+    // UNARY_OPERATION(+)
+    // UNARY_OPERATION(-)
 
-    #undef UNARY_OPERATION
+    // #undef UNARY_OPERATION
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::complementInPlace(){
-        forEach([](T& item){
-            item = ~item;
-        });
-    }
+
     
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::plusInPlace(){
-        forEach([](T& item){
-            item = +item;
-        });
-    }
+    // #define UNARY_OPERATION_INPLACE(OP_SYMBOL, OP_NAME)\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     void Tensor<T, DataMB, MetadataMB>::OP_NAME##InPlace(){\
+    //         forEach([](T& item){\
+    //             item = OP_SYMBOL item;\
+    //         });\
+    //     }
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::oppositeInPlace(){
-        forEach([](T& item){
-            item = -item;
-        });
-    }
+    // UNARY_OPERATION_INPLACE(~, complement)
+    // UNARY_OPERATION_INPLACE(+, plus)
+    // UNARY_OPERATION_INPLACE(-, opposite)
 
-    #define PREFIX_POSTFIX(OP_SYMBOL)\
-        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
-        Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(){\
-    /**/\
-            forEach([](T& item){\
-                OP_SYMBOL item;\
-            });\
-    /**/\
-            return *this;\
-        }\
-    /**/\
-        template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
-        Tensor<T> Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(int) const{\
-            Tensor<T> temporary(*this);\
-            operator++();\
-            return temporary;\
-        }\
-    /**/
+    // #undef UNARY_OPERATION_INPLACE
 
-    PREFIX_POSTFIX(++)
-    PREFIX_POSTFIX(--)
 
-    #undef PREFIX_POSTFIX
+
+
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::complementInPlace(){
+    //     forEach([](T& item){
+    //         item = ~item;
+    //     });
+    // }
+    
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::plusInPlace(){
+    //     forEach([](T& item){
+    //         item = +item;
+    //     });
+    // }
+
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::oppositeInPlace(){
+    //     forEach([](T& item){
+    //         item = -item;
+    //     });
+    // }
+
+
+
+    // #define PREFIX_POSTFIX(OP_SYMBOL)\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     Tensor<T>& Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(){\
+    // /**/\
+    //         forEach([](T& item){\
+    //             OP_SYMBOL item;\
+    //         });\
+    // /**/\
+    //         return *this;\
+    //     }\
+    // /**/\
+    //     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>\
+    //     Tensor<T> Tensor<T, DataMB, MetadataMB>::operator OP_SYMBOL(int) const{\
+    //         Tensor<T> temporary(*this);\
+    //         operator++();\
+    //         return temporary;\
+    //     }\
+    // /**/
+
+    // PREFIX_POSTFIX(++)
+    // PREFIX_POSTFIX(--)
+
+    // #undef PREFIX_POSTFIX
 
 
 

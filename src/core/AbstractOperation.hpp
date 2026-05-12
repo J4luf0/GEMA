@@ -123,6 +123,69 @@ class AbstractOperation {
 
 
 
+    #define UNARY_OPERATION(OP_SYMBOL)\
+        template<typename D = Derived>\
+        auto operator OP_SYMBOL() const\
+        requires requires (T<D> a) {OP_SYMBOL a;}{\
+    /**/\
+            return self().forEachAndReturn([](const T<D>& item){\
+                return OP_SYMBOL item;\
+            });\
+        }\
+    /**/
+
+    UNARY_OPERATION(~)
+    UNARY_OPERATION(!)
+    UNARY_OPERATION(+)
+    UNARY_OPERATION(-)
+
+    #undef UNARY_OPERATION
+
+
+
+    #define UNARY_OPERATION_INPLACE(OP_SYMBOL, OP_NAME)\
+        template<typename D = Derived>\
+        void OP_NAME##InPlace(){\
+            self().forEach([](T<D>& item){\
+                item = OP_SYMBOL item;\
+            });\
+        }
+
+    UNARY_OPERATION_INPLACE(~, complement)
+    UNARY_OPERATION_INPLACE(+, plus)
+    UNARY_OPERATION_INPLACE(-, opposite)
+
+    #undef UNARY_OPERATION_INPLACE
+
+
+
+    #define PREFIX_POSTFIX(OP_SYMBOL)\
+        template<typename D = Derived>\
+        Derived& operator OP_SYMBOL(){\
+    /**/\
+            self().forEach([](T<D>& item){\
+                OP_SYMBOL item;\
+            });\
+    /**/\
+            return *this;\
+        }\
+    /**/\
+        template<typename D = Derived>\
+        Derived operator OP_SYMBOL(int) const{\
+            Derived temporary(*this);\
+            operator++();\
+            return temporary;\
+        }\
+    /**/
+
+    PREFIX_POSTFIX(++)
+    PREFIX_POSTFIX(--)
+
+    #undef PREFIX_POSTFIX
+
+
+
+
     // #define ARITHMETIC_BINARY_ToTrT(OP_SYMBOL)\
     //     template <typename Other> requires (!std::same_as<Other, Derived<T>>)\
     //     friend auto operator OP_SYMBOL(const Other& tensor1, const Other& tensor2) = delete;

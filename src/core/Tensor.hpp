@@ -990,63 +990,63 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
 
     // UNARY OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------
     
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise negation on each item and returns result as new tensor. Does not change original tensor.
-     * 
-     * @return Resulting tensor.
-     */
-    auto operator~() const
-    requires requires (T a) {~a;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise negation on each item and returns result as new tensor. Does not change original tensor.
+    //  * 
+    //  * @return Resulting tensor.
+    //  */
+    // auto operator~() const
+    // requires requires (T a) {~a;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs logical negation on each item and returns result as new tensor. Does not change original tensor.
-     * 
-     * @return Resulting tensor.
-     */
-    auto operator!() const
-    requires requires (T a) {!a;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs logical negation on each item and returns result as new tensor. Does not change original tensor.
+    //  * 
+    //  * @return Resulting tensor.
+    //  */
+    // auto operator!() const
+    // requires requires (T a) {!a;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary plus on each item and returns result as new tensor. Does not change original tensor.
-     * 
-     * @return Resulting tensor.
-     * 
-     * @warning Even if items have unary + implemented as identity (doing nothing), this overload will still traverse to apply
-     * the operation.
-     */
-    auto operator+() const
-    requires requires (T a) {+a;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary plus on each item and returns result as new tensor. Does not change original tensor.
+    //  * 
+    //  * @return Resulting tensor.
+    //  * 
+    //  * @warning Even if items have unary + implemented as identity (doing nothing), this overload will still traverse to apply
+    //  * the operation.
+    //  */
+    // auto operator+() const
+    // requires requires (T a) {+a;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary minus on each item and returns result as new tensor. Does not change original tensor.
-     * 
-     * @return Resulting tensor.
-     */
-    auto operator-() const
-    requires requires (T a) {-a;};
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary minus on each item and returns result as new tensor. Does not change original tensor.
+    //  * 
+    //  * @return Resulting tensor.
+    //  */
+    // auto operator-() const
+    // requires requires (T a) {-a;};
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs bitwise negation (~) on each item in a tensor.
-     */
-    void complementInPlace();
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs bitwise negation (~) on each item in a tensor.
+    //  */
+    // void complementInPlace();
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary plus (+) on a tensor.
-     */
-    void plusInPlace();
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary plus (+) on a tensor.
+    //  */
+    // void plusInPlace();
 
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Performs unary minus (-) on all items of the tensor.
-     */
-    void oppositeInPlace();
+    // /** -----------------------------------------------------------------------------------------------------------------------
+    //  * @brief Performs unary minus (-) on all items of the tensor.
+    //  */
+    // void oppositeInPlace();
 
-    Tensor<T>& operator++();
+    // Tensor<T>& operator++();
 
-    Tensor<T> operator++(int) const;
+    // Tensor<T> operator++(int) const;
 
-    Tensor<T>& operator--();
+    // Tensor<T>& operator--();
 
-    Tensor<T> operator--(int) const;
+    // Tensor<T> operator--(int) const;
 
     
 
