@@ -11,7 +11,7 @@ concept MemoryBackendConcept = requires(B b, const B cb, T* p, const T* cp, T va
 
     // CONSTRUCTION
 
-    //{ B() }; // Constructors actually shouldn´t be required
+    //{ B() }; // Default constructors actually shouldn´t be required?
     requires std::copy_constructible<B>;
     requires std::move_constructible<B>;
 
@@ -43,6 +43,10 @@ concept MemoryBackendConcept = requires(B b, const B cb, T* p, const T* cp, T va
     { cb.copy(p, cp, n) } -> std::same_as<void>;
     { cb.memory_set(p, ch, n) } -> std::same_as<T*>;
     { cb.compare(cp, cp, n) } -> std::same_as<int>;
+
+    
+    { cb.set_value(p, n, value) } -> std::same_as<void>;
+    { cb.get_value(cp, n) } -> std::convertible_to<T>;
 
     { cb.copy_to_host(p, cp, n) } -> std::same_as<void>;
     { cb.copy_from_host(p, cp, n) } -> std::same_as<void>;

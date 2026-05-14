@@ -18,6 +18,13 @@ namespace gema {
     }
 
     template <class T, size_t Alignment>
+    template <typename U>
+    MemoryBackend<T, Alignment>::MemoryBackend(const MemoryBackend<U, Alignment>& memoryBackend)
+    requires (!std::is_same_v<U, T>){
+
+    }
+
+    template <class T, size_t Alignment>
     MemoryBackend<T, Alignment>::MemoryBackend(MemoryBackend<T, Alignment>&& memoryBackend) noexcept {
 
     }
@@ -88,7 +95,7 @@ namespace gema {
 
     template <class T, size_t Alignment>
     void MemoryBackend<T, Alignment>::copy(T* dest, const T* src, size_t count) const {
-        std::memcpy(dest, src, count);
+        std::memcpy(dest, src, count * sizeof(T));
     }
 
     template <class T, size_t Alignment>
@@ -101,28 +108,64 @@ namespace gema {
         return std::memcmp(a, b, count * sizeof(T));
     }
 
+    template <class T, size_t Alignment>
+    void MemoryBackend<T, Alignment>::set_value(T* dest, const uint64_t index, const T& value) const{
+        dest[index] = value;
+    }
 
+    template <class T, size_t Alignment>
+    T MemoryBackend<T, Alignment>::get_value(const T* dest, const uint64_t index) const{
+        return dest[index];
+    }
 
     template <class T, size_t Alignment>
     void MemoryBackend<T, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
-        std::memcpy(dest, src, count);
+        //std::memcpy(dest, src, count);
+
+        if constexpr(std::is_trivially_copyable_v<T>) {
+
+            std::memcpy(dest, src, count * sizeof(T));
+
+        } else {
+
+            for(size_t i = 0; i < count; ++i){
+                dest[i] = src[i];
+            }
+        }
     }
 
     template <class T, size_t Alignment>
     void MemoryBackend<T, Alignment>::copy_from_host(T* dest, const T* src, size_t count) const {
-        std::memcpy(dest, src, count);
+        //std::memcpy(dest, src, count);
+
+        if constexpr(std::is_trivially_copyable_v<T>) {
+
+            std::memcpy(dest, src, count * sizeof(T));
+
+        } else {
+
+            for(size_t i = 0; i < count; ++i){
+                dest[i] = src[i];
+            }
+        }
     }
+
+    // template <class T, size_t Alignment>
+    // template <typename U>
+    // MemoryBackend<U> MemoryBackend<T, Alignment>::copy_with_type() const{
+    //     return MemoryBackend<U>();
+    // }
 
     template <class T, size_t Alignment>
     template <MemoryBackendConcept<T> DestBackend, MemoryBackendConcept<T> SrcBackend>
     void MemoryBackend<T, Alignment>::copy_to_backend(
-        T* dest, const DestBackend& destBackend, const T* src, const SrcBackend& srcBackend, const uint64_t n
-    ){
-        
+        T *dest, const DestBackend &destBackend, const T *src, const SrcBackend &srcBackend, const uint64_t n)
+    {
+
         if constexpr(std::is_same_v<DestBackend, MemoryBackend<T>>){
             srcBackend.copy_to_host(dest, src, n);
         }else if constexpr(std::is_same_v<SrcBackend, MemoryBackend<T>>){
-            srcBackend.copy_from_host(dest, src, n);
+            destBackend.copy_from_host(dest, src, n);
         }else{
             MemoryBackend<T> hostBackend;
             T* host = hostBackend.allocate(n);

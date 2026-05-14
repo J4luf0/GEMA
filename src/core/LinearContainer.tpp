@@ -43,18 +43,15 @@ namespace gema{
     }
 
     // template <class T, MemoryBackendConcept<T> IMemoryBackend>
-    // LinearContainer<T, IMemoryBackend>::LinearContainer
-    // (const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend)
+    // LinearContainer<T, IMemoryBackend>::LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend)
     // : memoryBackend_(memoryBackend){
+    //     size_t initSize = s.size();
+    //     reserve(initSize);
 
-    //     size_t otherSize = other.size();
-    //     reserve(otherSize);
+    //     memoryBackend_.uninitialized_copy(s.data(), s.data() + initSize, begin_);
 
-    //     memoryBackend_.uninitialized_copy(other.begin(), other.end(), begin_);
-
-    //     end_ = begin_ + otherSize;
+    //     end_ = begin_ + initSize;
     // }
-
     
     template <class T, MemoryBackendConcept<T> IMemoryBackend>
     template <MemoryBackendConcept<T> IOtherMemoryBackend>
@@ -172,6 +169,16 @@ namespace gema{
     }
 
     template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    void LinearContainer<T, IMemoryBackend>::set(const uint64_t index, const T& value){
+        memoryBackend_.set_value(begin_, index, value);
+    }
+
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    T LinearContainer<T, IMemoryBackend>::get(const uint64_t index) const {
+        return memoryBackend_.get_value(begin_, index);
+    }
+
+    template <class T, MemoryBackendConcept<T> IMemoryBackend>
     LinearContainer<T, IMemoryBackend>::operator std::span<T>(){
         return std::span<T>(begin_, end_);
     }
@@ -181,9 +188,14 @@ namespace gema{
         return std::span<const T>(begin_, end_);
     }
 
+    // template <class T, MemoryBackendConcept<T> IMemoryBackend>
+    // LinearContainer<T, IMemoryBackend>::operator std::vector<T>() const {
+    //     return std::vector(begin_, end_);
+    // }
+
     template <class T, MemoryBackendConcept<T> IMemoryBackend>
     LinearContainer<T, IMemoryBackend>::~LinearContainer(){
-        
+        clear();
     }
 
     template <class T, MemoryBackendConcept<T> IMemoryBackend>
@@ -207,7 +219,7 @@ namespace gema{
             memoryBackend_.uninitialized_move(oldBegin, oldBegin + oldSize, newData);
 
             if constexpr(!std::is_trivially_destructible_v<T>) {
-                std::destroy(oldBegin, oldBegin + oldSize);
+                memoryBackend_.destroy(oldBegin, oldBegin + oldSize);
             }
 
             //std::allocator_traits<A>::deallocate(alloc_, oldBegin, capacity());
@@ -240,7 +252,6 @@ namespace gema{
         }
 
         end_ = begin_ + n;
-
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
@@ -418,7 +429,7 @@ namespace gema{
         size_t n = size();
         if(n != other.size()) return false;
 
-        if constexpr(std::is_trivially_copyable_v<T> && std::has_unique_object_representations_v<T>){
+        if constexpr(std::is_trivially_copyable_v<T> /*&& std::has_unique_object_representations_v<T>*/){
             //return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
             return memoryBackend_.compare(begin_, other.begin_, n) == 0;
         }

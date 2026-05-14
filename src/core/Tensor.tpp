@@ -161,36 +161,38 @@ namespace gema {
 
     // STATIC PRIVATE DEFAULT VALUES: -----------------------------------------------------------------------------------------
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    inline std::function<EqualsCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultEquals_ = [] (const T& a, const T& b) {
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // inline std::function<EqualsCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultEquals_ = [] (const T& a, const T& b) {
         
-        if constexpr (std::is_floating_point<T>::value) {
-            T epsilon = std::numeric_limits<T>::epsilon();
-            return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
-        } else {
-            return a == b;
-        }
-    };
+    //     if constexpr (std::is_floating_point<T>::value) {
+    //         T epsilon = std::numeric_limits<T>::epsilon();
+    //         return std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)));
+    //     } else {
+    //         return a == b;
+    //     }
+    // };
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    inline std::function<OrderCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultOrder_ = [] (const T& a, const T& b) {
 
-        if constexpr (std::is_floating_point<T>::value) {
-            T epsilon = std::numeric_limits<T>::epsilon();
-            if (std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)))){
-                return 0;
-            }else if(a > b){
-                return 1;
-            }else{
-                return -1;
-            }
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // inline std::function<OrderCallable<T>> Tensor<T, DataMB, MetadataMB>::defaultOrder_ = [] (const T& a, const T& b) {
 
-        } else if constexpr (std::is_integral<T>::value){
-            return (a != b) * ((a > b) + -(a < b));
-        }else{
-            return 0;
-        }
-    };
+    //     if constexpr (std::is_floating_point<T>::value) {
+    //         T epsilon = std::numeric_limits<T>::epsilon();
+    //         if (std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)))){
+    //             return 0;
+    //         }else if(a > b){
+    //             return 1;
+    //         }else{
+    //             return -1;
+    //         }
+
+    //     } else if constexpr (std::is_integral<T>::value){
+    //         return (a != b) * ((a > b) + -(a < b));
+    //     }else{
+    //         return 0;
+    //     }
+    // };
+
 
 
 
@@ -203,6 +205,12 @@ namespace gema {
     : dimensionSizes_(newDimensionSizes){
         update();
     }
+
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // Tensor<T, DataMB, MetadataMB>::Tensor(span_view<uint64_t> newDimensionSizes)
+    // : dimensionSizes_(newDimensionSizes){
+
+    // }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     Tensor<T, DataMB, MetadataMB>::Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes,
@@ -217,17 +225,6 @@ namespace gema {
         
     }
 
-    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    // Tensor<T, DataMB, MetadataMB>::Tensor
-    // (const LinearContainer<uint64_t, IMemoryBackend>& newTensorDimensionSizes, const IMemoryBackend& memoryBackend){
-
-    //     tensor_ = LinearContainer<T, IMemoryBackend>(memoryBackend);
-    //     dimensionSizes_ = newTensorDimensionSizes;
-    //     dimensionJumps_ = LinearContainer<uint64_t, IMemoryBackend>(memoryBackend);
-
-    //     update();
-    // }
-
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     inline Tensor<T, DataMB, MetadataMB>::Tensor
     (const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const LinearContainer<T, DataMB>& newData) 
@@ -238,31 +235,46 @@ namespace gema {
         update();
     }
 
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // Tensor<T, DataMB, MetadataMB>::Tensor(
+    //     span_view<uint64_t> newDimensionSizes, 
+    //     const DataMB& dataBackend, 
+    //     const MetadataMB& metadataBackend
+    // ) : dimensionSizes_(newDimensionSizes, metadataBackend), dimensionJumps_(metadataBackend), tensor_(dataBackend){
+
+    //     update();
+    // }
+
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T, DataMB, MetadataMB>& otherTensor){
-        *this = otherTensor;
+    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T, DataMB, MetadataMB>& otherTensor)
+    :   tensor_(otherTensor.tensor_), 
+        dimensionSizes_(otherTensor.dimensionSizes_),
+        dimensionJumps_(otherTensor.dimensionJumps_)
+    {
+        //*this = otherTensor;
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept{
-        *this = std::move(otherTensor);
+    Tensor<T, DataMB, MetadataMB>::Tensor(Tensor<T, DataMB, MetadataMB>&& otherTensor) noexcept
+    :   tensor_(std::move(otherTensor.tensor_)), 
+        dimensionSizes_(std::move(otherTensor.dimensionSizes_)),
+        dimensionJumps_(std::move(otherTensor.dimensionJumps_))
+    {
+        //*this = std::move(otherTensor);
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T, DataMB, MetadataMB>::Tensor(const Tensor<T, DataMB, MetadataMB>* otherTensor){
+    template <typename OtherTensor>
+    Tensor<T, DataMB, MetadataMB>::Tensor(const OtherTensor* otherTensor)
+    :   tensor_(DataMB(otherTensor->tensor_.getMemoryBackend())),
+        dimensionSizes_(otherTensor->dimensionSizes_.getMemoryBackend()),
+        dimensionJumps_(otherTensor->dimensionJumps_.getMemoryBackend())
+    {
+
         tensor_.resize(otherTensor->tensor_.size());
         dimensionSizes_ = otherTensor->dimensionSizes_;
         dimensionJumps_ = otherTensor->dimensionJumps_;
     }
-
-
-    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    // Tensor<T, DataMB, MetadataMB>::Tensor(const IMemoryBackend &memoryBackend){
-
-    //     tensor_ = LinearContainer<T>(memoryBackend);
-    //     dimensionSizes_ = LinearContainer<uint64_t>(memoryBackend);
-    //     dimensionJumps_ = LinearContainer<uint64_t>(memoryBackend);
-    // }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     Tensor<T, DataMB, MetadataMB>::Tensor(){
@@ -294,7 +306,16 @@ namespace gema {
     void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, span_view<uint64_t> coordinates){
 
         uint64_t itemIndex = getIndex(coordinates);
+
+        if constexpr (std::is_same_v<T, double>){
+            if(value == 5 && coordinates.size() == 2 && coordinates[0] == 0){std::cout << "here setItem" << std::endl;}
+        }
+
         tensor_[itemIndex] = value;
+        
+        if constexpr (std::is_same_v<T, double>){
+            if(value == 5 && coordinates.size() == 2 && coordinates[0] == 0){std::cout << "here setItem" << std::endl;}
+        }
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
@@ -305,6 +326,16 @@ namespace gema {
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     const T* Tensor<T, DataMB, MetadataMB>::getData() const {
         return tensor_.data();
+    }
+
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    Tensor<T, DataMB, MetadataMB>::DataContainer& Tensor<T, DataMB, MetadataMB>::getDataContainer(){
+        return tensor_;
+    }
+
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    const Tensor<T, DataMB, MetadataMB>::DataContainer &Tensor<T, DataMB, MetadataMB>::getDataContainer() const{
+        return tensor_;
     }
 
     // Secure version will need to check for correct tensorItems size
@@ -327,16 +358,6 @@ namespace gema {
     //     userOrder_ = order;
     //     order_ = &userOrder_;
     // }
-
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::setTensorOutput(const std::function<void(const T&)>& tensorOutput){
-        this->tensorOutput_ = tensorOutput;
-    }
-
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput){
-        this->itemOutput_ = itemOutput;
-    }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     bool Tensor<T, DataMB, MetadataMB>::isValidCoordinates(span_view<uint64_t> coords) const{
@@ -406,14 +427,14 @@ namespace gema {
         return os << tensor.toString();
     }
 
-    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    void Tensor<T, DataMB, MetadataMB>::parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem){
+    // template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    // void Tensor<T, DataMB, MetadataMB>::parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem){
         
-        uint64_t i;
-        for(i = 0; tensorString[i] == '{'; ++i){}
-        std::vector<int> parsedDimensionSizes(i);
+    //     uint64_t i;
+    //     for(i = 0; tensorString[i] == '{'; ++i){}
+    //     std::vector<int> parsedDimensionSizes(i);
 
-    }
+    // }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     void Tensor<T, DataMB, MetadataMB>::fillWith(const T& value){
@@ -432,24 +453,26 @@ namespace gema {
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
-    Tensor<T> Tensor<T, DataMB, MetadataMB>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
+    Tensor<T, DataMB, MetadataMB> Tensor<T, DataMB, MetadataMB>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
-        if(dim1 == dim2) return Tensor<T>(dimensionSizes_);
+        if(dim1 == dim2) return Tensor<T, DataMB, MetadataMB>(dimensionSizes_);
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
-        LinearContainer<uint64_t> transposedDimensionSizes = dimensionSizes_; 
+        LinearContainer<uint64_t, MetadataMB> transposedDimensionSizes = dimensionSizes_; 
 
         // Swapping the dimension sizes
         transposedDimensionSizes[dim1] = dimensionSizes_[dim2]; 
         transposedDimensionSizes[dim2] = dimensionSizes_[dim1];
         
         // Initializing the new tensor
-        Tensor<T> tensorTransposed = Tensor<T>(transposedDimensionSizes);
+        Tensor<T, DataMB, MetadataMB> tensorTransposed = 
+            Tensor<T, DataMB, MetadataMB>(transposedDimensionSizes, tensor_.getMemoryBackend());
 
         LinearContainer<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
+        original.fill(0);
 
         // Looping through elements in tensor and swapping the desired coordinates
         for(uint64_t i = 0; i < tensor_.size(); ++i){
@@ -476,7 +499,7 @@ namespace gema {
 
         // Copying the dimensionSizes
         // Change assigment to just construction of correct size
-        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
+        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_.copyToBackend(MemoryBackend<uint64_t>());
 
         // Swapping the dimension sizes
         const uint64_t temporaryDimensionSize1 = dimensionSizes_[dim1];
@@ -486,11 +509,12 @@ namespace gema {
         const uint64_t itemCount = updateDimensionJump();
         
         // Initializing the new data
-        LinearContainer<T> newTensorData(itemCount);
+        LinearContainer<T, DataMB> newTensorData(itemCount, tensor_.getMemoryBackend());
 
         LinearContainer<uint64_t> original, switched;
         original.resize(dimensionSizes_.size());
         switched.resize(dimensionSizes_.size());
+        original.fill(0);
 
         // Looping through elements in tensor and swapping the desired coordinates
         for(uint64_t i = 0; i < itemCount; ++i){

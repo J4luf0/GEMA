@@ -5,28 +5,10 @@
 #include <type_traits>
 #include <vector>
 
+#include "Utils.hpp"
 #include "LinearContainer.hpp"
 
 namespace gema {
-
-
-template<typename T, std::size_t Extent = std::dynamic_extent>
-class span_view : public std::span<const T, Extent> {
-    using Base = std::span<const T, Extent>;
-
-public:
-    using Base::Base;
-
-    constexpr span_view(std::initializer_list<T> il)
-        requires (Extent == std::dynamic_extent)
-        : Base(il.begin(), il.size())
-    {}
-
-    // constexpr operator std::span<const T, Extent>() const noexcept {
-    //     return static_cast<Base>(*this);
-    // }
-};
-
 
 
 
@@ -107,41 +89,43 @@ concept tensor_computation_interface = requires (TensorT<T> tensor, T t){
 
 using Coords = LinearContainer<uint64_t>;
 
-template <template <typename> class Candidate, class T>
+//template <template <typename> class Candidate, class T>
+template <typename Candidate, typename T = typename Candidate::value_type>
 concept TensorConcept = requires(
-    Candidate<T> tensor, 
-    const Candidate<T> ctensor, 
-    Candidate<T> otherTensor, 
+    Candidate tensor, 
+    const Candidate ctensor, 
+    Candidate otherTensor, 
     T t,
-    const Candidate<T>& tensorInput,
-    Candidate<T>& tensorInputOutput,
+    const Candidate& tensorInput,
+    Candidate& tensorInputOutput,
     const T& itemInput,
     const Coords& coordsInput
 ) {
 
-    requires std::same_as<typename Candidate<T>::value_type, T>;
-    requires MemoryBackendConcept<typename Candidate<T>::memory_backend, T>;
+    requires std::same_as<typename Candidate::value_type, T>;
+    requires MemoryBackendConcept<typename Candidate::memory_backend, T>;
 
-    requires std::constructible_from<Candidate<T>, const Coords&>;
-    requires std::copy_constructible<Candidate<T>>;
-    requires std::move_constructible<Candidate<T>>;
-    requires std::default_initializable<Candidate<T>>;
+    requires std::constructible_from<Candidate, const Coords&>;
+    requires std::copy_constructible<Candidate>;
+    requires std::move_constructible<Candidate>;
+    requires std::default_initializable<Candidate>;
 
-    { otherTensor = tensor } -> std::same_as<Candidate<T>&>;
-    { otherTensor = std::move(tensor) } -> std::same_as<Candidate<T>&>;
+    { otherTensor = tensor } -> std::same_as<Candidate&>;
+    { otherTensor = std::move(tensor) } -> std::same_as<Candidate&>;
 
-    { ctensor.getDimensionSizes() } -> std::same_as<const LinearContainer<uint64_t>&>;
+    //{ ctensor.getDimensionSizes() } -> std::same_as<const LinearContainer<uint64_t>&>;
+    { ctensor.getDimensionSizes() } -> std::convertible_to<std::span<const uint64_t>>;
     { ctensor.getNumberOfDimensions() } -> std::same_as<uint64_t>;
     { ctensor.getNumberOfItems() } -> std::same_as<uint64_t>;
 
-    { tensor.getItem(coordsInput) } -> std::same_as<T&>;
+    { tensor.getItem(coordsInput) } -> std::convertible_to<T&>;//todo: really convertible? find way around
     { tensor.setItem(itemInput, coordsInput) } -> std::same_as<void>;
     { tensor.getData() } -> std::convertible_to<T*>;
     { ctensor.getData() } -> std::convertible_to<const T*>;
-    { tensor.setData(std::declval<const LinearContainer<T>&>()) };
+    //{ tensor.setData(std::declval<const LinearContainer<T>&>()) };
 
     { ctensor.isValidCoordinates(coordsInput) } -> std::convertible_to<bool>;
-    { Candidate<T>::isValidCoordinates(coordsInput, coordsInput) } -> std::convertible_to<bool>;
+    { Candidate::isValidCoordinates(coordsInput, coordsInput) } -> std::convertible_to<bool>;
     { ctensor.isEquilateral() } -> std::convertible_to<bool>;
 
     { ctensor == tensor } -> std::convertible_to<bool>;
@@ -150,8 +134,8 @@ concept TensorConcept = requires(
     { ctensor.transpositionAndReturn(
         std::declval<const uint64_t>(), 
         std::declval<const uint64_t>()
-    ) } -> std::same_as<Candidate<T>>;
-    { ctensor.transposition(
+    ) } -> std::same_as<Candidate>;
+    { tensor.transposition(
         std::declval<const uint64_t>(), 
         std::declval<const uint64_t>()
     ) } -> std::same_as<void>;
@@ -160,50 +144,50 @@ concept TensorConcept = requires(
     { tensor.addDimension(std::declval<const uint64_t>(), std::declval<const uint64_t>()) } -> std::same_as<void>;
     { tensor.removeDimension(std::declval<const uint64_t>()) } -> std::same_as<void>;
 
-    { Candidate<T>::applyAndReturn(
+    { Candidate::applyAndReturn(
         tensorInput, 
         itemInput, 
         [](const T&, const T&) -> T {}
         //std::declval<T(const T&, const T&)>()
-    ) } -> std::same_as<Candidate<T>>;
-    { Candidate<T>::applyAndReturn(
+    ) } -> std::same_as<Candidate>;
+    { Candidate::applyAndReturn(
         itemInput, 
         tensorInput,
         [](const T&, const T&) -> T {}
         //std::declval<T(const T&, const T&)>()
-    ) } -> std::same_as<Candidate<T>>;
-    { Candidate<T>::applyAndReturn(
+    ) } -> std::same_as<Candidate>;
+    { Candidate::applyAndReturn(
         tensorInput, 
         tensorInput, 
         [](const T&, const T&) -> T {}
         //std::declval<T(const T&, const T&)>()
-    ) } -> std::same_as<Candidate<T>>;
+    ) } -> std::same_as<Candidate>;
 
-    { Candidate<T>::apply(
+    { Candidate::apply(
         tensorInputOutput, 
         itemInput, 
         [](T&, const T&) -> void {}
         //std::declval<void(T&, const T&)>()
     ) } -> std::same_as<void>;
-    { Candidate<T>::apply(
+    { Candidate::apply(
         itemInput, 
         tensorInputOutput, 
         [](const T&, T&) -> void {}
         //std::declval<void(const T&, T&)>()
     ) } -> std::same_as<void>;
-    { Candidate<T>::apply(
+    { Candidate::apply(
         tensorInputOutput, 
         tensorInput,
         [](T&, const T&) -> void {}
         //std::declval<void(T&, const T&)>()
     ) } -> std::same_as<void>;
 
-    { Candidate<T>::forEachAndReturn(
+    { Candidate::forEachAndReturn(
         tensorInput, 
         [](const T&) -> T {}
         //std::declval<T(const T&)>()
-    ) } -> std::same_as<Candidate<T>>;
-    { Candidate<T>::forEach(
+    ) } -> std::same_as<Candidate>;
+    { Candidate::forEach(
         tensorInputOutput, 
         [](T&) -> void {}
         //std::declval<void(T&)>()

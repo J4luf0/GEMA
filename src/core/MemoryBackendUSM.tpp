@@ -18,8 +18,21 @@ namespace gema {
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(MemoryBackendUSM<T, Kind, Alignment>&& otherBackend) noexcept{
-        std::swap(otherBackend.queue_, this->queue_);
+    template <typename U>
+    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(const MemoryBackendUSM<U, Kind, Alignment>& otherBackend)
+    requires (!std::is_same_v<U, T>){
+        queue_ = otherBackend.queue_;
+    }
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(MemoryBackendUSM<T, Kind, Alignment>&& otherBackend) noexcept
+    : queue_(otherBackend.queue_){
+        otherBackend.queue_ = nullptr;
+    }
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    MemoryBackendUSM<T, Kind, Alignment>::MemoryBackendUSM(){
+        
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
@@ -41,9 +54,9 @@ namespace gema {
 
         if(n == 0) return nullptr;
 
-        std::size_t bytes = n * sizeof(T);
+        //std::size_t bytes = n * sizeof(T);
 
-        return sycl::aligned_alloc<T>(Alignment, bytes, *queue_, Kind);
+        return sycl::aligned_alloc<T>(Alignment, n, *queue_, Kind);
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
@@ -229,12 +242,19 @@ namespace gema {
         if constexpr (Kind == sycl::usm::alloc::device) {
 
             // fallback → copy to host (expensive!)
-            std::vector<T> tmpA(count), tmpB(count);
+            uint64_t countBytes = count * sizeof(T);
+            T* tmpA = new T[count];
+            T* tmpB = new T[count];
 
-            queue_->memcpy(tmpA.data(), a, count * sizeof(T)).wait();
-            queue_->memcpy(tmpB.data(), b, count * sizeof(T)).wait();
+            queue_->memcpy(tmpA, a, count * sizeof(T)).wait();
+            queue_->memcpy(tmpB, b, count * sizeof(T)).wait();
 
-            return std::memcmp(tmpA.data(), tmpB.data(), count * sizeof(T));
+            int result = std::memcmp(tmpA, tmpB, count * sizeof(T));
+
+            delete[] tmpA;
+            delete[] tmpB;
+
+            return result;
 
         } else {
 
@@ -251,13 +271,136 @@ namespace gema {
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    void MemoryBackendUSM<T, Kind, Alignment>::set_value(T* dest, const uint64_t index, const T& value) const {
+
+        T* placeToSave = dest + index;
+
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                *placeToSave = value;
+            });
+        }).wait();
+    }
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    T MemoryBackendUSM<T, Kind, Alignment>::get_value(const T* dest, const uint64_t index) const {
+
+        T* sharedTmp = sycl::malloc_shared<T>(1, *queue_);
+
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                new (sharedTmp) T(dest[index]);
+            });
+        }).wait();
+
+        T result = *sharedTmp;
+
+        std::destroy_at(sharedTmp);
+
+        sycl::free(sharedTmp, *queue_);
+
+        return result;
+    }
+
+    
+    // template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    // template <typename U>
+    // MemoryBackendUSM<U, Kind, Alignment> MemoryBackendUSM<T, Kind, Alignment>::copy_with_type() const{
+    //     return MemoryBackendUSM<U, Kind, Alignment>(queue_);
+    // }
+
+
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::copy_to_host(T* dest, const T* src, size_t count) const {
-        queue_->memcpy(dest, src, count * sizeof(T)).wait();
+
+        if constexpr(std::is_trivially_copyable_v<T>) {
+            queue_->memcpy(dest, src, count * sizeof(T)).wait();
+        } else {
+
+            // nejdřív raw bytes do temporary host storage
+            std::unique_ptr<std::byte[]> rawBuffer(new std::byte[count * sizeof(T)]);
+
+            queue_->memcpy(
+                rawBuffer.get(),
+                src,
+                count * sizeof(T)
+            ).wait();
+
+            // reinterpretace na host objekty
+            T* tmp = reinterpret_cast<T*>(rawBuffer.get());
+
+            // bezpečné zkopírování do cílových host objektů
+            for(size_t i = 0; i < count; ++i) {
+
+                if constexpr(std::is_copy_assignable_v<T>) {
+                    dest[i] = tmp[i];
+                } else {
+                    std::construct_at(dest + i, tmp[i]);
+                }
+
+            }
+        }
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     void MemoryBackendUSM<T, Kind, Alignment>::copy_from_host(T* dest, const T* src, size_t count) const {
-        queue_->memcpy(dest, src, count * sizeof(T)).wait();
+        //queue_->memcpy(dest, src, count * sizeof(T)).wait();
+
+        if constexpr(std::is_trivially_copyable_v<T>) {
+            queue_->memcpy(dest, src, count * sizeof(T)).wait();
+        } else {
+
+            // temporary shared storage aby kernel viděl objekty
+            T* tmp = sycl::malloc_shared<T>(
+                count,
+                *queue_
+            );
+
+            try {
+
+                // host copy do shared memory
+                for(size_t i = 0; i < count; ++i) {
+                    std::construct_at(tmp + i, src[i]);
+                }
+
+                // device-side assignment / construction
+                queue_->submit([&](sycl::handler& h){
+
+                    h.parallel_for(
+                        sycl::range<1>(count),
+                        [=](sycl::id<1> idx){
+
+                            size_t i = idx[0];
+
+                            if constexpr(std::is_copy_assignable_v<T>) {
+                                dest[i] = tmp[i];
+                            } else {
+                                new (dest + i) T(tmp[i]);
+                            }
+                        }
+                    );
+
+                }).wait();
+
+                // cleanup shared objects
+                for(size_t i = 0; i < count; ++i) {
+                    std::destroy_at(tmp + i);
+                }
+
+                sycl::free(tmp, *queue_);
+
+            } catch(...) {
+
+                for(size_t i = 0; i < count; ++i) {
+                    std::destroy_at(tmp + i);
+                }
+
+                sycl::free(tmp, *queue_);
+
+                throw;
+            }
+        }
     }
 }
 

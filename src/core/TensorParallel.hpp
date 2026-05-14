@@ -17,6 +17,9 @@ class TensorParallel;
 template <typename X, class T>
 concept is_tensorparallel_or_t = std::is_same_v<X, T> || std::is_same_v<X, TensorParallel<T>>;
 
+template<typename C, class T>
+concept apply_to_item_callable = std::is_invocable_r_v<void, C, T&> && sycl::is_device_copyable_v<std::remove_cvref_t<C>>;
+
 template <typename A, typename B, class T>
 concept tensor_or_t_or_bothtensor_parallel = 
     (std::is_same_v<std::remove_cvref_t<A>, TensorParallel<T>> && std::is_same_v<std::remove_cvref_t<B>, TensorParallel<T>>) ||
@@ -27,7 +30,8 @@ concept tensor_or_t_or_bothtensor_parallel =
 template<class T>
 class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParallel<T>>{
 
-    
+    static_assert(sycl::is_device_copyable_v<T>);
+    static_assert(std::is_trivially_copyable_v<T>);
 
     inline static sycl::queue queueGlobal_{sycl::property::queue::in_order{}};
 
@@ -42,7 +46,7 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     sycl::queue* queue_ = &queueGlobal_;
 
-    Tensor<T, MemoryBackendUSM<T, usmDataKind_>, MemoryBackendUSM<uint64_t, usmMetadataKind_>> tensor_;
+    Tensor<T, DataBackend, MetadataBackend> tensor_{DataBackend(queue_), MetadataBackend(queue_)};
 
     public:
 
@@ -50,10 +54,14 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     using type = TensorParallel<U>;
 
     using value_type = T;
-    using memory_backend = MemoryBackendUSM<T, sycl::usm::alloc::device>;
+    //using memory_backend = MemoryBackendUSM<T, sycl::usm::alloc::device>;
 
 
     TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes);
+
+    //TensorParallel(const MetadataContainer& newDimensionSizes, const DataContainer& newData);
+
+    //TensorParallel(span_view<uint64_t> newDimensionSizes);
 
     TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes, const LinearContainer<T>& newData);// = delete;
 
@@ -61,9 +69,12 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     TensorParallel(TensorParallel<T>&& otherTensor) noexcept;
 
-    TensorParallel(const TensorParallel<T>* otherTensor);
+    template <typename OtherTensor>
+    TensorParallel(OtherTensor* otherTensor);
 
     TensorParallel();
+
+    ~TensorParallel();
 
     TensorParallel<T>& operator=(const TensorParallel<T>& otherTensor);
     
@@ -71,15 +82,17 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
 
 
-    const LinearContainer<uint64_t>& getDimensionSizes() const;
+    const MetadataContainer& getDimensionSizes() const;
 
     uint64_t getNumberOfDimensions() const;
 
     uint64_t getNumberOfItems() const;
 
+    const Tensor<T, DataBackend, MetadataBackend>& getTensor() const;
+    sycl::queue* getQueue();
 
 
-    T& getItem(span_view<uint64_t> coordinates);
+    T getItem(span_view<uint64_t> coordinates);
 
     void setItem(const T& value, span_view<uint64_t> coordinates);
 
@@ -96,6 +109,9 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
     bool isEquilateral() const;
 
     void fillWith(const T& fill);
+
+    template<typename U> 
+    friend std::ostream& operator<<(std::ostream& os, const TensorParallel<U>& tensor);
 
     std::string toString() const;
 
@@ -155,6 +171,9 @@ class TensorParallel : /*public Tensor<T>,*/public AbstractOperation<TensorParal
 
     template <foreach_callable_parallel<T> C>
     static void forEach(TensorParallel<T>& tensor, C&& operation);
+
+    template <apply_to_item_callable<T> C>
+    void applyToItem(span_view<uint64_t> coords, C&& operation);
 
 };
 

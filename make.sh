@@ -43,7 +43,7 @@ cmake -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CXX_FLAGS="-fdiagnostics-color=always"
 
-cmake --build build
+cmake --build build #> error.log
 
 # spuštění testů pouze pokud build prošel
 if [ $? -eq 0 ]; then

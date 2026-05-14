@@ -41,12 +41,12 @@ public:
     LinearContainer() requires std::default_initializable<IMemoryBackend>;
     LinearContainer(const IMemoryBackend& memoryBackend);
     explicit LinearContainer(size_t n) requires std::default_initializable<IMemoryBackend>;
-    LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
+    explicit LinearContainer(size_t n, const IMemoryBackend& memoryBackend);
     LinearContainer(std::initializer_list<T> init) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(const LinearContainer<T, IMemoryBackend>& other, const IMemoryBackend& memoryBackend);
     //LinearContainer(const std::vector<T>& init) requires std::default_initializable<IMemoryBackend>;
     //LinearContainer(std::span<const T> s) requires std::default_initializable<IMemoryBackend>;
-    //LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend);
+    //explicit LinearContainer(std::span<const T> s, const IMemoryBackend& memoryBackend);
 
     
     template<MemoryBackendConcept<T> IOtherMemoryBackend>
@@ -60,6 +60,11 @@ public:
 
     operator std::span<T>();
     operator std::span<const T>() const;
+
+    void set(const uint64_t index, const T& value);
+    T get(const uint64_t index) const;
+
+    //operator std::vector<T>() const;
 
     ~LinearContainer();
 

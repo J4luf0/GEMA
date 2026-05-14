@@ -104,40 +104,43 @@ template <class T> using OrderCallable = int(const T&, const T&);
 template<class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
 class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
 
-    protected:
-
-    /// The tensor data itself, represented by vector containing all the items.
-    LinearContainer<T, DataMB> tensor_;
-    /// Size od every tensor dimension.
-    LinearContainer<uint64_t, MetadataMB> dimensionSizes_;
-
-    /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
-    /// dimension on flattened data. Used for optimization, shall not be leaked outside.
-    LinearContainer<uint64_t, MetadataMB> dimensionJumps_;
-    //std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
-
-
-    /// Function compares items in tensor and represents equality by bool.
-    static std::function<EqualsCallable<T>> defaultEquals_;
-    std::function<EqualsCallable<T>>* equals_ = &defaultEquals_;
-    std::function<EqualsCallable<T>> userEquals_;
-
-    /// Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
-    static std::function<OrderCallable<T>> defaultOrder_;
-    std::function<OrderCallable<T>>* order_ = &defaultOrder_;
-    std::function<OrderCallable<T>> userOrder_;
-
-    // std::function<void(const T&)> tensorOutput_;
-    // std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
-
     public:
 
     template<typename U, typename DMB, typename MDMB>
     using type = Tensor<U, DMB, MDMB>;
 
     using value_type = T;
-    using data_backend = DataMB;
-    using metadata_backend = MetadataMB;
+
+    using DataContainer = LinearContainer<T, DataMB>;
+    using MetadataContainer = LinearContainer<uint64_t, MetadataMB>;
+
+    protected:
+
+    /// The tensor data itself, represented by vector containing all the items.
+    DataContainer tensor_;
+    /// Size od every tensor dimension.
+    MetadataContainer dimensionSizes_;
+
+    /// Vector one to one with dimensionSizes_ where value on [n] tells how big jump corresponds to one increment of n-th
+    /// dimension on flattened data. Used for optimization, shall not be leaked outside.
+    MetadataContainer dimensionJumps_;
+    //std::map<std::vector<uint64_t>, uint64_t> recentAccessCache_; // Maybe make it its own helper class
+
+
+    /// Function compares items in tensor and represents equality by bool.
+    //static std::function<EqualsCallable<T>> defaultEquals_;
+    DefaultEquals<T> equals_{};
+    //std::function<EqualsCallable<T>> userEquals_;
+
+    /// Function orders items in a way: (less, equal, more) -> (-1, 0, 1).
+    //static std::function<OrderCallable<T>> defaultOrder_;
+    DefaultOrder<T> order_{};
+    //std::function<OrderCallable<T>> userOrder_;
+
+    // std::function<void(const T&)> tensorOutput_;
+    // std::function<void(const T&, const std::vector<uint64_t>&)> itemOutput_;
+
+    public:
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets dimensionSizes, calculates number of items and then allocates them on tensor, then sets functional
@@ -147,6 +150,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @param newDimensionSizes Vector filled with sizes of dimensions.
     */
     Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes);
+
+    //Tensor(span_view<uint64_t> newDimensionSizes);
 
     Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const DataMB& memoryBackend);
 
@@ -161,6 +166,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @param newData one dimensional vector of items to be added by order.
      */
     Tensor(const LinearContainer<uint64_t, MetadataMB>& newDimensionSizes, const LinearContainer<T, DataMB>& newData);
+    
+    //Tensor(span_view<uint64_t> newDimensionSizes, const DataMB& dataBackend, const MetadataMB& metadataBackend);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Copy constructor, makes the object the same as the parameter object.
@@ -182,7 +189,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @param otherTensor Tensor whose dimension sizes and item count is copied.
      */
-    Tensor(const Tensor<T, DataMB, MetadataMB>* otherTensor);
+    template <typename OtherTensor>
+    Tensor(const OtherTensor* otherTensor);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Empty constructor so it can be declared without being initalized - trying to do something with
@@ -241,6 +249,9 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
     T* getData();
     const T* getData() const;
 
+    DataContainer& getDataContainer();
+    const DataContainer& getDataContainer() const;
+
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Sets one dimensional array and puts its items into tensor by order, if the array is longer than number of items 
      * in a tensor, only those that fit will be added.
@@ -251,20 +262,6 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * and can be beneficial if user knows what it is doing and needs to put many values in a tensor at once.
     */
     Tensor<T, DataMB, MetadataMB>& setData(const LinearContainer<T, DataMB>& tensorItems);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Sets the output of the tensor through this->showTensor() method.
-     * 
-     * @param tensorOutput function that defines the output of the tensor.
-    */
-    void setTensorOutput(const std::function<void(const T&)>& tensorOutput);
-
-    /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Sets the output of the items through this->showItem() method.
-     * 
-     * @param tensorOutput function that defines the output of the tensor.
-    */
-    void setItemOutput(const std::function<void(const T&, const std::vector<uint64_t>&)>& itemOutput);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Checks if given coordinates is valid as this tensors coordinates according to dimension sizes.
@@ -316,7 +313,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * @param tensorString string in correct format to be parsed.
      * @param parseItem function to convert string to item.
      */
-    void parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem);
+    //void parse(const std::string& tensorString, const std::function<const T(const std::string&)>& parseItem);
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Fills tensor with passed value.
@@ -347,7 +344,7 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      * 
      * @return A tensor that got two dimensions transposed.
     */
-    Tensor<T> transpositionAndReturn(const uint64_t dim1 = 0, const uint64_t dim2 = 1) const;
+    Tensor<T, DataMB, MetadataMB> transpositionAndReturn(const uint64_t dim1 = 0, const uint64_t dim2 = 1) const;
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Swaps two dimensions in a tensor.
@@ -1176,13 +1173,11 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
     uint64_t updateInnerState();
 
     /** -----------------------------------------------------------------------------------------------------------------------
-     * @brief Virtual destructor.
+     * @brief Destructor.
     */
-    virtual ~Tensor();
+    ~Tensor();
 
 
-
-    protected:
 
     /** -----------------------------------------------------------------------------------------------------------------------
      * @brief Calculates coordinates from items index in a tensor, this is inverse method of "getIndex" method.
@@ -1204,6 +1199,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
     //uint64_t getIndex(std::initializer_list<uint64_t> coordinates) const;
     uint64_t getIndex(span_view<uint64_t> coordinates) const;
     static uint64_t getIndex(span_view<uint64_t> coordinates, span_view<uint64_t> dimensionSizes);
+
+    protected:
 
     LinearContainer<T> transposition_(const int dim1 = 0, const int dim2 = 1) const;
 

@@ -10,14 +10,24 @@ namespace gema{
     
     template <class T>
     TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes)
-    : tensor_(
-        newDimensionSizes.copyToBackend(MetadataBackend(queue_)),
-        DataBackend(queue_)
-    ){
+    : tensor_(newDimensionSizes.copyToBackend(MetadataBackend(queue_)), DataBackend(queue_)){
         // this->tensor_ = Tensor<T>(MemoryBackendUSM<T, usmDataKind_>(queue_));
         // this->dimensionSizes_ = LinearContainer<uint64_t>(newTensorDimensionSizes, MemoryBackendUSM<uint64_t, usmDataKind_>(queue_));
         // this->update();
     }
+
+    // template <class T>
+    // TensorParallel<T>::TensorParallel(const MetadataContainer& newDimensionSizes, const DataContainer& newData)
+    // : tensor_(newDimensionSizes, newData){
+
+    // }
+
+
+    // template <class T>
+    // TensorParallel<T>::TensorParallel(span_view<uint64_t> newDimensionSizes)
+    // : tensor_(newDimensionSizes, DataBackend(queue_), MetadataBackend(queue_)){
+
+    // }
 
     template <class T>
     TensorParallel<T>::TensorParallel(const LinearContainer<uint64_t>& newDimensionSizes, const LinearContainer<T>& newData)
@@ -30,20 +40,21 @@ namespace gema{
 
     template <class T>
     TensorParallel<T>::TensorParallel(const TensorParallel<T>& otherTensor)
-    : tensor_(otherTensor){
-        queue_ = otherTensor->queue_;
+    : tensor_(otherTensor.tensor_){
+        //queue_ = otherTensor.queue_;
     }
 
     template <class T>
     TensorParallel<T>::TensorParallel(TensorParallel<T>&& otherTensor) noexcept 
-    : tensor_(std::move(otherTensor)){
-        queue_ = std::move(otherTensor->queue_);
+    : tensor_(std::move(otherTensor.tensor_)){
+        //queue_ = std::move(otherTensor.queue_);
     }
 
     template <class T>
-    TensorParallel<T>::TensorParallel(const TensorParallel<T>* otherTensor)
-    : tensor_(otherTensor){
-        queue_ = otherTensor->queue_;
+    template <typename OtherTensor>
+    TensorParallel<T>::TensorParallel(OtherTensor* otherTensor)
+    : tensor_(&(otherTensor->getTensor())){
+        //*queue_ = otherTensor->getQueue();
     }
 
     template <class T>
@@ -53,22 +64,27 @@ namespace gema{
     }
 
     template <class T>
+    TensorParallel<T>::~TensorParallel(){
+        
+    }
+
+    template <class T>
     TensorParallel<T>& TensorParallel<T>::operator=(const TensorParallel<T>& otherTensor){
-        tensor_ = otherTensor;
+        tensor_ = otherTensor.tensor_;
         queue_ = otherTensor.queue_;
         return *this;
     }
 
     template <class T>
     TensorParallel<T>& TensorParallel<T>::operator=(TensorParallel<T>&& otherTensor) noexcept {
-        tensor_ = std::move(otherTensor);
+        tensor_ = std::move(otherTensor.tensor_);
         queue_ = std::move(otherTensor.queue_);
         return *this;
     }
 
     template <class T>
-    const LinearContainer<uint64_t>& TensorParallel<T>::getDimensionSizes() const {
-        tensor_.getDimensionSizes();
+    const TensorParallel<T>::MetadataContainer& TensorParallel<T>::getDimensionSizes() const {
+        return tensor_.getDimensionSizes();
     }
 
     template <class T>
@@ -82,13 +98,36 @@ namespace gema{
     }
 
     template <class T>
-    T& TensorParallel<T>::getItem(span_view<uint64_t> coordinates){
-         return tensor_.getItem(coordinates);
+    const Tensor<T, typename TensorParallel<T>::DataBackend, typename TensorParallel<T>::MetadataBackend>& 
+    TensorParallel<T>::getTensor() const {
+        return tensor_;
+    }
+
+    template <class T>
+    sycl::queue* TensorParallel<T>::getQueue(){
+        return queue_;
+    }
+
+    template <class T>
+    T TensorParallel<T>::getItem(span_view<uint64_t> coordinates){
+        //return tensor_.getItem(coordinates);
+        const uint64_t index = tensor_.getIndex(coordinates);
+        return tensor_.getDataContainer().get(index);
     }
 
     template <class T>
     void TensorParallel<T>::setItem(const T& value, span_view<uint64_t> coordinates){
-        tensor_.setItem(value, coordinates);
+
+        const uint64_t index = tensor_.getIndex(coordinates);
+        tensor_.getDataContainer().set(index, value);
+
+        // T* placeToSave = tensor_.getData() + tensor_.getIndex(coordinates);
+
+        // queue_->submit([&](sycl::handler& h){
+        //     h.single_task([=](){
+        //         *placeToSave = value;
+        //     });
+        // }).wait();
     }
 
     template <class T>
@@ -103,7 +142,8 @@ namespace gema{
 
     template <class T>
     TensorParallel<T>& TensorParallel<T>::setData(const LinearContainer<T>& tensorItems){
-        return setData(tensorItems.copyToBackend(DataBackend(queue_)));
+        tensor_.setData(tensorItems.copyToBackend(DataBackend(queue_)));
+        return *this;
     }
 
     template <class T>
@@ -126,30 +166,77 @@ namespace gema{
 
     template <class T>
     void TensorParallel<T>::fillWith(const T& fill){
-        tensor_.fillWith(fill);
+        //tensor_.fillWith(fill);
+
+        forEach([=](T& item){
+            item = fill;
+        });
+    }
+
+    template <typename U>
+    std::ostream& operator<<(std::ostream &os, const TensorParallel<U>& tensor){
+        return os << tensor.toString();
     }
 
     template <class T>
     std::string TensorParallel<T>::toString() const {
-        return tensor_.toString();
+        //return tensor_.toString();
+
+        const uint64_t itemCount = tensor_.getNumberOfItems();
+        LinearContainer<uint64_t, MetadataBackend> dimensionSizes = tensor_.getDimensionSizes();
+
+        std::vector<std::string> openingBrackets(itemCount);
+        std::fill(openingBrackets.begin(), openingBrackets.end(), "");
+
+        std::vector<std::string> closingBrackets(itemCount);
+        std::fill(closingBrackets.begin(), closingBrackets.end(), "");
+
+        uint64_t dimensionProduct = itemCount;
+
+        for(uint64_t i = 0; i < dimensionSizes.size(); i++){ // Identity endianness
+
+            for(uint64_t j = 0; j < itemCount; ++j){
+
+                if(j % dimensionProduct == 0){
+                    openingBrackets[j] += "{";
+                }
+
+                if(j % dimensionProduct == (dimensionProduct - 1)){
+                    closingBrackets[j] += "}";
+                }
+            }
+
+            dimensionProduct /= dimensionSizes[i];
+        }
+
+        std::string output = "";
+        LinearContainer<T> dataContainer = tensor_.getDataContainer().copyToBackend(MemoryBackend<T>());
+
+        for(uint64_t i = 0; i < itemCount; ++i){
+            output += 
+                std::format("{}{}{}{}", openingBrackets[i], dataContainer[i], closingBrackets[i], (((i + 1) >= itemCount) ? "" : ", "));
+        }
+
+        return output; 
     }
 
     template <class T>
     bool TensorParallel<T>::operator==(const TensorParallel<T>& otherTensor) const {
-        return tensor_ == otherTensor;
+        return tensor_ == otherTensor.tensor_;
     }
 
     template <class T>
     bool TensorParallel<T>::operator!=(const TensorParallel<T>& otherTensor) const {
-        return tensor_ != otherTensor;
+        return tensor_ != otherTensor.tensor_;
     }
 
     template <class T>
     TensorParallel<T> TensorParallel<T>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
-        return tensor_.transpositionAndReturn(dim1, dim2);
+        return TensorParallel<T>(this);
+        //return tensor_.transpositionAndReturn(dim1, dim2);
 
-        // if(dim1 == dim2) return TensorParallel<T>(this->dimensionSizes_);
+        // if(dim1 == dim2) return TensorParallel<T>(this);
 
         // // Copying the dimensionSizes
         // // Change assigment to just construction of correct size
@@ -201,7 +288,8 @@ namespace gema{
     template <class T>
     void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
 
-        tensor_.transposition(dim1, dim2);
+        return;
+        //tensor_.transposition(dim1, dim2);
 
         // if(dim1 == dim2) return;
 
@@ -282,7 +370,7 @@ namespace gema{
         const TensorParallel<T>* tensorOperand = type_pick<TensorParallel<T>>(operand1, operand2);
         sycl::queue* queue = tensorOperand->queue_;
 
-        TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(tensorOperand->getDimensionSizes());
+        TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(tensorOperand);
         opReturnType* resultRawData = resultTensor.getData();
 
         const T* operand1Raw;
@@ -322,11 +410,11 @@ namespace gema{
     template <apply_callable_parallel<T> C>
     /*static*/ void TensorParallel<T>::apply(TensorParallel<T>& operand1, const TensorParallel<T>& operand2, C&& operation){
 
-        const sycl::queue* queue = operand1->queue_;
+        sycl::queue* queue = operand1.queue_;
         T* operand1Raw = operand1.getData();
         const T* operand2Raw = operand2.getData();
 
-        queue->parallel_for(operand1->getNumberOfItems(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand1.getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1Raw[i], operand2Raw[i]);
         }).wait();
@@ -336,10 +424,10 @@ namespace gema{
     template <apply_callable_parallel<T> C>
     /*static*/ void TensorParallel<T>::apply(TensorParallel<T>& operand1, const T& operand2, C&& operation){
 
-        const sycl::queue* queue = operand1->queue_;
+        sycl::queue* queue = operand1.queue_;
         T* operand1Raw = operand1.getData();
 
-        queue->parallel_for(operand1->getNumberOfItems(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand1.getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1Raw[i], operand2);
         }).wait();
@@ -349,10 +437,10 @@ namespace gema{
     template <apply_reverse_callable_parallel<T> C>
     /*static*/ void TensorParallel<T>::apply(const T& operand1, TensorParallel<T>& operand2, C&& operation){
 
-        const sycl::queue* queue = operand2->queue_;
+        sycl::queue* queue = operand2.queue_;
         T* operand2Raw = operand2.getData();
 
-        queue->parallel_for(operand2->getNumberOfItems(), [=](sycl::id<1> idx){
+        queue->parallel_for(operand2.getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operand1, operand2Raw[i]);
         }).wait();
@@ -372,7 +460,7 @@ namespace gema{
         sycl::queue* queue = tensor.queue_;
 
         using opReturnType = decltype(operation(std::declval<T>()));
-        TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(tensor.getDimensionSizes());
+        TensorParallel<opReturnType> resultTensor = TensorParallel<opReturnType>(&tensor);
         opReturnType* resultRawData = resultTensor.getData();
 
         queue->parallel_for(tensor.getNumberOfItems(), [=](sycl::id<1> idx){
@@ -393,12 +481,25 @@ namespace gema{
     template <foreach_callable_parallel<T> C>
     /*static*/ void TensorParallel<T>::forEach(TensorParallel<T>& tensor, C&& operation){
 
-        const sycl::queue* queue = tensor.queue_;
+        sycl::queue* queue = tensor.queue_;
         T* operandRaw = tensor.getData();
 
-        queue->parallel_for(tensor.tensor_.size(), [=](sycl::id<1> idx){
+        queue->parallel_for(tensor.getNumberOfItems(), [=](sycl::id<1> idx){
             size_t i = idx[0];
             operation(operandRaw[i]);
+        }).wait();
+    }
+
+    template <class T>
+    template <apply_to_item_callable<T> C>
+    void TensorParallel<T>::applyToItem(span_view<uint64_t> coords, C&& operation){
+
+        T* operationItem = tensor_.getData() + tensor_.getIndex(coords);
+
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                operation(*operationItem);
+            });
         }).wait();
     }
 }

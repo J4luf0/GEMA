@@ -31,7 +31,7 @@ class AbstractOperation {
         inline friend auto operator OP_SYMBOL(const Derived& tensor, const T<D>& value)\
         requires requires (T<D> a, T<D> b) {a OP_SYMBOL b;}{\
     /**/\
-            return Derived::forEachAndReturn(tensor, [&value](const T<D>& item){\
+            return Derived::forEachAndReturn(tensor, [value](const T<D>& item){\
                 return item OP_SYMBOL value;\
             });\
         }\
@@ -45,7 +45,7 @@ class AbstractOperation {
     /**/\
             /* Do not delegate switched argument operator! While on numbers set the operation would be often commutative, */\
             /* it is not guaranteed to be so on every type and operation!*/\
-            return Derived::forEachAndReturn(tensor, [&value](const T<D>& item){\
+            return Derived::forEachAndReturn(tensor, [value](const T<D>& item){\
                 return value OP_SYMBOL item;\
             });\
         }\
@@ -69,7 +69,7 @@ class AbstractOperation {
         friend void operator OP_SYMBOL##=(Derived& tensor, const T<D>& value)\
         requires requires (T<D> a, T<D> b) {a OP_SYMBOL##= b;}{\
     /**/\
-            tensor.forEach([&value](T<D>& item){\
+            tensor.forEach([value](T<D>& item){\
                 item OP_SYMBOL##= value;\
             });\
         }\

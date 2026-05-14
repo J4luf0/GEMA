@@ -24,6 +24,8 @@ class MemoryBackend {
     MemoryBackend();
 
     MemoryBackend(const MemoryBackend<T, Alignment>& memoryBackend);
+    template <typename U>
+    MemoryBackend(const MemoryBackend<U, Alignment>& memoryBackend) requires (!std::is_same_v<U, T>);
     MemoryBackend(MemoryBackend<T, Alignment>&& memoryBackend) noexcept;
     MemoryBackend<T, Alignment>& operator=(const MemoryBackend<T, Alignment>& memoryBackend);
     MemoryBackend<T, Alignment>& operator=(MemoryBackend<T, Alignment>&& memoryBackend) noexcept;
@@ -45,6 +47,12 @@ class MemoryBackend {
     void copy(T* dest, const T* src, size_t count) const;
     T* memory_set(T* dest, size_t ch, size_t count ) const;
     int compare(const T* a, const T* b, size_t count) const;
+
+    void set_value(T* dest, const uint64_t index, const T& value) const;
+    T get_value(const T* dest, const uint64_t index) const;
+
+    // template <typename U>
+    // MemoryBackend<U> copy_with_type() const;
 
     void copy_to_host(T* dest, const T* src, size_t count) const;
     void copy_from_host(T* dest, const T* src, size_t count) const;
