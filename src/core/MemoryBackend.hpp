@@ -46,7 +46,8 @@ class MemoryBackend {
 
     void copy(T* dest, const T* src, size_t count) const;
     T* memory_set(T* dest, size_t ch, size_t count ) const;
-    int compare(const T* a, const T* b, size_t count) const;
+    bool equals(const T* a, const T* b, size_t count) const;
+    std::partial_ordering compare(const T* a, const T* b, size_t count) const;
 
     void set_value(T* dest, const uint64_t index, const T& value) const;
     T get_value(const T* dest, const uint64_t index) const;

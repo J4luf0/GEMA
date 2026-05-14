@@ -438,6 +438,8 @@ class Tensor : public AbstractOperation<Tensor<T, DataMB, MetadataMB>> {
      */
     bool operator!=(const Tensor<T, DataMB, MetadataMB>& otherTensor) const;
 
+    std::partial_ordering operator<=>(const Tensor<T, DataMB, MetadataMB>& otherTensor) const;
+
 
 
     // // ARITHMETIC OPERATOR OVERLOADS ------------------------------------------------------------------------------------------

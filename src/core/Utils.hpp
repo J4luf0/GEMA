@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <span>
 #include <cmath>
+#include <compare>
 
 namespace gema{
 
@@ -43,25 +44,41 @@ struct DefaultEquals {
 template<typename T>
 struct DefaultOrder {
 
-    int operator()(const T& a, const T& b) const {
+    std::partial_ordering operator()(const T& a, const T& b) const {
 
         if constexpr(std::is_floating_point_v<T>) {
             T epsilon = std::numeric_limits<T>::epsilon();
             if (std::fabs(a - b) <= (epsilon * std::max(std::fabs(a), std::fabs(b)))){
-                return 0;
+                return std::partial_ordering::equivalent;
             }else if(a > b){
-                return 1;
+                return std::partial_ordering::greater;
             }else{
-                return -1;
+                return std::partial_ordering::less;
             }
 
-            return (a > b) ? 1 : -1;
+            //return (a > b) ? 1 : -1;
 
-        } else if constexpr(std::is_integral_v<T>) {
-            return (a != b) * ((a > b) - (a < b));
-        } else {
-            return 0;
+        } else if constexpr(std::three_way_comparable<T>){
+            return a <=> b;
+            //auto cmp = (a <=> b);
+            //return (cmp > 0) - (cmp < 0);
+        }else if constexpr(requires {
+                { a == b } -> std::convertible_to<bool>;
+                { a < b } -> std::convertible_to<bool>;
+            }
+        ){
+            if(a == b) return std::partial_ordering::equivalent;
+            return (a < b) ? std::partial_ordering::less : std::partial_ordering::greater;
+        }else{
+            return std::partial_ordering::unordered;
         }
+        
+        
+        // else if constexpr(std::is_integral_v<T>) {
+        //     return (a != b) * ((a > b) - (a < b));
+        // } else {
+        //     return a <=> b;
+        // }
     }
 };
 

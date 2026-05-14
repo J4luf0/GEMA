@@ -1,6 +1,8 @@
+#include <compare>
 #include <type_traits>
 #include <sycl/sycl.hpp>
 
+#include "Utils.hpp"
 #include "MemoryBackendUSM.hpp"
 
 //#define T_ALLOC_ALIGN class T, sycl::usm::alloc MemoryType, std::size_t Alignment
@@ -235,39 +237,91 @@ namespace gema {
 
         return dest;
     }
-    
+
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
-    int MemoryBackendUSM<T, Kind, Alignment>::compare(const T* a, const T* b, size_t count) const {
+    bool MemoryBackendUSM<T, Kind, Alignment>::equals(const T *a, const T *b, size_t count) const{
 
-        if constexpr (Kind == sycl::usm::alloc::device) {
+        bool* workingResult = sycl::malloc_shared<bool>(1, *queue_);
+        *workingResult = true;
 
-            // fallback → copy to host (expensive!)
-            uint64_t countBytes = count * sizeof(T);
-            T* tmpA = new T[count];
-            T* tmpB = new T[count];
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                
+                DefaultEquals<T> equals;
+                for(uint64_t i = 0; i < count; i++){
 
-            queue_->memcpy(tmpA, a, count * sizeof(T)).wait();
-            queue_->memcpy(tmpB, b, count * sizeof(T)).wait();
-
-            int result = std::memcmp(tmpA, tmpB, count * sizeof(T));
-
-            delete[] tmpA;
-            delete[] tmpB;
-
-            return result;
-
-        } else {
-
-            if constexpr(std::is_trivially_copyable_v<T>) {
-                return std::memcmp(a, b, count * sizeof(T));
-            } else {
-                for(size_t i = 0; i < count; ++i){
-                    if(a[i] < b[i]) return -1;
-                    if(a[i] > b[i]) return 1;
+                    bool result = equals(a[i], b[i]);
+                    if(result != true){
+                        *workingResult = result;
+                        return;
+                    }
                 }
-                return 0;
-            }
-        }
+            });
+        }).wait();
+
+        bool finalResult = *workingResult;
+        sycl::free(workingResult, *queue_);
+
+        return finalResult;
+    }
+
+    template <class T, sycl::usm::alloc Kind, size_t Alignment>
+    std::partial_ordering MemoryBackendUSM<T, Kind, Alignment>::compare(const T* a, const T* b, size_t count) const {
+
+        std::partial_ordering* workingResult = sycl::malloc_shared<std::partial_ordering>(1, *queue_);
+        *workingResult = std::partial_ordering::equivalent;
+
+        queue_->submit([&](sycl::handler& h){
+            h.single_task([=](){
+                
+                DefaultOrder<T> order;
+                for(uint64_t i = 0; i < count; i++){
+
+                    std::partial_ordering result = order(a[i], b[i]);
+                    if(result != std::partial_ordering::equivalent){
+                        *workingResult = result;
+                        return;
+                    }
+                }
+            });
+        }).wait();
+
+        std::partial_ordering finalResult = *workingResult;
+        sycl::free(workingResult, *queue_);
+
+        return finalResult;
+
+
+
+        // if constexpr (Kind == sycl::usm::alloc::device) {
+
+        //     // fallback → copy to host (expensive!)
+        //     uint64_t countBytes = count * sizeof(T);
+        //     T* tmpA = new T[count];
+        //     T* tmpB = new T[count];
+
+        //     queue_->memcpy(tmpA, a, count * sizeof(T)).wait();
+        //     queue_->memcpy(tmpB, b, count * sizeof(T)).wait();
+
+        //     int result = std::memcmp(tmpA, tmpB, count * sizeof(T));
+
+        //     delete[] tmpA;
+        //     delete[] tmpB;
+
+        //     return result;
+
+        // } else {
+
+        //     if constexpr(std::is_trivially_copyable_v<T>) {
+        //         return std::memcmp(a, b, count * sizeof(T));
+        //     } else {
+        //         for(size_t i = 0; i < count; ++i){
+        //             if(a[i] < b[i]) return -1;
+        //             if(a[i] > b[i]) return 1;
+        //         }
+        //         return 0;
+        //     }
+        // }
     }
 
     template <class T, sycl::usm::alloc Kind, size_t Alignment>

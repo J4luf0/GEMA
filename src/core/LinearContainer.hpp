@@ -95,7 +95,7 @@ public:
     void assign(std::initializer_list<T> ilist);
 
     bool operator==(const LinearContainer<T, IMemoryBackend>& other) const;
-    auto operator<=>(const LinearContainer<T, IMemoryBackend>& other) const;
+    std::partial_ordering operator<=>(const LinearContainer<T, IMemoryBackend>& other) const;
 
     T& operator[](size_t i);
     const T& operator[](size_t i) const;

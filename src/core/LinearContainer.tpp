@@ -1,3 +1,4 @@
+#include <compare>
 #include <cstdint>
 #include <cstring>
 
@@ -429,30 +430,35 @@ namespace gema{
         size_t n = size();
         if(n != other.size()) return false;
 
-        if constexpr(std::is_trivially_copyable_v<T> /*&& std::has_unique_object_representations_v<T>*/){
-            //return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
-            return memoryBackend_.compare(begin_, other.begin_, n) == 0;
-        }
+        return memoryBackend_.equals(begin_, other.begin_, n);
 
-        for(size_t i = 0; i < n; ++i){
-            if(!(begin_[i] == other.begin_[i])) return false;
-        }
+        // if constexpr(std::is_trivially_copyable_v<T> /*&& std::has_unique_object_representations_v<T>*/){
+        //     //return std::memcmp(begin_, other.begin_, n * sizeof(T)) == 0;
+        //     return memoryBackend_.compare(begin_, other.begin_, n) == 0;
+        // }
+
+        // for(size_t i = 0; i < n; ++i){
+        //     if(!(begin_[i] == other.begin_[i])) return false;
+        // }
 
         return true;
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>
-    auto LinearContainer<T, IMemoryBackend>::operator<=>(const LinearContainer<T, IMemoryBackend>& other) const {
+    std::partial_ordering LinearContainer<T, IMemoryBackend>::operator<=>(const LinearContainer<T, IMemoryBackend>& other) const {
 
-        size_t n = std::min(size(), other.size());
+        size_t otherSize = other.size();
+        if(size() != otherSize) return std::partial_ordering::unordered;
 
-        for(size_t i = 0; i < n; ++i){
-            if(auto cmp = begin_[i] <=> other.begin_[i]; cmp != 0){
-                return cmp;
-            }
-        }
+        return memoryBackend_.compare(begin_, other.begin_, otherSize);
 
-        return size() <=> other.size();
+        // for(size_t i = 0; i < n; ++i){
+        //     if(auto cmp = begin_[i] <=> other.begin_[i]; cmp != 0){
+        //         return cmp;
+        //     }
+        // }
+
+        // return size() <=> other.size();
     }
 
     template<class T, MemoryBackendConcept<T> IMemoryBackend>

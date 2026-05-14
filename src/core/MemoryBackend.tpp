@@ -1,6 +1,7 @@
 #include <cstring>
 #include <iterator>
 
+#include "Utils.hpp"
 #include "MemoryBackend.hpp"
 
 //#define T_ALLOC_ALIGN class T, sycl::usm::alloc MemoryType, size_t Alignment
@@ -104,8 +105,55 @@ namespace gema {
     }
 
     template <class T, size_t Alignment>
-    int MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count) const {
-        return std::memcmp(a, b, count * sizeof(T));
+    bool MemoryBackend<T, Alignment>::equals(const T *a, const T *b, size_t count) const{
+
+        if constexpr(std::is_trivially_copyable_v<T> && std::has_unique_object_representations_v<T>){
+            return std::memcmp(a, b, count * sizeof(T)) == 0;
+        }else{
+
+            DefaultEquals<T> equals;
+
+            for(uint64_t i = 0; i < count; i++){
+
+                bool result = equals(a[i], b[i]);
+                if(result != true){
+                    return result;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    template <class T, size_t Alignment>
+    std::partial_ordering MemoryBackend<T, Alignment>::compare(const T* a, const T* b, size_t count) const {
+
+        if constexpr(std::is_trivially_copyable_v<T> && std::has_unique_object_representations_v<T>){
+
+            int result = std::memcmp(a, b, count * sizeof(T));
+
+            if(result == 0){
+                return std::partial_ordering::equivalent;
+            }else if(result > 0){
+                return std::partial_ordering::greater;
+            }else{
+                return std::partial_ordering::less;
+            }
+            //return std::memcmp(a, b, count * sizeof(T));
+        }else{
+
+            DefaultOrder<T> order;
+
+            for(uint64_t i = 0; i < count; i++){
+
+                std::partial_ordering result = order(a[i], b[i]);
+                if(result != std::partial_ordering::equivalent){
+                    return result;
+                }
+            }
+        }
+
+        return std::partial_ordering::equivalent;
     }
 
     template <class T, size_t Alignment>

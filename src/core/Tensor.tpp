@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <bit>
 #include <cmath>
+#include <compare>
 #include <cstdint>
 #include <format>
 #include <functional>
@@ -306,16 +307,7 @@ namespace gema {
     void Tensor<T, DataMB, MetadataMB>::setItem(const T& value, span_view<uint64_t> coordinates){
 
         uint64_t itemIndex = getIndex(coordinates);
-
-        if constexpr (std::is_same_v<T, double>){
-            if(value == 5 && coordinates.size() == 2 && coordinates[0] == 0){std::cout << "here setItem" << std::endl;}
-        }
-
         tensor_[itemIndex] = value;
-        
-        if constexpr (std::is_same_v<T, double>){
-            if(value == 5 && coordinates.size() == 2 && coordinates[0] == 0){std::cout << "here setItem" << std::endl;}
-        }
     }
 
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
@@ -781,6 +773,15 @@ namespace gema {
     {
         return !(*this == otherTensor);
     }
+
+    template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
+    std::partial_ordering Tensor<T, DataMB, MetadataMB>::operator<=>(const Tensor<T, DataMB, MetadataMB>& otherTensor) const {
+
+        if(dimensionSizes_ != otherTensor.dimensionSizes_) return std::partial_ordering::unordered;
+
+        return tensor_ <=> otherTensor.tensor_;
+    }
+
 
     // OPERATOR OVERLOADS -----------------------------------------------------------------------------------------------------
     // Operator overload implemetations are often repetetive. To reduce code duplicates, macros are created for the overloads
