@@ -233,8 +233,11 @@ namespace gema{
     template <class T>
     TensorParallel<T> TensorParallel<T>::transpositionAndReturn(const uint64_t dim1, const uint64_t dim2) const {
 
-        return TensorParallel<T>(this);
-        //return tensor_.transpositionAndReturn(dim1, dim2);
+        TensorParallel<T> newTensor(*this);
+        newTensor.transposition();
+        return newTensor;
+
+        //return tensor_.transpositionAndReturn(dim1, dim2);//never use
 
         // if(dim1 == dim2) return TensorParallel<T>(this);
 
@@ -288,51 +291,53 @@ namespace gema{
     template <class T>
     void TensorParallel<T>::transposition(const uint64_t dim1, const uint64_t dim2){
 
-        return;
         //tensor_.transposition(dim1, dim2);
 
-        // if(dim1 == dim2) return;
+        if(dim1 == dim2) return;
 
-        // // Copying the dimensionSizes
-        // // Change assigment to just construction of correct size
-        // const MetadataContainer oldDimensionSizes = tensor_.dimensionSizes_;
+        // Copying the dimensionSizes
+        // Change assigment to just construction of correct size
+        const MetadataContainer oldDimensionSizes = tensor_.dimensionSizes_;
+        span_view<uint64_t> oldDimensionSizesView{oldDimensionSizes};
 
-        // // Swapping the dimension sizes
-        // const uint64_t temporaryDimensionSize1 = tensor_.dimensionSizes_[dim1];
-        // tensor_.dimensionSizes_[dim1] = tensor_.dimensionSizes_[dim2];
-        // tensor_.dimensionSizes_[dim2] = temporaryDimensionSize1;
+        // Swapping the dimension sizes
+        const uint64_t temporaryDimensionSize1 = tensor_.dimensionSizes_[dim1];
+        tensor_.dimensionSizes_[dim1] = tensor_.dimensionSizes_[dim2];
+        tensor_.dimensionSizes_[dim2] = temporaryDimensionSize1;
 
-        // const uint64_t itemCount = tensor_.updateInnerState();
-        // const uint64_t dimensionCount = tensor_.getNumberOfDimensions();
+        span_view<uint64_t> newDimensionSizesView{tensor_.dimensionSizes_};
+
+        const uint64_t itemCount = tensor_.updateInnerState();
+        const uint64_t dimensionCount = tensor_.getNumberOfDimensions();
         
-        // // Initializing the new data
-        // DataContainer newData(itemCount, DataBackend(queue_));
+        // Initializing the new data
+        DataContainer newData(itemCount, DataBackend(queue_));
 
-        // T* oldDataRaw = tensor_.data();
-        // T* newDataRaw = newData.data();
+        T* oldDataRaw = tensor_.getData();
+        T* newDataRaw = newData.data();
 
+        //std::cout << "here transposition" << std::endl;
 
+        uint64_t* coordsBuffer = sycl::malloc_device<uint64_t>(itemCount * dimensionCount, *queue_);
 
-        // uint64_t* coordsBuffer = sycl::malloc<uint64_t>(itemCount * dimensionCount, *queue_, usmDataKind_);
+        queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
 
-        // queue_->parallel_for(itemCount, [=](sycl::id<1> idx){
+            size_t i = idx[0];
 
-        //     size_t i = idx[0];
+            uint64_t* coords = coordsBuffer + i * dimensionCount;
+            Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
 
-        //     uint64_t* coords = coordsBuffer + i * dimensionCount;
-        //     Tensor<T>::getCoords(i, oldDimensionSizesView, coords);
+            uint64_t temporaryCoord1 = coords[dim1];
+            coords[dim1] = coords[dim2];
+            coords[dim2] = temporaryCoord1;
 
-        //     uint64_t temporaryCoord1 = coords[dim1];
-        //     coords[dim1] = coords[dim2];
-        //     coords[dim2] = temporaryCoord1;
+            span_view<uint64_t> coordsView{coords, dimensionCount};
 
-        //     std::span<const uint64_t> coordsView{coords, dimensionCount};
+            newDataRaw[Tensor<T>::getIndex(coordsView, newDimensionSizesView)] = std::move(oldDataRaw[i]);
 
-        //     newDataRaw[Tensor<T>::getIndex(coordsView)] = std::move(oldDataRaw[i]);
+        }).wait();
 
-        // }).wait();
-
-        // this->tensor_ = std::move(newData);
+        tensor_.getDataContainer() = std::move(newData);
     }
 
     template <class T>

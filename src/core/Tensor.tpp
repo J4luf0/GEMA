@@ -1286,13 +1286,25 @@ namespace gema {
         uint64_t* coordsBuffer
     ){
 
-        uint64_t dimensionJump = 1;
+        // uint64_t dimensionJump = 1;
+        // for(const uint64_t dimensionSize : dimensionSizes){
+        //     dimensionJump *= dimensionSize;
+        // }
 
-        for (size_t i = 0; i < dimensionSizes.size(); ++i) {
-            uint64_t coord = itemIndex / dimensionJump;
-            coordsBuffer[i] = coord;
-            itemIndex -= coord * dimensionJump;
-            dimensionJump *= dimensionSizes[i];
+        // for (size_t i = 0; i < dimensionSizes.size(); ++i) {
+        //     dimensionJump /= dimensionSizes[i];
+        //     uint64_t coord = itemIndex / dimensionJump;
+        //     coordsBuffer[i] = coord;
+        //     itemIndex -= coord * dimensionJump;
+        // }
+
+        
+
+        const uint64_t dimensionCount = dimensionSizes.size();
+
+        for(size_t i = dimensionCount; i-- > 0;){
+            coordsBuffer[i] = itemIndex % dimensionSizes[i];
+            itemIndex /= dimensionSizes[i];
         }
     }
 
