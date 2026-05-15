@@ -619,14 +619,14 @@ namespace gema {
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     void Tensor<T, DataMB, MetadataMB>::addDimension(const uint64_t newDimensionSize, const uint64_t putBefore){
 
-        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
-        const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const LinearContainer<uint64_t, MetadataMB> oldDimensionSizes = dimensionSizes_; //todo: probably delete
+        const LinearContainer<uint64_t, MetadataMB> oldDimensionJumps = dimensionJumps_; //todo: probably delete
 
         dimensionSizes_.insert(dimensionSizes_.begin() + putBefore, newDimensionSize);
 
         const uint64_t newItemCount = updateDimensionJump();
 
-        LinearContainer<T> newTensor(newItemCount);
+        LinearContainer<T, DataMB> newTensor(newItemCount);
 
         uint64_t j = 0;
         uint64_t jCounter = 0;
@@ -660,14 +660,14 @@ namespace gema {
     template <class T, MemoryBackendConcept<T> DataMB, MemoryBackendConcept<uint64_t> MetadataMB>
     void Tensor<T, DataMB, MetadataMB>::removeDimension(const uint64_t removedDimensionIndex){
 
-        const LinearContainer<uint64_t> oldDimensionSizes = dimensionSizes_;
-        const LinearContainer<uint64_t> oldDimensionJumps = dimensionJumps_;
+        const LinearContainer<uint64_t, MetadataMB> oldDimensionSizes = dimensionSizes_;
+        const LinearContainer<uint64_t, MetadataMB> oldDimensionJumps = dimensionJumps_;
 
         dimensionSizes_.erase(dimensionSizes_.begin() + removedDimensionIndex);
 
         const uint64_t newItemCount = updateDimensionJump();
 
-        LinearContainer<T> newTensor(newItemCount);
+        LinearContainer<T, DataMB> newTensor(newItemCount);
         
         uint64_t j = 0;
         uint64_t jCounter = 0;
