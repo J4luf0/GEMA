@@ -241,26 +241,64 @@ namespace gema {
     template <class T, sycl::usm::alloc Kind, size_t Alignment>
     bool MemoryBackendUSM<T, Kind, Alignment>::equals(const T *a, const T *b, size_t count) const{
 
-        bool* workingResult = sycl::malloc_shared<bool>(1, *queue_);
-        *workingResult = true;
+        // Older but simpler/more reliable implementation
+        // bool* workingResult = sycl::malloc_shared<bool>(1, *queue_);
+        // *workingResult = true;
 
-        queue_->submit([&](sycl::handler& h){
-            h.single_task([=](){
+        // queue_->submit([&](sycl::handler& h){
+        //     h.single_task([=](){
                 
-                DefaultEquals<T> equals;
-                for(uint64_t i = 0; i < count; i++){
+        //         DefaultEquals<T> equals;
+        //         for(uint64_t i = 0; i < count; i++){
 
-                    bool result = equals(a[i], b[i]);
-                    if(result != true){
-                        *workingResult = result;
-                        return;
-                    }
-                }
-            });
+        //             bool result = equals(a[i], b[i]);
+        //             if(result != true){
+        //                 *workingResult = result;
+        //                 return;
+        //             }
+        //         }
+        //     });
+        // }).wait();
+
+        // bool finalResult = *workingResult;
+        // sycl::free(workingResult, *queue_);
+
+        // return finalResult;
+
+        uint64_t* deviceAcumulator = sycl::malloc_device<uint64_t>(1, *queue_);
+
+        uint64_t initialValue = 0;
+        queue_->memcpy(deviceAcumulator, &initialValue, sizeof(uint64_t)).wait();
+
+        queue_->parallel_for(count, [=](sycl::id<1> idx){
+            size_t i = idx[0];
+
+            DefaultEquals<T> equals;
+
+            if(!equals(a[i], b[i])){
+
+                sycl::atomic_ref<
+                    uint64_t,
+                    sycl::memory_order::relaxed,
+                    sycl::memory_scope::device,
+                    sycl::access::address_space::global_space
+                > atomicFlag(*deviceAcumulator);
+
+                atomicFlag.store(1);
+            }
+
+            // bool result = equals(a[i], b[i]);
+            // if(result != true){
+            //     *workingResult += 1;
+            // }
         }).wait();
 
-        bool finalResult = *workingResult;
-        sycl::free(workingResult, *queue_);
+        uint64_t hostAcumulator;
+        queue_->memcpy(&hostAcumulator, deviceAcumulator, sizeof(uint64_t)).wait();
+
+        bool finalResult = (hostAcumulator == 0);
+
+        sycl::free(deviceAcumulator, *queue_);
 
         return finalResult;
     }

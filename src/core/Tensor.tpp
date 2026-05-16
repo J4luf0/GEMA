@@ -364,8 +364,8 @@ namespace gema {
 
         if(dimensionSizes.size() != coords.size()) return false;
 
-        for(const uint64_t coord : coords){
-            if(coord == 0) return false;
+        for(uint64_t i = 0; i < dimensionSizes.size(); i++){
+            if(coords[i] >= dimensionSizes[i]) return false;
         }
 
         return true;
